@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F2EBE3;
+  --foreground: #2D241E;
+  --palette-beige: #D6C7B1;
+  --palette-taupe: #B6A691;
+  --palette-brown: #A38B75;
+  --palette-gray: #D1D3D4;
+  --palette-sage: #949B7B;
+  --tile-text: #2D241E;
+  --tile-text-muted: rgba(45, 36, 30, 0.6);
+}
+
+.dark {
+  --tile-text: #F2EBE3;
+  --tile-text-muted: rgba(242, 235, 227, 0.6);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-dm-sans);
+  --color-palette-beige: var(--palette-beige);
+  --color-palette-taupe: var(--palette-taupe);
+  --color-palette-brown: var(--palette-brown);
+  --color-palette-gray: var(--palette-gray);
+  --color-palette-sage: var(--palette-sage);
+  --color-tile-text: var(--tile-text);
+  --color-tile-text-muted: var(--tile-text-muted);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+/* WinUI + Apple Liquid Glass Tile Styles */
+.tile {
+  @apply relative overflow-hidden active:scale-95 cursor-pointer flex flex-col justify-end p-2 text-white font-medium 
+         backdrop-blur-xl border border-white/20 shadow-lg rounded-none transition-all duration-500;
+}
+
+.grid-rows-5 {
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
+/* Orientation-based Dashboard Layout */
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: auto;
+}
+
+.dashboard-main::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboard-main {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (orientation: landscape) {
+  .dashboard-main {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 25rem; /* Adjusted for 1 row + title */
+    width: auto;
+    max-width: 100%;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 1280px) {
+  .dashboard-main {
+    height: 52rem; /* Adjusted for 2 rows + titles + gap */
+  }
+}
+
+.tile-1x1 {
+  @apply w-16 h-16 min-w-[4rem] min-h-[4rem] max-w-[4rem] max-h-[4rem];
+}
+
+.tile-1x2 {
+  @apply w-16 h-[8.375rem] min-w-[4rem] min-h-[8.375rem] max-w-[4rem] max-h-[8.375rem];
+}
+
+.tile-2x1 {
+  @apply w-[8.375rem] h-16 min-w-[8.375rem] min-h-[4rem] max-w-[8.375rem] max-h-[4rem];
+}
+
+.tile-2x2 {
+  @apply w-[8.375rem] h-[8.375rem] min-w-[8.375rem] min-h-[8.375rem] max-w-[8.375rem] max-h-[8.375rem];
+}
+
+.tile-2x3 {
+  @apply w-[8.375rem] h-[12.75rem] min-w-[8.375rem] min-h-[12.75rem] max-w-[8.375rem] max-h-[12.75rem];
+}
+
+.tile-3x2 {
+  @apply w-[12.75rem] h-[8.375rem] min-w-[12.75rem] min-h-[8.375rem] max-w-[12.75rem] max-h-[8.375rem];
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
