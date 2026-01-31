@@ -11,25 +11,25 @@ interface CalendarProps {
   size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
   accent?: 'primary' | 'secondary';
   opacity?: number;
+  label?: string;
 }
 
-const CalendarTile: React.FC<CalendarProps> = ({ size = '2x3', accent = 'secondary', opacity = 60 }) => {
+const CalendarTile: React.FC<CalendarProps> = ({ size = '2x3', accent = 'secondary', opacity = 65, label = 'Calendar' }) => {
   const [value, onChange] = useState<Value>(new Date());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
+    setMounted(true);
   }, []);
 
   if (!mounted) {
     return (
-      <Tile size={size} accentType={accent} opacity={opacity} className="animate-pulse" />
+      <Tile size={size} accentType={accent} opacity={opacity} label={label} className="animate-pulse" />
     );
   }
 
   return (
-    <Tile size={size} accentType={accent} opacity={opacity}>
+    <Tile size={size} accentType={accent} opacity={opacity} label={label}>
       <div className="w-full h-full flex flex-col items-center justify-center p-0 overflow-hidden calendar-container">
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-tile-text opacity-80">
           {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}

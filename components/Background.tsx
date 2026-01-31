@@ -8,30 +8,34 @@ const Background: React.FC = () => {
   const bgRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
 
+  // Separate effect for background color/image logic to prevent flashes
   useEffect(() => {
     const ctx = gsap.context(() => {
       if (!bgRef.current) return;
 
       if (bgType === 'color') {
-        const targetColor = bgValue || (theme === 'dark' ? '#2D241E' : '#F2EBE3');
+        const targetColor = bgValue || (theme === 'dark' ? '#1A1410' : '#F2EBE3');
         gsap.to(bgRef.current, {
           backgroundColor: targetColor,
           backgroundImage: 'none',
           duration: 1.2,
-          ease: 'power3.out'
+          ease: 'power3.out',
+          overwrite: 'auto'
         });
-      } else if (bgType === 'image') {
+      } else if (bgType === 'image' && bgValue) {
         gsap.to(bgRef.current, {
           backgroundImage: `url(${bgValue})`,
+          backgroundColor: theme === 'dark' ? '#1A1410' : '#F2EBE3', // Base color behind image
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          duration: 1.2,
-          ease: 'power3.out'
+          duration: 1,
+          ease: 'power2.inOut',
+          overwrite: 'auto'
         });
       }
     });
 
-    return () => ctx.revert();
+    return () => ctx.kill(); // Kill the animation without resetting properties
   }, [theme, bgType, bgValue]);
 
   // Separate effect for blur to prevent background reloading
@@ -52,6 +56,7 @@ const Background: React.FC = () => {
       <div 
         ref={bgRef} 
         className="absolute inset-0 will-change-[background-color,background-image]" 
+        style={{ backgroundColor: theme === 'dark' ? '#1A1410' : '#F2EBE3' }}
       />
       
       {/* Liquid Glass / Blur Layer */}

@@ -50,12 +50,12 @@ const Home = () => {
       {
         title: "Life at a glance",
         tiles: [
-          { id: 'clock', size: '2x2', component: ClockTile },
-          { id: 'calendar', size: '2x3', component: CalendarTile },
+          { id: 'clock', size: '2x2', component: ClockTile, label: 'Clock' },
+          { id: 'calendar', size: '2x3', component: CalendarTile, label: 'Calendar' },
           { id: 'settings', size: '1x1', label: 'Settings', icon: Settings, accent: 'secondary', opacity: 60 },
           { id: 'quote', size: '3x2', accent: 'primary' },
           { id: 'ad', size: '3x2', component: AdTile, props: { title: "New Collection 2025", description: "Discover the future of design." } },
-          { id: 'weather', size: '2x1', component: WeatherTile }
+          { id: 'weather', size: '2x1', component: WeatherTile, label: 'Weather' }
         ]
       },
       {
@@ -90,7 +90,8 @@ const Home = () => {
             ...tile.props,
             accent,
             opacity,
-            size: tile.size // Ensure size is also passed
+            size: tile.size,
+            label: tile.label
           }
         };
       })
@@ -140,7 +141,7 @@ const Home = () => {
                 <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 text-foreground">
                   {group.title}
                 </h2>
-                <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[21.5rem] w-max">
+                <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[22.5rem] w-max">
                   {group.tiles.map((tile) => {
                     if (tile.component) {
                       const Component = tile.component;

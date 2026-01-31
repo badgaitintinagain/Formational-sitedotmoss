@@ -21,7 +21,10 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
   const glowRef = useRef<HTMLDivElement>(null);
 
   // Use a fallback opacity if not provided
-  const effectiveOpacity = opacity !== undefined ? opacity / 100 : 0.4;
+  const effectiveOpacity = opacity !== undefined ? opacity / 100 : 0.45;
+
+  // Determine text color based on background image or accent
+  const textClass = bgImage ? 'text-white' : 'text-tile-text';
 
   const sizeClasses = {
     '1x1': 'tile-1x1 row-span-1 col-span-1',
@@ -39,13 +42,13 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
     if (!tile || !glow) return;
 
     const ctx = gsap.context(() => {
-      // Smooth color transition for the tile itself
+      // Smooth entry
       gsap.from(tile, {
         opacity: 0,
-        scale: 0.95,
-        duration: 0.8,
-        ease: 'power2.out',
-        delay: Math.random() * 0.3
+        scale: 0.98,
+        duration: 0.6,
+        ease: 'power1.out',
+        delay: Math.random() * 0.2
       });
 
       const onMouseEnter = () => {
@@ -56,7 +59,7 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
           duration: 0.4,
           ease: 'power2.out',
           borderColor: 'rgba(255,255,255,0.6)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
         });
       };
 
@@ -67,7 +70,7 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
           filter: 'brightness(1)',
           duration: 0.4,
           ease: 'power2.inOut',
-          borderColor: 'rgba(255,255,255,0.2)',
+          borderColor: 'rgba(255,255,255,0.25)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
         });
       };
@@ -96,7 +99,7 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
     <div 
       ref={tileRef}
       onClick={onClick}
-      className={`tile relative overflow-hidden group ${sizeClasses[size]} flex flex-col ${isSmall ? 'justify-center items-center' : 'justify-end items-start'} p-2 text-left border cursor-pointer text-tile-text ${className}`}
+      className={`tile relative overflow-hidden group ${sizeClasses[size]} flex flex-col ${isSmall ? 'justify-center items-center' : 'justify-end items-start'} p-2 text-left border cursor-pointer ${textClass} ${className}`}
     >
       {/* Base Color Background (from Palette) */}
       {accentType && (
@@ -104,7 +107,7 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
           className="absolute inset-0 z-0 transition-colors duration-500"
           style={{ 
             backgroundColor: `var(--accent-${accentType})`,
-            opacity: bgImage ? 0.3 : effectiveOpacity 
+            opacity: bgImage ? 0.35 : effectiveOpacity 
           }}
         />
       )}
@@ -115,12 +118,12 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
       {/* Background Image */}
       {bgImage && (
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 blur-[2px]"
+          className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 blur-[1px]"
           style={{ backgroundImage: `url(${bgImage})` }}
         />
       )}
       {/* Dark Overlay for Image */}
-      {bgImage && <div className="absolute inset-0 z-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />}
+      {bgImage && <div className="absolute inset-0 z-0 bg-black/40 group-hover:bg-black/25 transition-colors duration-500" />}
 
       {/* Gradient Blur Overlay */}
       <div 
@@ -137,7 +140,7 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
         {children}
       </div>
       {!isSmall && label && (
-        <span className="relative z-10 text-[7px] uppercase tracking-widest font-bold mt-auto opacity-80">
+        <span className="relative z-10 text-[7px] uppercase tracking-widest font-bold mt-auto opacity-80 drop-shadow-sm">
           {label}
         </span>
       )}

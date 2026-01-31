@@ -63,10 +63,14 @@ const WeatherTile: React.FC<WeatherProps> = ({ size = '2x1', accent = 'primary',
   }, [location]);
 
   useEffect(() => {
-    setMounted(true);
+    // Avoid synchronous setState warning
+    const timer = setTimeout(() => setMounted(true), 0);
     fetchWeather();
     const interval = setInterval(fetchWeather, 3600000); // 1 hour
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [fetchWeather]);
 
   const Icon = weather ? getWeatherIcon(weather.code) : Cloud;
@@ -83,15 +87,14 @@ const WeatherTile: React.FC<WeatherProps> = ({ size = '2x1', accent = 'primary',
       accentType={accent}
       opacity={opacity}
       bgImage={location.image}
-      className="text-white"
     >
       <div className="flex flex-col items-center justify-center h-full w-full pointer-events-none">
         {loading ? (
           <div className="animate-pulse bg-white/20 h-6 w-12 rounded" />
         ) : (
-          <div className="flex flex-col items-center bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/10">
-            <p className="text-xl font-medium leading-none tracking-tighter text-white">{weather?.temp}°C</p>
-            <p className="text-[7px] uppercase tracking-[0.3em] opacity-100 text-white mt-1">{location.name}</p>
+          <div className="flex flex-col items-center bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/10 shadow-xl">
+            <p className="text-xl font-medium leading-none tracking-tighter text-white drop-shadow-md">{weather?.temp}°C</p>
+            <p className="text-[7px] uppercase tracking-[0.3em] font-bold text-white/90 mt-1">{location.name}</p>
           </div>
         )}
       </div>
