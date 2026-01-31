@@ -28,7 +28,7 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<any>(null);
 
-  // format คือ: "username/space-name"
+  // Hugging Face Space ID
   const HF_REPO_ID = "badgaitintin/Micronversation"; 
 
   const getClient = async () => {
@@ -62,13 +62,13 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
     setLoading(true);
 
     try {
-      // Connect to the client if not already connected
+      // Connect to the client
       const client = await getClient();
       
-      // Using the specific API endpoint provided in the documentation
-      const result = await client.predict("/generate_response", {
-        user_input: userMessage,
-      });
+      // ✅ แก้ไขตรงนี้: เรียกชื่อ Endpoint ให้ตรงเป๊ะ และส่ง Array
+      // API Name: "/generate_text_onnx"
+      // Input: [userMessage] (ส่งเป็น array ตำแหน่งแรกคือ prompt_text)
+      const result = await client.predict("/generate_text_onnx", [userMessage]);
 
       if (result && result.data && Array.isArray(result.data)) {
         const botResponse = result.data[0] as string;
@@ -77,14 +77,12 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
         throw new Error("Unexpected response format from Hugging Face Space");
       }
     } catch (error: any) {
-      // Improved error logging to catch hidden properties
       console.error("Chat Error Detailed:", error);
       const errorMessage = error?.message || (typeof error === 'string' ? error : "Unknown error");
-      console.error("Chat Error Message:", errorMessage);
       
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: `Error: ${errorMessage}. Please check if the Hugging Face Space "${HF_REPO_ID}" is active and public.` 
+        text: `Error: ${errorMessage}. Please check if the Hugging Face Space "${HF_REPO_ID}" is active.` 
       }]);
     } finally {
       setLoading(false);
@@ -127,8 +125,8 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
                   <h2 className="text-xl font-light tracking-tight text-foreground">Micronversation</h2>
                   <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">
                     Running on Hugging Face CPU
-                    (Model: Micronversation-V1.5-106M)
-                    </p>
+                    (Model: Micronversation-V1.5-106M-0FI8)
+                  </p>
                 </div>
               </div>
               <button 
