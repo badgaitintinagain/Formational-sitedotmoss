@@ -11,9 +11,10 @@ interface TileProps {
   bgClass?: string;
   bgImage?: string;
   icon?: LucideIcon;
+  onClick?: () => void;
 }
 
-const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgClass = 'bg-blue-600/70 border-blue-400/50', bgImage, icon: Icon }) => {
+const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgClass = 'bg-blue-600/70 border-blue-400/50', bgImage, icon: Icon, onClick }) => {
   const tileRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +84,7 @@ const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgCl
   return (
     <div 
       ref={tileRef}
+      onClick={onClick}
       className={`tile relative overflow-hidden group ${sizeClasses[size]} ${bgClass} flex flex-col ${isSmall ? 'justify-center items-center' : 'justify-end items-start'} p-2 text-left border cursor-pointer text-tile-text ${className}`}
     >
       {/* Background Image */}

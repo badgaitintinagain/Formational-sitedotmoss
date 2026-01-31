@@ -1,0 +1,190 @@
+"use client";
+import React, { useState, useRef, useEffect } from 'react';
+import Tile from './Tile';
+import { Send, Loader2, X, BrainCircuit, User } from 'lucide-react';
+import gsap from 'gsap';
+import { Client } from "@gradio/client"; 
+
+interface Message {
+  role: 'user' | 'bot';
+  text: string;
+}
+
+const AIChatTile = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'bot', text: 'MICRONVERSATIOOOONNNNN! Hello!' }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const modalRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const clientRef = useRef<any>(null);
+
+  // format คือ: "username/space-name"
+  const HF_REPO_ID = "badgaitintin/Micronversation"; 
+
+  const getClient = async () => {
+    if (clientRef.current) return clientRef.current;
+    clientRef.current = await Client.connect(HF_REPO_ID);
+    return clientRef.current;
+  };
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Animation
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      gsap.fromTo(modalRef.current, 
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "power2.out" }
+      );
+    }
+  }, [isOpen]);
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setLoading(true);
+
+    try {
+      // Connect to the client if not already connected
+      const client = await getClient();
+      
+      // Using the specific API endpoint provided in the documentation
+      const result = await client.predict("/generate_response", {
+        user_input: userMessage,
+      });
+
+      if (result && result.data && Array.isArray(result.data)) {
+        const botResponse = result.data[0] as string;
+        setMessages(prev => [...prev, { role: 'bot', text: botResponse }]);
+      } else {
+        throw new Error("Unexpected response format from Hugging Face Space");
+      }
+    } catch (error: any) {
+      // Improved error logging to catch hidden properties
+      console.error("Chat Error Detailed:", error);
+      const errorMessage = error?.message || (typeof error === 'string' ? error : "Unknown error");
+      console.error("Chat Error Message:", errorMessage);
+      
+      setMessages(prev => [...prev, { 
+        role: 'bot', 
+        text: `Error: ${errorMessage}. Please check if the Hugging Face Space "${HF_REPO_ID}" is active and public.` 
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Tile 
+        size="2x2" 
+        label="Micronversation" 
+        icon={BrainCircuit} 
+        bgClass="bg-palette-brown/40 border-white/20"
+        onClick={() => setIsOpen(true)}
+      >
+        <div className="flex flex-col items-center justify-center">
+           <div className="text-[10px] uppercase tracking-[0.2em] opacity-40 mt-2"></div>
+        </div>
+      </Tile>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* App Window */}
+          <div 
+            ref={modalRef}
+            className="relative w-full max-w-4xl h-[80vh] bg-[#1a1a1a]/90 border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
+              <div className="flex items-center gap-3">
+                <BrainCircuit className="text-palette-sage" />
+                <div>
+                  <h2 className="text-xl font-light tracking-tight text-white">Micronversation</h2>
+                  <p className="text-[10px] uppercase tracking-widest opacity-50 text-white">Running on Hugging Face CPU</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                  <div className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-palette-sage' : 'bg-white/10'}`}>
+                      {msg.role === 'user' ? <User size={16} className="text-white" /> : <BrainCircuit size={16} className="text-palette-sage" />}
+                    </div>
+                    <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
+                      msg.role === 'user' 
+                        ? 'bg-palette-sage/20 rounded-tr-none border border-palette-sage/20 text-white' 
+                        : 'bg-white/5 rounded-tl-none border border-white/5 text-gray-200'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex justify-start animate-pulse">
+                  <div className="flex gap-3 items-center text-[10px] uppercase tracking-widest opacity-40 ml-11 text-white">
+                    <Loader2 className="animate-spin" size={14} />
+                    <span>Processing...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Area */}
+            <form 
+              onSubmit={handleSendMessage}
+              className="p-6 border-t border-white/5 bg-black/20"
+            >
+              <div className="relative max-w-3xl mx-auto">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type a message..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-6 pr-14 text-sm text-white focus:outline-none focus:border-palette-sage/50 transition-all placeholder:text-white/20"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || loading}
+                  className="absolute right-2 top-2 bottom-2 px-4 bg-palette-sage/20 hover:bg-palette-sage/40 disabled:opacity-20 rounded-lg transition-all flex items-center justify-center text-palette-sage"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default AIChatTile;

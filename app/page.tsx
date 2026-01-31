@@ -6,6 +6,7 @@ import WeatherTile from "@/components/WeatherTile";
 import AdTile from "@/components/AdTile";
 import CalendarTile from "@/components/CalendarTile";
 import ClockTile from "@/components/ClockTile";
+import AIChatTile from "@/components/MicronversationTile";
 import Background from "@/components/Background";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -13,9 +14,9 @@ import gsap from "gsap";
 import { 
   ShoppingBag, Clock as ClockIcon, Calendar, Mail, Settings, Sun, Cloud, Package, Users,
   Monitor, Music, Video as VideoIcon, Image as ImageIcon, MapPin, Gamepad2, 
-  Camera, Mic, PenTool, Newspaper, TrendingUp as TrendingUpIcon, Plane, 
+  Camera, Mic, PenTool, TrendingUp as TrendingUpIcon, Plane, 
   Gamepad, Heart, Dribbble, TrendingDown, Utensils, Search, User, 
-  MessageSquare, Navigation, Bell, Battery, Wifi, Bluetooth, Cpu, Quote, Megaphone
+  MessageSquare, Navigation, Bell, Battery, Wifi, Bluetooth, Quote, Megaphone
 } from "lucide-react";
 
 export default function Home() {
@@ -103,7 +104,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Group 2: Work & Focus (Demo) */}
+            {/* Group 2: AI Lab */}
+            <div className="flex flex-col gap-3 w-fit items-start flex-shrink-0">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 theme-text">AI Lab</h2>
+              <div className="grid grid-rows-2 md:grid-rows-5 grid-flow-col gap-1.5 h-fit md:h-[21.5rem] w-max">
+                <AIChatTile />
+              </div>
+            </div>
+
+            {/* Group 3: Work & Focus (Demo) */}
             <div className="flex flex-col gap-3 w-fit items-start flex-shrink-0">
               <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 theme-text">Work & Focus</h2>
               <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[21.5rem] w-max">
@@ -123,7 +132,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Group 3: Entertainment (Demo) */}
+            {/* Group 4: Entertainment (Demo) */}
             <div className="flex flex-col gap-3 w-fit items-start flex-shrink-0">
               <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 theme-text">Entertainment</h2>
               <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[21.5rem] w-max">
@@ -136,7 +145,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Group 4: Next Chapter */}
+            {/* Group 5: Next Chapter */}
             <div className="flex flex-col gap-3 w-fit items-start flex-shrink-0">
               <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 theme-text">Next Chapter</h2>
               <div className="flex h-[21.5rem] w-[21.5rem]">
