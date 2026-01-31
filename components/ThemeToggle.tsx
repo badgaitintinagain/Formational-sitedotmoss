@@ -11,8 +11,8 @@ const ThemeToggle: React.FC = () => {
   useEffect(() => {
     if (iconRef.current) {
       gsap.fromTo(iconRef.current, 
-        { rotation: -90, opacity: 0, scale: 0.5 },
-        { rotation: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        { rotation: theme === 'dark' ? -180 : 0, opacity: 0, scale: 0.5 },
+        { rotation: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.7)' }
       );
     }
   }, [theme]);
@@ -20,14 +20,14 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="fixed top-8 right-12 z-50 p-2 rounded-full bg-white/10 dark:bg-black/10 backdrop-blur-md border border-zinc-900/10 dark:border-white/10 hover:scale-110 transition-all duration-300 cursor-pointer group"
+      className="fixed top-8 right-12 z-50 p-3 rounded-xl bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group shadow-lg"
       aria-label="Toggle Theme"
     >
-      <div ref={iconRef}>
+      <div ref={iconRef} className="flex items-center justify-center">
         {theme === 'light' ? (
-          <Moon size={20} className="text-zinc-800 group-hover:text-indigo-600 transition-colors" />
+          <Sun size={20} className="text-amber-600 transition-colors" />
         ) : (
-          <Sun size={20} className="text-zinc-200 group-hover:text-amber-400 transition-colors" />
+          <Moon size={20} className="text-indigo-400 transition-colors" />
         )}
       </div>
     </button>

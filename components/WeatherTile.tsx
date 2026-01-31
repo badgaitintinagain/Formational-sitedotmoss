@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Sun, Cloud, CloudRain, CloudLightning, Snowflake, Wind } from 'lucide-react';
 import Tile from './Tile';
 
@@ -25,18 +25,24 @@ const getWeatherIcon = (code: number) => {
   return Cloud;
 };
 
-const WeatherTile: React.FC = () => {
+interface WeatherProps {
+  size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
+  accent?: 'primary' | 'secondary';
+  opacity?: number;
+}
+
+const WeatherTile: React.FC<WeatherProps> = ({ size = '2x1', accent = 'primary', opacity = 45 }) => {
   const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   
-  // Pick a random location once on mount
   const location = useMemo(() => {
-    if (!mounted) return null;
+    // Only pick a location after mount to ensure hydration consistency
+    if (typeof window === 'undefined') return LOCATIONS[0];
     return LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
-  }, [mounted]);
+  }, []);
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     if (!location) return;
     try {
       const response = await fetch(
@@ -54,44 +60,43 @@ const WeatherTile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location]);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      fetchWeather();
-      // Update every 1 hour (3600000 ms)
-      const interval = setInterval(fetchWeather, 3600000);
-      return () => clearInterval(interval);
-    }
-  }, [mounted, location]);
+    fetchWeather();
+    const interval = setInterval(fetchWeather, 3600000); // 1 hour
+    return () => clearInterval(interval);
+  }, [fetchWeather]);
 
   const Icon = weather ? getWeatherIcon(weather.code) : Cloud;
 
-  if (!mounted || !location) return <Tile size="2x1" label="Weather" icon={Cloud} bgClass="bg-palette-sage/70 border-white/20" />;
+  if (!mounted) {
+    return <Tile size={size} accentType={accent} opacity={opacity} className="animate-pulse" />;
+  }
 
   return (
     <Tile 
-      size="2x1" 
+      size={size} 
       label={location.name} 
       icon={Icon} 
-      bgClass="bg-palette-sage/70 border-white/20"
+      accentType={accent}
+      opacity={opacity}
       bgImage={location.image}
       className="text-white"
     >
-      {loading ? (
-        <div className="animate-pulse bg-white/20 h-6 w-12 rounded" />
-      ) : (
-        <div className="flex flex-col items-center">
-          <p className="text-xl font-semibold leading-none">{weather?.temp}°C</p>
-          <p className="text-[7px] uppercase tracking-widest opacity-90 mt-1 truncate w-full text-center">{location.name}</p>
-        </div>
-      )}
+      <div className="flex flex-col items-center justify-center h-full w-full pointer-events-none">
+        {loading ? (
+          <div className="animate-pulse bg-white/20 h-6 w-12 rounded" />
+        ) : (
+          <div className="flex flex-col items-center bg-black/40 backdrop-blur-md px-3 py-1.5 border border-white/10">
+            <p className="text-xl font-medium leading-none tracking-tighter text-white">{weather?.temp}°C</p>
+            <p className="text-[7px] uppercase tracking-[0.3em] opacity-100 text-white mt-1">{location.name}</p>
+          </div>
+        )}
+      </div>
     </Tile>
   );
 };
 
-export default WeatherTile;
+export default memo(WeatherTile);

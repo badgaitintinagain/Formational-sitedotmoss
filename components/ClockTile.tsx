@@ -1,82 +1,91 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import Tile from "./Tile";
 
-const ClockTile: React.FC = () => {
+interface ClockProps {
+  size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
+  accent?: 'primary' | 'secondary';
+  opacity?: number;
+}
+
+const ClockTile: React.FC<ClockProps> = ({ size = '2x2', accent = 'primary', opacity = 50 }) => {
   const minutesRef = useRef<HTMLSpanElement>(null);
   const hoursRef = useRef<HTMLSpanElement>(null);
   const [digitalTime, setDigitalTime] = useState("");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Avoid synchronous setState warning by deferring
+    const timer = setTimeout(() => {
+      setMounted(true);
+      setTime(); 
+    }, 0);
     
     function setTime() {
       const now = new Date();
-
-      // Analog logic
       const seconds = now.getSeconds();
       const minutes = now.getMinutes();
+      const hours = now.getHours();
+
+      // Analog logic (smoother with fractional rotations)
       const minutesDegrees = (minutes / 60) * 360 + (seconds / 60) * 6 + 90;
+      const hoursDegrees = (hours / 12) * 360 + (minutes / 60) * 30 + 90;
+
       if (minutesRef.current) {
         minutesRef.current.style.transform = `rotate(${minutesDegrees}deg)`;
       }
-
-      const hours = now.getHours();
-      const hoursDegrees = (hours / 12) * 360 + (minutes / 60) * 30 + 90;
       if (hoursRef.current) {
         hoursRef.current.style.transform = `rotate(${hoursDegrees}deg)`;
       }
 
-      // Digital logic
       setDigitalTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
     }
 
     const intervalId = setInterval(setTime, 1000);
-    setTime(); // Initial call
 
-    return () => clearInterval(intervalId);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(intervalId);
+    };
   }, []);
 
   if (!mounted) {
     return (
-      <Tile size="2x2" bgClass="bg-palette-sage/70 border-white/20">
-        <div className="animate-pulse bg-white/10 w-full h-full rounded-lg" />
-      </Tile>
+      <Tile size={size} accentType={accent} opacity={opacity} className="animate-pulse" />
     );
   }
 
   return (
-    <Tile size="2x2" bgClass="bg-palette-sage/70 border-white/20">
-      <div className="relative w-full h-full flex flex-col items-center justify-center p-1 overflow-hidden">
+    <Tile size={size} accentType={accent} opacity={opacity}>
+      <div className="relative w-full h-full flex flex-col items-center justify-center p-1 overflow-hidden pointer-events-none">
         {/* Analog Clock Face */}
-        <div className="clock-face relative w-20 h-20 border-2 border-tile-text/30 rounded-full flex items-center justify-center">
-          <div className="center-dot w-1.5 h-1.5 bg-tile-text rounded-full z-30" />
+        <div className="clock-face relative w-20 h-20 border-2 border-tile-text/40 rounded-full flex items-center justify-center bg-white/10 dark:bg-black/20 backdrop-blur-sm">
+          <div className="center-dot w-2 h-2 bg-tile-text rounded-full z-30 shadow-sm" />
           
           <span ref={hoursRef} className="hand hour-hand" />
           <span ref={minutesRef} className="hand min-hand" />
           
-          {/* Hour Markers */}
-          {[...Array(12)].map((_, i) => (
+          {/* Subtle Hour Markers */}
+          {[...Array(4)].map((_, i) => (
             <div 
               key={i} 
               className="absolute w-full h-full" 
-              style={{ transform: `rotate(${i * 30}deg)` }}
+              style={{ transform: `rotate(${i * 90}deg)` }}
             >
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-1 bg-tile-text/40" />
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-1.5 bg-tile-text/60" />
             </div>
           ))}
         </div>
 
-        {/* Digital Clock */}
-        <div className="mt-2 text-[10px] font-mono tracking-widest text-tile-text bg-white/10 dark:bg-black/20 px-2 py-0.5 rounded-none backdrop-blur-sm border border-white/10">
+        {/* Digital Clock Label */}
+        <div className="mt-3 text-[10px] font-mono tracking-[0.2em] text-tile-text bg-white/20 dark:bg-black/30 px-3 py-1 border border-white/10">
           {digitalTime}
         </div>
       </div>
 
       <style jsx>{`
         .clock-face {
-          box-shadow: 0 0 15px rgba(0,0,0,0.05), inset 0 0 8px rgba(255,255,255,0.1);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.05), inset 0 0 10px rgba(255,255,255,0.05);
         }
         .hand {
           position: absolute;
@@ -85,9 +94,7 @@ const ClockTile: React.FC = () => {
           background: currentColor;
           transform-origin: 100%;
           transform: rotate(90deg);
-          transition: all 0.05s;
-          transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
-          border-radius: 0px;
+          transition: transform 0.1s cubic-bezier(0.4, 2.3, 0.3, 1);
         }
         .hour-hand {
           width: 25%;
@@ -95,14 +102,14 @@ const ClockTile: React.FC = () => {
           z-index: 10;
         }
         .min-hand {
-          width: 35%;
-          height: 2px;
+          width: 38%;
+          height: 1.5px;
           z-index: 11;
-          opacity: 0.8;
+          opacity: 0.9;
         }
       `}</style>
     </Tile>
   );
 };
 
-export default ClockTile;
+export default memo(ClockTile);

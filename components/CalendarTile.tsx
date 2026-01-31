@@ -7,24 +7,29 @@ import Tile from './Tile';
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-const CalendarTile: React.FC = () => {
+interface CalendarProps {
+  size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
+  accent?: 'primary' | 'secondary';
+  opacity?: number;
+}
+
+const CalendarTile: React.FC<CalendarProps> = ({ size = '2x3', accent = 'secondary', opacity = 60 }) => {
   const [value, onChange] = useState<Value>(new Date());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) {
     return (
-      <Tile size="2x3" bgClass="bg-palette-sage/60 border-white/20">
-        <div className="animate-pulse bg-white/10 w-full h-full rounded-lg" />
-      </Tile>
+      <Tile size={size} accentType={accent} opacity={opacity} className="animate-pulse" />
     );
   }
 
   return (
-    <Tile size="2x3" bgClass="bg-palette-sage/60 border-white/20">
+    <Tile size={size} accentType={accent} opacity={opacity}>
       <div className="w-full h-full flex flex-col items-center justify-center p-0 overflow-hidden calendar-container">
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-tile-text opacity-80">
           {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}

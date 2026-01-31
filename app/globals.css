@@ -4,14 +4,37 @@
 
 :root {
   --background: #F2EBE3;
-  --foreground: #2D241E;
+  --foreground: #1A1410; 
   --palette-beige: #D6C7B1;
   --palette-taupe: #B6A691;
   --palette-brown: #A38B75;
   --palette-gray: #D1D3D4;
   --palette-sage: #949B7B;
-  --tile-text: #2D241E;
-  --tile-text-muted: rgba(45, 36, 30, 0.6);
+  --tile-text: #1A1410; 
+  --tile-text-muted: rgba(26, 20, 16, 0.6);
+  --accent-primary: #949B7B;
+  --accent-secondary: #B6A691;
+}
+
+.dark {
+  --background: #1A1410;
+  --foreground: #F2EBE3;
+  --tile-text: #F2EBE3;
+  --tile-text-muted: rgba(242, 235, 227, 0.6);
+}
+
+/* Earth & Pastel Palettes (Improved pairs) */
+[data-palette='serene'] { --accent-primary: #949B7B; --accent-secondary: #B6A691; }
+[data-palette='clay'] { --accent-primary: #CB997E; --accent-secondary: #A5A58D; }
+[data-palette='moss'] { --accent-primary: #6B705C; --accent-secondary: #949B7B; }
+[data-palette='desert'] { --accent-primary: #DDBEA9; --accent-secondary: #FFE8D6; }
+[data-palette='ocean'] { --accent-primary: #A8DADC; --accent-secondary: #457B9D; }
+[data-palette='spring'] { --accent-primary: #FFB4A2; --accent-secondary: #E5989B; }
+[data-palette='sunset'] { --accent-primary: #B5838D; --accent-secondary: #6B705C; }
+[data-palette='vintage'] { --accent-primary: #A68A64; --accent-secondary: #582F0E; }
+
+.force-grayscale {
+  filter: grayscale(100%);
 }
 
 .dark {
@@ -30,6 +53,8 @@
   --color-palette-sage: var(--palette-sage);
   --color-tile-text: var(--tile-text);
   --color-tile-text-muted: var(--tile-text-muted);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
 }
 
 body {
@@ -41,7 +66,7 @@ body {
 
 /* WinUI + Apple Liquid Glass Tile Styles */
 .tile {
-  @apply relative overflow-hidden active:scale-95 cursor-pointer flex flex-col justify-end p-2 text-white font-medium 
+  @apply relative overflow-hidden active:scale-95 cursor-pointer flex flex-col justify-end p-2 font-medium 
          backdrop-blur-xl border border-white/20 shadow-lg rounded-none transition-all duration-500;
 }
 

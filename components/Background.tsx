@@ -1,39 +1,74 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { useTheme } from './ThemeProvider';
 import gsap from 'gsap';
 
 const Background: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, bgType, bgValue, glassBlur } = useTheme();
   const bgRef = useRef<HTMLDivElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!bgRef.current) return;
+    const ctx = gsap.context(() => {
+      if (!bgRef.current) return;
 
-    if (theme === 'dark') {
-      gsap.to(bgRef.current, {
-        backgroundColor: '#2D241E', // Dark Brown
-        duration: 0.8,
-        ease: 'power2.inOut'
-      });
-    } else {
-      gsap.to(bgRef.current, {
-        backgroundColor: '#F2EBE3', // Beige
-        duration: 0.8,
-        ease: 'power2.inOut'
+      if (bgType === 'color') {
+        const targetColor = bgValue || (theme === 'dark' ? '#2D241E' : '#F2EBE3');
+        gsap.to(bgRef.current, {
+          backgroundColor: targetColor,
+          backgroundImage: 'none',
+          duration: 1.2,
+          ease: 'power3.out'
+        });
+      } else if (bgType === 'image') {
+        gsap.to(bgRef.current, {
+          backgroundImage: `url(${bgValue})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          duration: 1.2,
+          ease: 'power3.out'
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, [theme, bgType, bgValue]);
+
+  // Separate effect for blur to prevent background reloading
+  useEffect(() => {
+    if (layerRef.current) {
+      gsap.to(layerRef.current, {
+        backdropFilter: `blur(${glassBlur}px)`,
+        webkitBackdropFilter: `blur(${glassBlur}px)`,
+        duration: 0.5,
+        ease: 'power2.out'
       });
     }
-  }, [theme]);
+  }, [glassBlur]);
 
   return (
-    <div ref={bgRef} className="fixed inset-0 z-0 overflow-hidden transition-colors duration-500">
-      {/* Subtle Noise Texture */}
-      <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+    <div className="fixed inset-0 z-0 overflow-hidden select-none pointer-events-none">
+      {/* Actual Background Content */}
+      <div 
+        ref={bgRef} 
+        className="absolute inset-0 will-change-[background-color,background-image]" 
+      />
       
-      {/* Very subtle gradient for depth */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-zinc-200/20 dark:from-indigo-900/10 to-transparent" />
+      {/* Liquid Glass / Blur Layer */}
+      <div 
+        ref={layerRef}
+        className="absolute inset-0 z-10"
+      />
+
+      {/* Subtle Noise Texture */}
+      <div className="absolute inset-0 z-20 opacity-[0.03] dark:opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      
+      {/* Darken/Lighten Overlay for readability */}
+      <div className={`absolute inset-0 z-30 transition-opacity duration-1000 ${
+        theme === 'dark' ? 'bg-black/25' : 'bg-white/15'
+      }`} />
     </div>
   );
 };
 
-export default Background;
+export default memo(Background);

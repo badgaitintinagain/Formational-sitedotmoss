@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { LucideIcon } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -12,11 +12,16 @@ interface TileProps {
   bgImage?: string;
   icon?: LucideIcon;
   onClick?: () => void;
+  accentType?: 'primary' | 'secondary';
+  opacity?: number;
 }
 
-const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgClass = 'bg-blue-600/70 border-blue-400/50', bgImage, icon: Icon, onClick }) => {
+const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children, bgClass = '', bgImage, icon: Icon, onClick, accentType, opacity }) => {
   const tileRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+
+  // Use a fallback opacity if not provided
+  const effectiveOpacity = opacity !== undefined ? opacity / 100 : 0.4;
 
   const sizeClasses = {
     '1x1': 'tile-1x1 row-span-1 col-span-1',
@@ -33,60 +38,80 @@ const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgCl
     const glow = glowRef.current;
     if (!tile || !glow) return;
 
-    const onMouseEnter = () => {
-      gsap.to(glow, {
-        opacity: 1,
-        duration: 0.4,
-        ease: 'power2.out'
-      });
-      gsap.to(tile, {
-        filter: 'brightness(1.05)',
-        duration: 0.4,
-        ease: 'power2.out',
-        borderColor: 'rgba(255,255,255,0.8)',
-      });
-    };
-
-    const onMouseLeave = () => {
-      gsap.to(glow, {
+    const ctx = gsap.context(() => {
+      // Smooth color transition for the tile itself
+      gsap.from(tile, {
         opacity: 0,
-        duration: 0.4,
-        ease: 'power2.inOut'
+        scale: 0.95,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: Math.random() * 0.3
       });
-      gsap.to(tile, {
-        filter: 'brightness(1)',
-        duration: 0.4,
-        ease: 'power2.inOut',
-        borderColor: 'rgba(255,255,255,0.4)',
-      });
-    };
 
-    const onMouseMove = (e: MouseEvent) => {
-      const rect = tile.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const onMouseEnter = () => {
+        gsap.to(glow, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+        gsap.to(tile, {
+          y: -4,
+          filter: 'brightness(1.1)',
+          duration: 0.4,
+          ease: 'power2.out',
+          borderColor: 'rgba(255,255,255,0.6)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+        });
+      };
 
-      tile.style.setProperty('--mouse-x', `${x}px`);
-      tile.style.setProperty('--mouse-y', `${y}px`);
-    };
+      const onMouseLeave = () => {
+        gsap.to(glow, { opacity: 0, duration: 0.4, ease: 'power2.inOut' });
+        gsap.to(tile, {
+          y: 0,
+          filter: 'brightness(1)',
+          duration: 0.4,
+          ease: 'power2.inOut',
+          borderColor: 'rgba(255,255,255,0.2)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        });
+      };
 
-    tile.addEventListener('mouseenter', onMouseEnter);
-    tile.addEventListener('mouseleave', onMouseLeave);
-    tile.addEventListener('mousemove', onMouseMove);
+      const onMouseMove = (e: MouseEvent) => {
+        const rect = tile.getBoundingClientRect();
+        tile.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        tile.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      };
 
-    return () => {
-      tile.removeEventListener('mouseenter', onMouseEnter);
-      tile.removeEventListener('mouseleave', onMouseLeave);
-      tile.removeEventListener('mousemove', onMouseMove);
-    };
+      tile.addEventListener('mouseenter', onMouseEnter);
+      tile.addEventListener('mouseleave', onMouseLeave);
+      tile.addEventListener('mousemove', onMouseMove);
+
+      return () => {
+        tile.removeEventListener('mouseenter', onMouseEnter);
+        tile.removeEventListener('mouseleave', onMouseLeave);
+        tile.removeEventListener('mousemove', onMouseMove);
+      };
+    }, tile);
+
+    return () => ctx.revert();
   }, []);
 
   return (
     <div 
       ref={tileRef}
       onClick={onClick}
-      className={`tile relative overflow-hidden group ${sizeClasses[size]} ${bgClass} flex flex-col ${isSmall ? 'justify-center items-center' : 'justify-end items-start'} p-2 text-left border cursor-pointer text-tile-text ${className}`}
+      className={`tile relative overflow-hidden group ${sizeClasses[size]} flex flex-col ${isSmall ? 'justify-center items-center' : 'justify-end items-start'} p-2 text-left border cursor-pointer text-tile-text ${className}`}
     >
+      {/* Base Color Background (from Palette) */}
+      {accentType && (
+        <div 
+          className="absolute inset-0 z-0 transition-colors duration-500"
+          style={{ 
+            backgroundColor: `var(--accent-${accentType})`,
+            opacity: bgImage ? 0.3 : effectiveOpacity 
+          }}
+        />
+      )}
+
+      {/* Manual bgClass overlay (if provided) */}
+      {bgClass && <div className={`absolute inset-0 z-0 ${bgClass}`} />}
+
       {/* Background Image */}
       {bgImage && (
         <div 
@@ -118,6 +143,8 @@ const Tile: React.FC<TileProps> = ({ size, label, className = '', children, bgCl
       )}
     </div>
   );
-};
+});
+
+Tile.displayName = 'Tile';
 
 export default Tile;
