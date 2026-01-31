@@ -16,17 +16,6 @@ interface CalendarProps {
 
 const CalendarTile: React.FC<CalendarProps> = ({ size = '2x3', accent = 'secondary', opacity = 65, label = 'Calendar' }) => {
   const [value, onChange] = useState<Value>(new Date());
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <Tile size={size} accentType={accent} opacity={opacity} label={label} className="animate-pulse" />
-    );
-  }
 
   return (
     <Tile size={size} accentType={accent} opacity={opacity} label={label}>

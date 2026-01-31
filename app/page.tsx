@@ -44,8 +44,10 @@ const Home = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [randomQuote, setRandomQuote] = useState<typeof QUOTES[0] | null>(null);
 
-  // --- Optimization: Memoize Config with Randomization ---
-  const dashboardConfig: DashboardGroup[] = useMemo(() => {
+  // --- Optimization: Stable Randomized Config ---
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardGroup[]>([]);
+
+  useEffect(() => {
     const baseGroups: DashboardGroup[] = [
       {
         title: "Life at a glance",
@@ -74,18 +76,16 @@ const Home = () => {
       }
     ];
 
-    return baseGroups.map(group => ({
+    const randomized = baseGroups.map(group => ({
       ...group,
-      // Randomize accent and opacity for tiles that don't have them explicitly set
       tiles: group.tiles.map(tile => {
         const accent = tile.accent || (Math.random() > 0.5 ? 'primary' : 'secondary');
-        const opacity = tile.opacity || Math.floor(Math.random() * 31) + 45; // 45-75% for better contrast
+        const opacity = tile.opacity || Math.floor(Math.random() * 31) + 45;
         
         return {
           ...tile,
           accent,
           opacity,
-          // Pass accent and opacity to specialized components via props
           props: {
             ...tile.props,
             accent,
@@ -96,17 +96,10 @@ const Home = () => {
         };
       })
     }));
-  }, []);
 
-  useEffect(() => {
-    const init = () => {
-      setMounted(true);
-      setRandomQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-    };
-    
-    // Defer to next tick to avoid cascading render warning in some environments
-    const timeout = setTimeout(init, 0);
-    return () => clearTimeout(timeout);
+    setDashboardConfig(randomized);
+    setMounted(true);
+    setRandomQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   }, []);
 
   useEffect(() => {
@@ -121,7 +114,13 @@ const Home = () => {
     });
   }, [mounted]);
 
-  if (!mounted) return null;
+  if (!mounted) return (
+    <div className="min-h-screen w-full bg-[#F2EBE3] dark:bg-[#1A1410] flex items-center justify-center">
+       <div className="animate-pulse text-foreground opacity-20 text-sm tracking-widest uppercase font-bold text-center">
+         Initializing Site...
+       </div>
+    </div>
+  );
 
   return (
     <div ref={containerRef} className="relative min-h-screen w-full overflow-x-hidden overflow-y-auto font-sans flex items-center justify-center">

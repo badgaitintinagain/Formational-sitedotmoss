@@ -13,11 +13,8 @@ const ClockTile: React.FC<ClockProps> = ({ size = '2x2', accent = 'primary', opa
   const minutesRef = useRef<HTMLSpanElement>(null);
   const hoursRef = useRef<HTMLSpanElement>(null);
   const [digitalTime, setDigitalTime] = useState("");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
     function setTime() {
       const now = new Date();
       const seconds = now.getSeconds();
@@ -44,12 +41,6 @@ const ClockTile: React.FC<ClockProps> = ({ size = '2x2', accent = 'primary', opa
     return () => clearInterval(intervalId);
   }, []);
 
-  if (!mounted) {
-    return (
-      <Tile size={size} accentType={accent} opacity={opacity} label={label} className="animate-pulse" />
-    );
-  }
-
   return (
     <Tile size={size} accentType={accent} opacity={opacity} label={label}>
       <div className="relative w-full flex flex-col items-center justify-center p-1 pointer-events-none">
@@ -74,7 +65,7 @@ const ClockTile: React.FC<ClockProps> = ({ size = '2x2', accent = 'primary', opa
 
         {/* Digital Clock Label */}
         <div className="mt-2 text-[10px] font-mono tracking-[0.2em] text-tile-text bg-white/20 dark:bg-black/30 px-3 py-1 border border-white/10">
-          {digitalTime}
+          {digitalTime || "--:--"}
         </div>
       </div>
 

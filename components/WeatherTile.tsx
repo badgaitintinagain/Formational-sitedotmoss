@@ -34,11 +34,9 @@ interface WeatherProps {
 const WeatherTile: React.FC<WeatherProps> = ({ size = '2x1', accent = 'primary', opacity = 45 }) => {
   const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   
   const location = useMemo(() => {
-    // Only pick a location after mount to ensure hydration consistency
-    if (typeof window === 'undefined') return LOCATIONS[0];
+    // Pick a random location
     return LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
   }, []);
 
@@ -63,21 +61,12 @@ const WeatherTile: React.FC<WeatherProps> = ({ size = '2x1', accent = 'primary',
   }, [location]);
 
   useEffect(() => {
-    // Avoid synchronous setState warning
-    const timer = setTimeout(() => setMounted(true), 0);
     fetchWeather();
     const interval = setInterval(fetchWeather, 3600000); // 1 hour
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [fetchWeather]);
 
   const Icon = weather ? getWeatherIcon(weather.code) : Cloud;
-
-  if (!mounted) {
-    return <Tile size={size} accentType={accent} opacity={opacity} className="animate-pulse" />;
-  }
 
   return (
     <Tile 

@@ -62,7 +62,7 @@ body {
 /* WinUI + Apple Liquid Glass Tile Styles */
 .tile {
   @apply relative overflow-hidden active:scale-95 cursor-pointer flex flex-col justify-end p-2 font-medium 
-         backdrop-blur-xl border border-white/20 shadow-lg rounded-none transition-all duration-500;
+         backdrop-blur-xl border border-white/20 shadow-lg rounded-none;
 }
 
 .grid-rows-5 {

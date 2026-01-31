@@ -42,21 +42,26 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
     if (!tile || !glow) return;
 
     const ctx = gsap.context(() => {
-      // Smooth entry
-      gsap.from(tile, {
-        opacity: 0,
-        scale: 0.98,
-        duration: 0.6,
-        ease: 'power1.out',
-        delay: Math.random() * 0.2
-      });
+      // Robust entry animation
+      gsap.fromTo(tile, 
+        { opacity: 0, scale: 0.98, y: 5 },
+        { 
+          opacity: 1, 
+          scale: 1, 
+          y: 0, 
+          duration: 0.8, 
+          ease: 'power2.out',
+          delay: Math.random() * 0.3,
+          clearProps: 'opacity,scale,y' // Clear GSAP styles after entry so CSS/Hover stays clean
+        }
+      );
 
       const onMouseEnter = () => {
-        gsap.to(glow, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+        gsap.to(glow, { opacity: 1, duration: 0.3, ease: 'power2.out' });
         gsap.to(tile, {
           y: -4,
           filter: 'brightness(1.1)',
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.out',
           borderColor: 'rgba(255,255,255,0.6)',
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
@@ -64,11 +69,11 @@ const Tile: React.FC<TileProps> = memo(({ size, label, className = '', children,
       };
 
       const onMouseLeave = () => {
-        gsap.to(glow, { opacity: 0, duration: 0.4, ease: 'power2.inOut' });
+        gsap.to(glow, { opacity: 0, duration: 0.3, ease: 'power2.inOut' });
         gsap.to(tile, {
           y: 0,
           filter: 'brightness(1)',
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.inOut',
           borderColor: 'rgba(255,255,255,0.25)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
