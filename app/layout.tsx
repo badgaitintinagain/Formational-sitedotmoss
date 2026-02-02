@@ -9,8 +9,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Formational - Sitedotmoss",
-  description: "Windows 8 Metro UI Style",
+  title: "site(.)moss",
+  description: "Windows 8 Metro UI Style with Pastel Aesthetic",
 };
 
 export default function RootLayout({

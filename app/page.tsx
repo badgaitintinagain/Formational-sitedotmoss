@@ -131,7 +131,7 @@ const Home = () => {
       <div className="relative z-20 w-full flex flex-col items-center justify-center py-12 min-h-screen">
         <div className="w-fit max-w-full px-6 md:px-12 lg:px-16">
           <header className="mb-8 text-left dashboard-header">
-            <h1 className="text-5xl md:text-6xl font-light tracking-tight text-foreground drop-shadow-sm">Formational</h1>
+            <h1 className="text-5xl md:text-6xl font-light tracking-tight text-foreground drop-shadow-sm">site(.)moss</h1>
           </header>
 
           <main className="dashboard-main w-fit max-w-full gap-x-8 gap-y-10 no-scrollbar pb-8">

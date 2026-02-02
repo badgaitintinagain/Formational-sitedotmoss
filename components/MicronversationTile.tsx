@@ -125,7 +125,7 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
                   <h2 className="text-xl font-light tracking-tight text-foreground">Micronversation</h2>
                   <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">
                     Running on Hugging Face CPU
-                    (Model: Micronversation-V1.5-106M-0FI8)
+                    (Model: Micronversation-V1.5-106M)
                   </p>
                 </div>
               </div>
