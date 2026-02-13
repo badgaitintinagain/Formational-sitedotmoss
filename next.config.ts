@@ -14,12 +14,6 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'gsap'],
-    // Use web version of @libsql/client for ARM64 compatibility
-    turbo: {
-      resolveAlias: {
-        '@libsql/client': '@libsql/client/web',
-      },
-    },
   },
 };
 
