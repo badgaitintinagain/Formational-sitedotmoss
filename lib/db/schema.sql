@@ -1,0 +1,61 @@
+-- Initial Schema for Blog System
+-- Run this manually in Turso or use drizzle-kit push
+
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'admin',
+  avatar TEXT,
+  created_at INTEGER DEFAULT (unixepoch())
+);
+
+-- Posts Table
+CREATE TABLE IF NOT EXISTS posts (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  excerpt TEXT,
+  content TEXT NOT NULL,
+  cover_image TEXT,
+  author_id TEXT NOT NULL,
+  author_name TEXT NOT NULL,
+  tags TEXT,
+  published INTEGER DEFAULT 0,
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch())
+);
+
+-- Comments Table
+CREATE TABLE IF NOT EXISTS comments (
+  id TEXT PRIMARY KEY,
+  post_slug TEXT NOT NULL,
+  author_name TEXT NOT NULL,
+  author_email TEXT,
+  author_avatar TEXT,
+  content TEXT NOT NULL,
+  parent_id TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (parent_id) REFERENCES comments(id)
+);
+
+-- Reactions Table
+CREATE TABLE IF NOT EXISTS reactions (
+  id TEXT PRIMARY KEY,
+  comment_id TEXT NOT NULL,
+  user_id TEXT,
+  type TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (comment_id) REFERENCES comments(id)
+);
+
+-- Indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
+CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_slug, created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_parent ON comments(parent_id);
+CREATE INDEX IF NOT EXISTS idx_comments_status ON comments(status);

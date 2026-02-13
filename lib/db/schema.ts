@@ -1,0 +1,60 @@
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+
+// Blog Posts Table
+export const posts = sqliteTable("posts", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull(),
+  coverImage: text("cover_image"),
+  authorId: text("author_id").notNull(),
+  authorName: text("author_name").notNull(),
+  tags: text("tags"), // JSON string array
+  published: integer("published", { mode: "boolean" }).default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// Comments Table
+export const comments = sqliteTable("comments", {
+  id: text("id").primaryKey(),
+  postSlug: text("post_slug").notNull(),
+  authorName: text("author_name").notNull(),
+  authorEmail: text("author_email"),
+  authorAvatar: text("author_avatar"),
+  content: text("content").notNull(),
+  parentId: text("parent_id"), // For nested comments
+  status: text("status").default("pending"), // pending, approved, spam
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// Reactions Table (optional - for likes, etc.)
+export const reactions = sqliteTable("reactions", {
+  id: text("id").primaryKey(),
+  commentId: text("comment_id").notNull(),
+  userId: text("user_id"),
+  type: text("type").notNull(), // like, love, thinking
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// Users Table (simple admin only)
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").default("admin"), // admin
+  avatar: text("avatar"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// Type exports
+export type Post = typeof posts.$inferSelect;
+export type NewPost = typeof posts.$inferInsert;
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;
+export type Reaction = typeof reactions.$inferSelect;
+export type User = typeof users.$inferSelect;

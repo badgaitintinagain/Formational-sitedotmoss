@@ -6,9 +6,11 @@ import AdTile from "@/components/AdTile";
 import CalendarTile from "@/components/CalendarTile";
 import ClockTile from "@/components/ClockTile";
 import AIChatTile from "@/components/MicronversationTile";
+import BlogTile from "@/components/BlogTile";
 import SettingsModal from "@/components/SettingsModal";
 import Background from "@/components/Background";
 import ThemeToggle from "@/components/ThemeToggle";
+import ProfileButton from "@/components/ProfileButton";
 import gsap from "gsap";
 import { 
   Mail, Settings, Package, Users, PenTool, LucideIcon
@@ -67,7 +69,7 @@ const Home = () => {
       {
         title: "Work & Focus",
         tiles: [
-          { id: 'mail', size: '2x2', label: 'Mail', icon: Mail, accent: 'primary', opacity: 55 },
+          { id: 'blog', size: '2x2', component: BlogTile, label: 'Blog' },
           { id: 'tasks', size: '2x2', label: 'Tasks', icon: PenTool, accent: 'secondary', opacity: 40 },
           { id: 'files', size: '1x1', label: 'Files', icon: Package, accent: 'primary', opacity: 25 },
           { id: 'project', size: '2x3', label: 'Project Alpha', accent: 'secondary', opacity: 50 },
@@ -127,6 +129,7 @@ const Home = () => {
     <div ref={containerRef} className="relative min-h-screen w-full overflow-x-hidden overflow-y-auto font-sans flex items-center justify-center">
       <Background />
       <ThemeToggle />
+      <ProfileButton />
       <div className="absolute inset-0 bg-white/5 dark:bg-black/10 z-10 backdrop-blur-[1px]" />
 
       <div className="relative z-20 w-full flex flex-col items-center justify-center py-12 min-h-screen">
