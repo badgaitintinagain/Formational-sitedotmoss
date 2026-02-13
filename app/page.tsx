@@ -33,9 +33,9 @@ interface DashboardGroup {
 
 // --- Constants ---
 const QUOTES = [
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80" },
-  { text: "Stay hungry, stay foolish.", author: "Steve Jobs", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80" },
-  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", image: "https://images.unsplash.com/photo-1485872232694-217b2ad2303e?auto=format&fit=crop&w=800&q=80" }
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=60" },
+  { text: "Stay hungry, stay foolish.", author: "Steve Jobs", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&q=60" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", image: "https://images.unsplash.com/photo-1485872232694-217b2ad2303e?auto=format&fit=crop&w=400&q=60" }
 ];
 
 const Home = () => {
@@ -105,19 +105,20 @@ const Home = () => {
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
     
-    // Animate header entry
+    // Animate header entry with GPU acceleration
     gsap.from(".dashboard-header", {
       y: -20,
       opacity: 0,
       duration: 1,
-      ease: "power3.out"
+      ease: "power3.out",
+      force3D: true,
     });
   }, [mounted]);
 
   if (!mounted) return (
     <div className="min-h-screen w-full bg-[#F2EBE3] dark:bg-[#1A1410] flex items-center justify-center">
-       <div className="animate-pulse text-foreground opacity-20 text-sm tracking-widest uppercase font-bold text-center">
-         Initializing Site...
+       <div className="text-foreground opacity-20 text-sm tracking-widest uppercase font-bold text-center">
+         Loading...
        </div>
     </div>
   );

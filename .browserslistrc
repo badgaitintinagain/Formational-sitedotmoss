@@ -1,9 +1,12 @@
 # Target modern browsers to reduce polyfills and bundle size
-# This will eliminate unnecessary polyfills for Array.at, Object.fromEntries, etc.
+# This eliminates polyfills for Array.at, Object.fromEntries, String.trim*, etc.
 
-defaults
-last 2 versions
-> 0.5%
+# Modern browsers only (past 2 years)
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
 not dead
 not IE 11
 not op_mini all
+> 0.2%

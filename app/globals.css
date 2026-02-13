@@ -59,10 +59,18 @@ body {
   overflow-x: hidden;
 }
 
+/* Performance optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* WinUI + Apple Liquid Glass Tile Styles */
 .tile {
   @apply relative overflow-hidden active:scale-95 cursor-pointer flex flex-col justify-end p-2 font-medium 
          backdrop-blur-xl border border-white/20 shadow-lg rounded-none;
+  transform: translateZ(0); /* Force GPU acceleration */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .grid-rows-5 {

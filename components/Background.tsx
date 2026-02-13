@@ -20,17 +20,19 @@ const Background: React.FC = () => {
           backgroundImage: 'none',
           duration: 1.2,
           ease: 'power3.out',
-          overwrite: 'auto'
+          overwrite: 'auto',
+          force3D: true, // Force GPU acceleration
         });
       } else if (bgType === 'image' && bgValue) {
         gsap.to(bgRef.current, {
           backgroundImage: `url(${bgValue})`,
-          backgroundColor: theme === 'dark' ? '#1A1410' : '#F2EBE3', // Base color behind image
+          backgroundColor: theme === 'dark' ? '#1A1410' : '#F2EBE3',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           duration: 1,
           ease: 'power2.inOut',
-          overwrite: 'auto'
+          overwrite: 'auto',
+          force3D: true, // Force GPU acceleration
         });
       }
     });
@@ -55,7 +57,7 @@ const Background: React.FC = () => {
       {/* Actual Background Content */}
       <div 
         ref={bgRef} 
-        className="absolute inset-0 will-change-[background-color,background-image]" 
+        className="absolute inset-0 will-change-[background-color,background-image] transform-gpu" 
         style={{ backgroundColor: theme === 'dark' ? '#1A1410' : '#F2EBE3' }}
       />
       
@@ -65,8 +67,14 @@ const Background: React.FC = () => {
         className="absolute inset-0 z-10"
       />
 
-      {/* Subtle Noise Texture */}
-      <div className="absolute inset-0 z-20 opacity-[0.03] dark:opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      {/* Subtle Noise Texture - Inline SVG for performance */}
+      <div 
+        className="absolute inset-0 z-20 opacity-[0.03] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat'
+        }}
+      />
       
       {/* Darken/Lighten Overlay for readability */}
       <div className={`absolute inset-0 z-30 transition-opacity duration-1000 ${
