@@ -38,13 +38,16 @@ async function setupDatabase() {
     // Create first admin user
     console.log('👤 Creating admin user...');
     
+    // Import bcryptjs dynamically
+    const bcrypt = (await import('bcryptjs')).default;
+    
     const adminId = `admin-${Date.now()}`;
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@sitedotmoss.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
     const adminName = 'Admin';
     
-    // Simple base64 hash (replace with bcrypt in production!)
-    const passwordHash = Buffer.from(adminPassword).toString('base64');
+    // Hash password with bcrypt
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
     
     await turso.execute({
       sql: `INSERT INTO users (id, email, name, password_hash, role) 

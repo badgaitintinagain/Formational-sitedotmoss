@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo, useRef, memo } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import Tile from "@/components/Tile";
 import WeatherTile from "@/components/WeatherTile";
 import AdTile from "@/components/AdTile";
@@ -13,7 +13,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ProfileButton from "@/components/ProfileButton";
 import gsap from "gsap";
 import { 
-  Mail, Settings, Package, Users, PenTool, LucideIcon
+  Settings, Package, Users, PenTool, LucideIcon
 } from "lucide-react";
 
 // --- Types ---

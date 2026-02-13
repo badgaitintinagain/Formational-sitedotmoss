@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isValid = verifyPassword(password, user.passwordHash);
+    const isValid = await verifyPassword(password, user.passwordHash);
 
     if (!isValid) {
       return NextResponse.json(

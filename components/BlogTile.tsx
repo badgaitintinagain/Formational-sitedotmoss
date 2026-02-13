@@ -33,7 +33,7 @@ const BlogTile: React.FC<BlogTileProps> = ({ size = '2x2', accent = 'primary', o
     if (isOpen && posts.length === 0) {
       fetchPosts();
     }
-  }, [isOpen]);
+  }, [isOpen, posts]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -128,6 +128,7 @@ const BlogTile: React.FC<BlogTileProps> = ({ size = '2x2', accent = 'primary', o
                   {posts.map((post) => (
                     <article 
                       key={post.id}
+                      onClick={() => window.location.href = `/blog/${post.slug}`}
                       className="group cursor-pointer bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 rounded-xl overflow-hidden transition-all duration-300"
                     >
                       {post.coverImage && (

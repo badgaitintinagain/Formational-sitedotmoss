@@ -1,14 +1,12 @@
 // Simple auth utilities for admin-only access
-// Note: For production, use NextAuth.js or Clerk
+import bcrypt from 'bcryptjs';
 
-export function hashPassword(password: string): string {
-  // This is a placeholder - in production use bcrypt or similar
-  // For now, just use a simple hash for demo
-  return Buffer.from(password).toString('base64');
+export async function hashPassword(password: string): Promise<string> {
+  return await bcrypt.hash(password, 12);
 }
 
-export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return await bcrypt.compare(password, hash);
 }
 
 export function generateId(): string {

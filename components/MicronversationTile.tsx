@@ -25,7 +25,7 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
   
   const modalRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const clientRef = useRef<any>(null);
+  const clientRef = useRef<unknown>(null);
 
   // Hugging Face Space ID
   const HF_REPO_ID = "badgaitintin/Micronversation"; 

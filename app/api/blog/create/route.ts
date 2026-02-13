@@ -3,7 +3,7 @@ import { db, posts } from '@/lib/db';
 import { generateId, generateSlug } from '@/lib/auth/utils';
 import { withAuth } from '@/lib/middleware/auth';
 
-async function createPostHandler(request: NextRequest, user: any) {
+async function createPostHandler(request: NextRequest, user: { id: string; email: string; name: string; role: string }) {
   try {
     const body = await request.json();
     const { title, content, excerpt, coverImage, tags, published } = body;

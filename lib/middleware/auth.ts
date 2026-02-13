@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function withAuth(handler: Function, requireAdmin = false) {
+export function withAuth(handler: (...args: any[]) => Promise<Response>, requireAdmin = false) {
   return async (request: NextRequest) => {
     try {
       const authCookie = request.cookies.get('auth_user');
@@ -23,7 +23,7 @@ export function withAuth(handler: Function, requireAdmin = false) {
 
       // Pass user to handler
       return handler(request, user);
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid session' },
         { status: 401 }
