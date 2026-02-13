@@ -2,8 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Tile from './Tile';
 import { Send, Loader2, X, BrainCircuit, User } from 'lucide-react';
-import gsap from 'gsap';
-import { Client } from "@gradio/client"; 
+import gsap from 'gsap'; 
 
 interface Message {
   role: 'user' | 'bot';
@@ -33,6 +32,8 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
 
   const getClient = async () => {
     if (clientRef.current) return clientRef.current;
+    // Lazy load @gradio/client only when needed (saves ~50KB on initial bundle)
+    const { Client } = await import("@gradio/client");
     clientRef.current = await Client.connect(HF_REPO_ID);
     return clientRef.current;
   };

@@ -1,0 +1,9 @@
+# Target modern browsers to reduce polyfills and bundle size
+# This will eliminate unnecessary polyfills for Array.at, Object.fromEntries, etc.
+
+defaults
+last 2 versions
+> 0.5%
+not dead
+not IE 11
+not op_mini all
