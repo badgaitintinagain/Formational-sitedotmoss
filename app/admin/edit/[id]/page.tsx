@@ -204,9 +204,11 @@ export default function EditPostPage() {
       </header>
 
       <div className="max-w-7xl mx-auto p-4">
-        <div className={`grid ${showPreview ? 'lg:grid-cols-2' : 'grid-cols-1'} gap-6`}>
-          {/* Edit Form */}
-          <div className="space-y-4">
+        {/* Layout Container */}
+        <div className={`grid gap-6 ${showPreview ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 lg:grid-cols-3'}`}>
+          
+          {/* LEFT: Main Content (Title & Editor) */}
+          <div className={`space-y-4 ${showPreview ? 'col-span-1' : 'lg:col-span-2'}`}>
             {/* Title */}
             <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
               <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
@@ -222,84 +224,9 @@ export default function EditPostPage() {
               />
             </div>
 
-            {/* Cover Image */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-3 uppercase tracking-wide">
-                Cover Image
-              </label>
-              {formData.coverImage ? (
-                <div className="relative group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={formData.coverImage}
-                    alt="Cover"
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                    >
-                      Change
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, coverImage: '' })}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium flex items-center gap-2"
-                    >
-                      <Trash2 size={14} />
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full h-64 border-2 border-dashed border-foreground/20 rounded-lg hover:border-accent-primary/50 hover:bg-accent-primary/5 transition-all flex flex-col items-center justify-center gap-3 group"
-                >
-                  <div className="w-16 h-16 rounded-full bg-accent-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Upload size={28} className="text-accent-primary" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-foreground">
-                      {uploading ? 'Uploading...' : 'Click to upload cover image'}
-                    </p>
-                    <p className="text-xs text-foreground/40 mt-1">PNG, JPG, GIF up to 10MB</p>
-                  </div>
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file, true);
-                }}
-                className="hidden"
-              />
-            </div>
-
-            {/* Excerpt */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
-                Excerpt
-              </label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none"
-                rows={2}
-                placeholder="Brief description of your post..."
-              />
-            </div>
-
             {/* Content */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4 flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
+              <div className="flex items-center justify-between mb-3 border-b border-foreground/10 pb-3">
                 <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
                   Content * (Markdown)
                 </label>
@@ -327,136 +254,115 @@ export default function EditPostPage() {
                 required
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none font-mono"
-                rows={20}
-                placeholder="# Write your content here&#10;&#10;Use **Markdown** formatting:&#10;- **bold**, *italic*&#10;- ## Headings&#10;- [Links](url)&#10;- ![Images](url)"
+                className="w-full h-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none font-mono"
+                placeholder="# Write your content here..."
               />
-            </div>
-
-            {/* Tags */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
-                Tags
-              </label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
-                placeholder="tech, design, tutorial (comma separated)"
-              />
-              {formData.tags && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.tags.split(',').map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-accent-primary/10 text-accent-primary text-xs rounded-full"
-                    >
-                      #{tag.trim()}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Published Toggle */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
-                    Publish Status
-                  </label>
-                  <p className="text-xs text-foreground/40 mt-1">
-                    {formData.published ? 'Post is visible to everyone' : 'Post is hidden (draft)'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, published: !formData.published })}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                    formData.published ? 'bg-green-500' : 'bg-foreground/20'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                      formData.published ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
             </div>
           </div>
 
-          {/* Preview Panel */}
-          {showPreview && (
-            <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-6">
+          {/* RIGHT: Sidebar Settings OR Preview */}
+          <div className="space-y-6">
+            
+            {/* If Preview is ON, show PREVIEW here. If OFF, show SETTINGS here */}
+            {showPreview ? (
+              <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-6 h-full overflow-y-auto max-h-[calc(100vh-140px)] sticky top-24">
                 <div className="flex items-center gap-2 mb-4 pb-4 border-b border-foreground/10">
                   <Eye size={16} className="text-accent-primary" />
                   <h2 className="text-sm font-medium text-foreground">Live Preview</h2>
                 </div>
-                
-                {/* Preview Content */}
                 <article>
                   {formData.coverImage && (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={formData.coverImage}
-                      alt="Cover"
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
+                    <img src={formData.coverImage} alt="Cover" className="w-full h-48 object-cover rounded-lg mb-4" />
                   )}
-                  
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-                    {formData.title || 'Untitled Post'}
-                  </h1>
-                  
-                  {formData.excerpt && (
-                    <p className="text-sm text-foreground/60 mb-4 italic">
-                      {formData.excerpt}
-                    </p>
-                  )}
-                  
-                  {formData.tags && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {formData.tags.split(',').map((tag, i) => (
-                        <span
-                          key={i}
-                          className="text-xs px-2 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
-                        >
-                          #{tag.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="prose prose-sm dark:prose-invert max-w-none
-                    prose-headings:text-foreground prose-p:text-foreground/80 
-                    prose-a:text-accent-primary prose-strong:text-foreground
-                    prose-code:text-accent-primary prose-code:bg-accent-primary/10
-                    prose-img:rounded-lg prose-img:w-full prose-img:h-auto">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                      components={{
-                        img: ({...props}) => (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img 
-                            {...props} 
-                            alt={props.alt || 'Blog image'}
-                            className="w-full h-auto rounded-lg my-4"
-                            loading="lazy"
-                          />
-                        ),
-                      }}
-                    >
+                  <h1 className="text-2xl font-bold text-foreground mb-3">{formData.title || 'Untitled'}</h1>
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                       {formData.content || '*No content yet...*'}
                     </ReactMarkdown>
                   </div>
                 </article>
               </div>
-            </div>
-          )}
+            ) : (
+              /* SETTINGS SIDEBAR */
+              <div className="space-y-4 sticky top-24">
+                {/* Publish Toggle */}
+                <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">Publish Status</label>
+                      <p className="text-xs text-foreground/40 mt-1">{formData.published ? 'Visible' : 'Draft'}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, published: !formData.published })}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.published ? 'bg-green-500' : 'bg-foreground/20'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.published ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cover Image */}
+                <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+                  <label className="block text-xs font-medium text-foreground/60 mb-3 uppercase tracking-wide">Cover Image</label>
+                  {formData.coverImage ? (
+                    <div className="relative group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={formData.coverImage} alt="Cover" className="w-full h-40 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, coverImage: '' })}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-40 border-2 border-dashed border-foreground/20 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-accent-primary/50 text-foreground/40 hover:text-accent-primary hover:bg-accent-primary/5 transition-all"
+                    >
+                      <Upload size={24} />
+                      <span className="text-xs">Upload Cover</span>
+                    </button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) handleImageUpload(f, true); }} className="hidden" />
+                </div>
+
+                {/* Excerpt */}
+                <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+                  <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">Excerpt</label>
+                  <textarea
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none"
+                    rows={4}
+                    placeholder="Short summary..."
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+                  <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">Tags</label>
+                  <input
+                    type="text"
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 mb-2"
+                    placeholder="tag1, tag2..."
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.split(',').filter(Boolean).map((t, i) => (
+                      <span key={i} className="px-2 py-1 bg-accent-primary/10 text-accent-primary text-xs rounded-md">#{t.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+          </div>
         </div>
       </div>
     </div>
