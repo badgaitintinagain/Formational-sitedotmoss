@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, Tag, User, Send } from 'lucide-react';
+import { ArrowLeft, User, Send } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -119,128 +119,158 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-foreground/10 py-6">
-        <div className="max-w-4xl mx-auto px-6">
-          <button
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors"
-          >
-            <ArrowLeft size={18} />
-            <span>Back</span>
-          </button>
+      {/* Header แบบ IG */}
+      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-xl py-4">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.push('/blog')}
+              className="flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span className="hidden md:inline">Back</span>
+            </button>
+            <h1 className="text-lg font-medium text-foreground">Post</h1>
+            <div className="w-16" />
+          </div>
         </div>
       </header>
 
-      <article className="max-w-4xl mx-auto px-6 py-12">
-        {post.coverImage && (
-          <div className="relative w-full aspect-video mb-8 rounded-2xl overflow-hidden">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground mb-4">
-          {post.title}
-        </h1>
-
-        <div className="flex flex-wrap items-center gap-4 text-sm text-foreground/60 mb-8 pb-8 border-b border-foreground/10">
-          <div className="flex items-center gap-2">
-            <User size={16} />
-            <span>{post.authorName}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar size={16} />
-            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-          </div>
-          {post.tags.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Tag size={16} />
-              <span>{post.tags.join(', ')}</span>
+      {/* เลย์เอาต์แบบ IG - Desktop: รูปซ้าย เนื้อหาขวา, Mobile: รูปบน เนื้อหาล่าง */}
+      <main className="max-w-6xl mx-auto">
+        <div className="lg:flex lg:h-[calc(100vh-73px)]">
+          {/* ส่วนรูป */}
+          {post.coverImage && (
+            <div className="lg:w-3/5 bg-black flex items-center justify-center lg:sticky lg:top-[73px] lg:h-[calc(100vh-73px)]">
+              <div className="relative w-full aspect-square lg:aspect-auto lg:h-full">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
           )}
-        </div>
 
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          {post.content.split('\n').map((paragraph, i) => (
-            <p key={i} className="text-foreground/80 leading-relaxed mb-4">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Comments Section */}
-        <div className="mt-16 pt-12 border-t border-foreground/10">
-          <h2 className="text-2xl font-light text-foreground mb-8">
-            Comments ({comments.length})
-          </h2>
-
-          {/* Comment Form */}
-          <form onSubmit={handleCommentSubmit} className="mb-12 bg-foreground/5 rounded-xl p-6">
-            <h3 className="text-lg font-medium text-foreground mb-4">Leave a comment</h3>
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <input
-                type="text"
-                required
-                placeholder="Your name *"
-                value={commentForm.name}
-                onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                className="bg-background border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50"
-              />
-              <input
-                type="email"
-                required
-                placeholder="Your email *"
-                value={commentForm.email}
-                onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
-                className="bg-background border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50"
-              />
-            </div>
-            <textarea
-              required
-              placeholder="Your comment *"
-              value={commentForm.content}
-              onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
-              className="w-full bg-background border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50 resize-none"
-              rows={4}
-            />
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-4 flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary rounded-lg transition-all"
-            >
-              <Send size={16} />
-              <span>{submitting ? 'Submitting...' : 'Submit Comment'}</span>
-            </button>
-          </form>
-
-          {/* Comments List */}
-          <div className="space-y-6">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-foreground/5 rounded-xl p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center">
-                      <User size={16} className="text-accent-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{comment.authorName}</p>
-                      <p className="text-xs text-foreground/60">
-                        {new Date(comment.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
+          {/* ส่วนเนื้อหา */}
+          <div className="lg:w-2/5 bg-background lg:overflow-y-auto">
+            <article className="p-4 md:p-6">
+              {/* Header ของโพสต์ */}
+              <div className="border-b border-foreground/10 pb-4 mb-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-accent-primary/20 flex items-center justify-center">
+                    <User size={18} className="text-accent-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{post.authorName}</p>
+                    <p className="text-xs text-foreground/60">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
-                <p className="text-foreground/80 leading-relaxed">{comment.content}</p>
+                <h1 className="text-2xl md:text-3xl font-medium text-foreground mb-2">
+                  {post.title}
+                </h1>
+                {post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {post.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="text-xs px-3 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
+
+              {/* เนื้อหาโพสต์ */}
+              <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none mb-8">
+                {post.content.split('\n').map((paragraph, i) => (
+                  paragraph.trim() && (
+                    <p key={i} className="text-foreground/80 leading-relaxed mb-4">
+                      {paragraph}
+                    </p>
+                  )
+                ))}
+              </div>
+
+              {/* ส่วน Comments */}
+              <div className="border-t border-foreground/10 pt-8">
+                <h2 className="text-lg font-medium text-foreground mb-6">
+                  Comments ({comments.length})
+                </h2>
+
+                {/* Comment Form */}
+                <form onSubmit={handleCommentSubmit} className="mb-8 space-y-3">
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Your name *"
+                      value={commentForm.name}
+                      onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
+                      className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
+                    />
+                    <input
+                      type="email"
+                      required
+                      placeholder="Your email *"
+                      value={commentForm.email}
+                      onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
+                      className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
+                    />
+                  </div>
+                  <textarea
+                    required
+                    placeholder="Your comment *"
+                    value={commentForm.content}
+                    onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
+                    className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-4 text-sm text-foreground focus:outline-none focus:border-accent-primary/50 transition-all resize-none"
+                    rows={3}
+                  />
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary font-medium rounded-lg transition-all"
+                  >
+                    <Send size={16} />
+                    <span>{submitting ? 'Posting...' : 'Post Comment'}</span>
+                  </button>
+                </form>
+
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {comments.length === 0 ? (
+                    <p className="text-sm text-foreground/40 text-center py-8">No comments yet. Be the first!</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-3 pb-4 border-b border-foreground/5 last:border-0">
+                        <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center flex-shrink-0">
+                          <User size={14} className="text-accent-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-foreground text-sm">{comment.authorName}</p>
+                            <span className="text-xs text-foreground/40">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </article>
           </div>
         </div>
-      </article>
+      </main>
     </div>
   );
 }

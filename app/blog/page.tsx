@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, ArrowLeft } from 'lucide-react';
+import { FileText, Tag, ArrowLeft } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -40,31 +40,25 @@ export default function BlogListPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-foreground/10 py-6">
-        <div className="max-w-7xl mx-auto px-6">
+      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-xl py-4">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.push('/')}
               className="flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors"
             >
-              <ArrowLeft size={18} />
-              <span>Back</span>
+              <ArrowLeft size={20} />
             </button>
-          </div>
-          <div className="mt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="text-accent-primary" size={32} />
-              <h1 className="text-4xl font-light text-foreground">Blog</h1>
-            </div>
-            <p className="text-sm text-foreground/60">Thoughts, stories, and ideas</p>
+            <h1 className="text-xl font-light text-foreground">Blog</h1>
+            <div className="w-8" />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-[1200px] mx-auto px-2 md:px-4 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="text-foreground/60">Loading posts...</div>
+            <div className="text-foreground/60">Loading...</div>
           </div>
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -73,41 +67,47 @@ export default function BlogListPage() {
             <p className="text-sm text-foreground/40 mt-2">Check back soon!</p>
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-2">
             {posts.map((post) => (
               <article
                 key={post.id}
                 onClick={() => router.push(`/blog/${post.slug}`)}
-                className="group cursor-pointer bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+                className="group cursor-pointer bg-background border border-foreground/10 overflow-hidden transition-all duration-300 hover:shadow-lg"
               >
-                {post.coverImage && (
-                  <div className="aspect-video bg-foreground/5 overflow-hidden relative">
+                {/* รูปแบบ IG - รูปสี่เหลี่ยมจัตุรัส */}
+                <div className="aspect-square bg-foreground/5 overflow-hidden relative">
+                  {post.coverImage ? (
                     <Image
                       src={post.coverImage}
                       alt={post.title}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                  </div>
-                )}
-                <div className="p-6">
-                  <h2 className="text-xl font-medium text-foreground mb-3 group-hover:text-accent-primary transition-colors">
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
+                      <FileText size={48} className="text-foreground/20" />
+                    </div>
+                  )}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                </div>
+
+                {/* เนื้อหาด้านล่าง */}
+                <div className="p-4">
+                  <h2 className="text-base md:text-lg font-medium text-foreground mb-2 line-clamp-2 group-hover:text-accent-primary transition-colors">
                     {post.title}
                   </h2>
-                  <p className="text-sm text-foreground/60 mb-4 line-clamp-3">
+                  <p className="text-xs md:text-sm text-foreground/60 mb-3 line-clamp-2">
                     {post.excerpt}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-foreground/50">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} />
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    </div>
+                  <div className="flex items-center justify-between text-xs text-foreground/40">
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     {post.tags.length > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Tag size={14} />
-                        <span>{post.tags[0]}</span>
-                      </div>
+                      <span className="flex items-center gap-1">
+                        <Tag size={12} />
+                        {post.tags[0]}
+                      </span>
                     )}
                   </div>
                 </div>
