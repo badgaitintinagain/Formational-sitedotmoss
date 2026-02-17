@@ -23,7 +23,7 @@ const BlogTile: React.FC<BlogTileProps> = ({ size = '2x2', accent = 'primary', o
       onClick={() => router.push('/blog')}
     >
       <div className="flex flex-col items-center justify-center">
-        <div className="text-[10px] uppercase tracking-widest opacity-40 text-tile-text">View Posts</div>
+        <div className="text-[10px] uppercase tracking-widest opacity-40 text-tile-text"></div>
       </div>
     </Tile>
   );
