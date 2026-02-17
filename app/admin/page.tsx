@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Search, Image as ImageIcon, Calendar, MessageSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Search, Calendar, Tag, User, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 
 interface Post {
@@ -13,6 +13,7 @@ interface Post {
   createdAt: Date;
   tags: string[];
   coverImage?: string;
+  authorName: string;
 }
 
 export default function AdminPage() {
@@ -99,16 +100,20 @@ export default function AdminPage() {
   };
 
   const deletePost = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+    if (!confirm('แน่ใจหรือว่าต้องการลบโพสต์นี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
     try {
       const response = await fetch(`/api/blog/posts/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
+        alert('ลบโพสต์สำเร็จ!');
         fetchPosts();
+      } else {
+        alert('ไม่สามารถลบโพสต์ได้');
       }
     } catch (error) {
       console.error('Failed to delete post:', error);
+      alert('เกิดข้อผิดพลาดในการลบโพสต์');
     }
   };
 
@@ -252,103 +257,131 @@ export default function AdminPage() {
             )}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-4">
             {filteredPosts.map((post) => (
-              <div
+              <article
                 key={post.id}
                 className="group bg-foreground/5 border border-foreground/10 rounded-xl overflow-hidden hover:border-accent-primary/30 hover:shadow-lg transition-all"
               >
-                {/* Cover Image */}
-                {post.coverImage ? (
-                  <div className="relative w-full h-48 bg-foreground/10">
-                    <Image
-                      src={post.coverImage}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 flex items-center justify-center">
-                    <ImageIcon size={48} className="text-foreground/10" />
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-base font-semibold text-foreground line-clamp-2 flex-1">
-                      {post.title}
-                    </h3>
-                    {post.published ? (
-                      <span className="flex-shrink-0 px-2 py-0.5 bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] rounded-full font-medium">
-                        Published
-                      </span>
+                <div className="md:flex">
+                  {/* Cover Image */}
+                  <div className="md:w-72 md:h-48 h-56 bg-foreground/10 relative flex-shrink-0">
+                    {post.coverImage ? (
+                      <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 288px"
+                        className="object-cover"
+                      />
                     ) : (
-                      <span className="flex-shrink-0 px-2 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] rounded-full font-medium">
-                        Draft
-                      </span>
+                      <div className="w-full h-full bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-accent-primary/10 flex items-center justify-center">
+                            <Calendar size={28} className="text-accent-primary/40" />
+                          </div>
+                          <p className="text-xs text-foreground/30">No cover image</p>
+                        </div>
+                      </div>
                     )}
-                  </div>
-
-                  <p className="text-xs text-foreground/60 line-clamp-2 mb-3">
-                    {post.excerpt || 'No excerpt available'}
-                  </p>
-
-                  {/* Tags */}
-                  {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {post.tags.slice(0, 3).map((tag, i) => (
-                        <span
-                          key={i}
-                          className="text-[10px] px-2 py-0.5 bg-accent-primary/10 text-accent-primary rounded-full"
-                        >
-                          #{tag}
+                    {/* Status badge */}
+                    <div className="absolute top-3 left-3">
+                      {post.published ? (
+                        <span className="px-3 py-1 bg-green-500/90 backdrop-blur-sm text-white text-xs rounded-full font-medium flex items-center gap-1.5">
+                          <Eye size={12} />
+                          Published
                         </span>
-                      ))}
-                      {post.tags.length > 3 && (
-                        <span className="text-[10px] px-2 py-0.5 bg-foreground/10 text-foreground/40 rounded-full">
-                          +{post.tags.length - 3}
+                      ) : (
+                        <span className="px-3 py-1 bg-yellow-500/90 backdrop-blur-sm text-white text-xs rounded-full font-medium flex items-center gap-1.5">
+                          <EyeOff size={12} />
+                          Draft
                         </span>
                       )}
                     </div>
-                  )}
-
-                  {/* Meta */}
-                  <div className="flex items-center gap-2 text-[10px] text-foreground/40 mb-3 pb-3 border-b border-foreground/10">
-                    <Calendar size={10} />
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => togglePublish(post.id, post.published)}
-                      className="flex-1 flex items-center justify-center gap-1.5 p-2 hover:bg-foreground/10 rounded-lg transition-colors text-xs"
-                      title={post.published ? 'Unpublish' : 'Publish'}
-                    >
-                      {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
-                      <span className="hidden sm:inline">{post.published ? 'Hide' : 'Show'}</span>
-                    </button>
-                    <button
-                      onClick={() => router.push(`/admin/edit/${post.id}`)}
-                      className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-accent-primary/10 hover:bg-accent-primary/20 text-accent-primary rounded-lg transition-colors text-xs font-medium"
-                      title="Edit"
-                    >
-                      <Edit size={14} />
-                      <span className="hidden sm:inline">Edit</span>
-                    </button>
-                    <button
-                      onClick={() => deletePost(post.id)}
-                      className="p-2 hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                  {/* Content */}
+                  <div className="flex-1 p-5 flex flex-col">
+                    {/* Title */}
+                    <h2 className="text-xl font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-accent-primary transition-colors">
+                      {post.title}
+                    </h2>
+
+                    {/* Excerpt */}
+                    <p className="text-sm text-foreground/60 line-clamp-2 mb-4 flex-1">
+                      {post.excerpt || 'No excerpt available'}
+                    </p>
+
+                    {/* Meta Info */}
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/40 mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <User size={12} />
+                        <span>{post.authorName}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={12} />
+                        <span>{new Date(post.createdAt).toLocaleDateString('th-TH', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}</span>
+                      </div>
+                      {post.tags.length > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <Tag size={12} />
+                          <span>{post.tags.length} tags</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tags */}
+                    {post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {post.tags.slice(0, 4).map((tag, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] px-2 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                        {post.tags.length > 4 && (
+                          <span className="text-[10px] px-2 py-1 bg-foreground/10 text-foreground/40 rounded-full">
+                            +{post.tags.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-4 border-t border-foreground/10">
+                      <button
+                        onClick={() => togglePublish(post.id, post.published)}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 hover:bg-foreground/10 rounded-lg transition-colors text-xs font-medium"
+                        title={post.published ? 'Unpublish' : 'Publish'}
+                      >
+                        {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
+                        <span>{post.published ? 'Unpublish' : 'Publish'}</span>
+                      </button>
+                      <button
+                        onClick={() => router.push(`/admin/edit/${post.id}`)}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-accent-primary/10 hover:bg-accent-primary/20 text-accent-primary rounded-lg transition-colors text-xs font-medium"
+                        title="Edit"
+                      >
+                        <Edit size={14} />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => deletePost(post.id)}
+                        className="px-3 py-2 hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
