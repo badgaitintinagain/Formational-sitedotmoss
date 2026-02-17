@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { User, LogIn, LogOut, Settings, Shield } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -119,7 +120,7 @@ const ProfileButton: React.FC = () => {
         >
           <div className="w-8 h-8 rounded-full bg-accent-primary/20 border-2 border-accent-primary/30 flex items-center justify-center overflow-hidden group-hover:border-accent-primary/50 transition-all">
             {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              <Image src={user.avatar} alt={user.name} width={32} height={32} className="w-full h-full object-cover" />
             ) : (
               <User size={16} className="text-accent-primary" />
             )}

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, posts } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ slug: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { slug } = await context.params;
+    const slug = request.nextUrl.searchParams.get('slug');
+    
+    if (!slug) {
+      return NextResponse.json(
+        { error: 'Slug parameter is required' },
+        { status: 400 }
+      );
+    }
 
     const postList = await db
       .select()

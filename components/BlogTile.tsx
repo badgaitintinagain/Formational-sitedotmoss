@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import Tile from './Tile';
+import Image from 'next/image';
+import Link from 'next/link';
 import { FileText, X, Calendar, Tag } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -132,11 +134,13 @@ const BlogTile: React.FC<BlogTileProps> = ({ size = '2x2', accent = 'primary', o
                       className="group cursor-pointer bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 rounded-xl overflow-hidden transition-all duration-300"
                     >
                       {post.coverImage && (
-                        <div className="aspect-video bg-foreground/5 overflow-hidden">
-                          <img 
+                        <div className="aspect-video bg-foreground/5 overflow-hidden relative">
+                          <Image 
                             src={post.coverImage} 
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
                       )}
@@ -168,16 +172,12 @@ const BlogTile: React.FC<BlogTileProps> = ({ size = '2x2', accent = 'primary', o
 
             {/* Footer */}
             <div className="p-4 border-t border-foreground/5 bg-foreground/5 text-center">
-              <a 
+              <Link 
                 href="/blog" 
                 className="text-sm text-accent-primary hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.href = '/blog';
-                }}
               >
                 View all posts →
-              </a>
+              </Link>
             </div>
           </div>
         </div>

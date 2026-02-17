@@ -9,6 +9,10 @@ interface Message {
   text: string;
 }
 
+interface GradioClient {
+  predict: (endpoint: string, data: unknown[]) => Promise<{ data: string[] }>;
+}
+
 interface AIProps {
   size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
   accent?: 'primary' | 'secondary';
@@ -25,7 +29,7 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
   
   const modalRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const clientRef = useRef<unknown>(null);
+  const clientRef = useRef<GradioClient | null>(null);
 
   // Hugging Face Space ID
   const HF_REPO_ID = "badgaitintin/Micronversation"; 
@@ -77,9 +81,9 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
       } else {
         throw new Error("Unexpected response format from Hugging Face Space");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Chat Error Detailed:", error);
-      const errorMessage = error?.message || (typeof error === 'string' ? error : "Unknown error");
+      const errorMessage = error instanceof Error ? error.message : (typeof error === 'string' ? error : "Unknown error");
       
       setMessages(prev => [...prev, { 
         role: 'bot', 

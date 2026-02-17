@@ -3,13 +3,11 @@ import dynamic from 'next/dynamic';
 
 // Lazy load heavy components
 export const LazyBlogTile = dynamic(() => import('@/components/BlogTile'), {
-  loading: () => <div>Loading...</div>,
-  ssr: false, // Only load on client side
+  ssr: false
 });
 
 export const LazyMicronversationTile = dynamic(() => import('@/components/MicronversationTile'), {
-  loading: () => <div>Loading...</div>,
-  ssr: false,
+  ssr: false
 });
 
 // Pre-load critical components

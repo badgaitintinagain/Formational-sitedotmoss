@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function withAuth(handler: (...args: any[]) => Promise<Response>, requireAdmin = false) {
+type AuthHandler = (request: NextRequest, user: { id: string; email: string; name: string; role: string }) => Promise<Response>;
+
+export function withAuth(handler: AuthHandler, requireAdmin = false) {
   return async (request: NextRequest) => {
     try {
       const authCookie = request.cookies.get('auth_user');

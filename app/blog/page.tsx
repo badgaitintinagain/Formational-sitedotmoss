@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { FileText, Calendar, Tag, ArrowLeft } from 'lucide-react';
 
 interface BlogPost {
@@ -80,11 +81,13 @@ export default function BlogListPage() {
                 className="group cursor-pointer bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
               >
                 {post.coverImage && (
-                  <div className="aspect-video bg-foreground/5 overflow-hidden">
-                    <img
+                  <div className="aspect-video bg-foreground/5 overflow-hidden relative">
+                    <Image
                       src={post.coverImage}
                       alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                 )}

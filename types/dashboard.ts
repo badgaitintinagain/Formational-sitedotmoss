@@ -7,9 +7,9 @@ export interface TileConfig {
   size: TileSize;
   label?: string;
   icon?: LucideIcon;
-  component?: React.FC<any>;
+  component?: React.ComponentType<Record<string, unknown>>;
   bgClass?: string;
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
   group?: string;
 }
 

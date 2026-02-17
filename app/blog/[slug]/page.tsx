@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, Tag, User, Send } from 'lucide-react';
 
 interface Post {
@@ -132,11 +133,15 @@ export default function BlogPostPage() {
 
       <article className="max-w-4xl mx-auto px-6 py-12">
         {post.coverImage && (
-          <img
-            src={post.coverImage}
-            alt={post.title}
-            className="w-full aspect-video object-cover rounded-2xl mb-8"
-          />
+          <div className="relative w-full aspect-video mb-8 rounded-2xl overflow-hidden">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
+            />
+          </div>
         )}
 
         <h1 className="text-4xl md:text-5xl font-light tracking-tight text-foreground mb-4">

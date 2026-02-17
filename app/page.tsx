@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, memo } from "react";
+import React, { useState, useEffect, useRef, memo, useMemo } from "react";
 import Tile from "@/components/Tile";
 import WeatherTile from "@/components/WeatherTile";
 import AdTile from "@/components/AdTile";
@@ -42,14 +42,14 @@ const QUOTES = [
 
 const Home = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [randomQuote, setRandomQuote] = useState<typeof QUOTES[0] | null>(null);
 
-  // --- Optimization: Stable Randomized Config ---
-  const [dashboardConfig, setDashboardConfig] = useState<DashboardGroup[]>([]);
+  // --- Use useState for random values to avoid impure function in useMemo ---
+  const [randomQuote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
 
-  useEffect(() => {
+  // --- Optimization: Stable Randomized Config using useMemo ---
+  const dashboardConfig = useMemo<DashboardGroup[]>(() => {
     const baseGroups: DashboardGroup[] = [
       {
         title: "Life at a glance",
@@ -78,7 +78,7 @@ const Home = () => {
       }
     ];
 
-    const randomized = baseGroups.map(group => ({
+    return baseGroups.map(group => ({
       ...group,
       tiles: group.tiles.map(tile => {
         const accent = tile.accent || (Math.random() > 0.5 ? 'primary' : 'secondary');
@@ -98,10 +98,6 @@ const Home = () => {
         };
       })
     }));
-
-    setDashboardConfig(randomized);
-    setMounted(true);
-    setRandomQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   }, []);
 
   useEffect(() => {
@@ -151,7 +147,7 @@ const Home = () => {
                       return <Component key={tile.id} {...tile.props} />;
                     }
 
-                    if (tile.id === 'quote' && randomQuote) {
+                    if (tile.id === 'quote') {
                       return (
                         <Tile key={tile.id} size={tile.size} bgImage={randomQuote.image} bgClass="bg-black/40 border-white/20" className="text-white">
                           <div className="flex flex-col items-center justify-center w-full h-full px-6 text-center">

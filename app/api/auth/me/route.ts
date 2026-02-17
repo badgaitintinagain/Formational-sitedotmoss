@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const user = JSON.parse(authCookie.value);
     
     return NextResponse.json({ user });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ user: null });
   }
 }
