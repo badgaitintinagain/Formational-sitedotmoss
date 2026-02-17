@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
     const { postSlug, name, email, content, parentId } = body;
 
     // Validation
-    if (!postSlug || !name || !email || !content) {
+    if (!postSlug || !name || !content) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Name and content are required' },
         { status: 400 }
       );
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       id: commentId,
       postSlug,
       authorName: name,
-      authorEmail: email,
+      authorEmail: email || null,
       content: sanitizedContent,
       parentId: parentId || null,
       status: 'approved', // Auto-approve comments now

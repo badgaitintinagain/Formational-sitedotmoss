@@ -34,7 +34,7 @@ export default function BlogPostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [commentForm, setCommentForm] = useState({ name: '', email: '', content: '' });
+  const [commentForm, setCommentForm] = useState({ name: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchPost = async () => {
@@ -85,7 +85,7 @@ export default function BlogPostPage() {
       });
 
       if (response.ok) {
-        setCommentForm({ name: '', email: '', content: '' });
+        setCommentForm({ name: '', content: '' });
         alert('Comment submitted! It will appear after approval.');
         fetchComments();
       }
@@ -224,24 +224,14 @@ export default function BlogPostPage() {
 
                 {/* Comment Form */}
                 <form onSubmit={handleCommentSubmit} className="mb-6 space-y-2">
-                  <div className="grid md:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Your name *"
-                      value={commentForm.name}
-                      onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                      className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-                    />
-                    <input
-                      type="email"
-                      required
-                      placeholder="Your email *"
-                      value={commentForm.email}
-                      onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
-                      className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Your name *"
+                    value={commentForm.name}
+                    onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
+                    className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
+                  />
                   <textarea
                     required
                     placeholder="Your comment *"

@@ -36,7 +36,7 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [commentForm, setCommentForm] = useState({ name: '', email: '', content: '' });
+  const [commentForm, setCommentForm] = useState({ name: '', content: '' });
   const [submitting, setSubmitting] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -142,14 +142,13 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
         body: JSON.stringify({
           postSlug: slug,
           name: commentForm.name,
-          email: commentForm.email,
           content: commentForm.content,
           parentId: replyingTo,
         }),
       });
 
       if (response.ok) {
-        setCommentForm({ name: '', email: '', content: '' });
+        setCommentForm({ name: '', content: '' });
         setReplyingTo(null);
         fetchComments();
       }
@@ -356,6 +355,7 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
             {/* Like Button */}
             <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={handleLike}
                 className={`flex items-center gap-2 transition-all ${
                   isLiked ? 'text-red-500' : 'text-foreground/60 hover:text-red-500'
@@ -384,24 +384,14 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  required
-                  placeholder="Your name"
-                  value={commentForm.name}
-                  onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                  className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50"
-                />
-                <input
-                  type="email"
-                  required
-                  placeholder="Your email"
-                  value={commentForm.email}
-                  onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
-                  className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50"
-                />
-              </div>
+              <input
+                type="text"
+                required
+                placeholder="Your name"
+                value={commentForm.name}
+                onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
+                className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50 mb-2"
+              />
               <div className="flex gap-2">
                 <input
                   type="text"
