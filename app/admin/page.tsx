@@ -134,257 +134,210 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push('/')}
-                className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
-                title="Back to home"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">Admin Console</h1>
-                <p className="text-xs text-foreground/40">Welcome back, {user.name}</p>
+    <div className="min-h-screen bg-background flex">
+      {/* LEFT: Sidebar Menu */}
+      <aside className="w-64 bg-foreground/5 border-r border-foreground/10 hidden md:flex flex-col sticky top-0 h-screen overflow-y-auto">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-foreground mb-1">Admin</h1>
+          <p className="text-xs text-foreground/40">Console</p>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-2">
+          <button
+            onClick={() => setFilterStatus('all')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${filterStatus === 'all' ? 'bg-accent-primary/10 text-accent-primary font-medium' : 'text-foreground/60 hover:bg-foreground/5'}`}
+          >
+            <div className="p-2 bg-white/50 rounded-lg shadow-sm">
+              <User size={18} />
+            </div>
+            <span>All Posts</span>
+            <span className="ml-auto text-xs bg-foreground/10 px-2 py-0.5 rounded-full">{stats.total}</span>
+          </button>
+
+          <button
+            onClick={() => setFilterStatus('published')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${filterStatus === 'published' ? 'bg-green-500/10 text-green-600 font-medium' : 'text-foreground/60 hover:bg-foreground/5'}`}
+          >
+            <div className="p-2 bg-white/50 rounded-lg shadow-sm">
+              <Eye size={18} />
+            </div>
+            <span>Published</span>
+            <span className="ml-auto text-xs bg-foreground/10 px-2 py-0.5 rounded-full">{stats.published}</span>
+          </button>
+
+          <button
+            onClick={() => setFilterStatus('draft')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${filterStatus === 'draft' ? 'bg-yellow-500/10 text-yellow-600 font-medium' : 'text-foreground/60 hover:bg-foreground/5'}`}
+          >
+            <div className="p-2 bg-white/50 rounded-lg shadow-sm">
+              <EyeOff size={18} />
+            </div>
+            <span>Drafts</span>
+            <span className="ml-auto text-xs bg-foreground/10 px-2 py-0.5 rounded-full">{stats.draft}</span>
+          </button>
+
+          <div className="pt-6 mt-6 border-t border-foreground/10">
+            <button
+              onClick={() => router.push('/admin/comments')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-foreground/60 hover:bg-foreground/5 transition-all"
+            >
+              <div className="p-2 bg-white/50 rounded-lg shadow-sm">
+                <MessageSquare size={18} />
               </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => router.push('/admin/comments')}
-                className="flex items-center gap-2 px-4 py-2 bg-foreground/10 hover:bg-foreground/20 text-foreground rounded-lg transition-all text-sm"
-              >
-                <MessageSquare size={16} />
-                <span className="hidden md:inline">Comments</span>
-              </button>
-              <button
-                onClick={() => router.push('/admin/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary font-medium rounded-lg transition-all text-sm"
-              >
-                <Plus size={16} />
-                <span>New Post</span>
-              </button>
-            </div>
+              <span>Comments</span>
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-foreground/60 hover:bg-foreground/5 transition-all"
+            >
+              <div className="p-2 bg-white/50 rounded-lg shadow-sm">
+                <ArrowLeft size={18} />
+              </div>
+              <span>Back to Site</span>
+            </button>
           </div>
+        </nav>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="bg-foreground/5 rounded-lg p-3 border border-foreground/10">
-              <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-              <p className="text-xs text-foreground/40">Total Posts</p>
+        <div className="p-4 border-t border-foreground/10">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center text-accent-primary font-bold">
+              {user.name.charAt(0)}
             </div>
-            <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.published}</p>
-              <p className="text-xs text-green-600/60 dark:text-green-400/60">Published</p>
-            </div>
-            <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20">
-              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.draft}</p>
-              <p className="text-xs text-yellow-600/60 dark:text-yellow-400/60">Drafts</p>
-            </div>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
-              <input
-                type="text"
-                placeholder="Search posts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-foreground/5 border border-foreground/10 rounded-lg text-sm text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-              />
-            </div>
-            <div className="flex gap-1 bg-foreground/5 rounded-lg p-1 border border-foreground/10">
-              <button
-                onClick={() => setFilterStatus('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  filterStatus === 'all'
-                    ? 'bg-accent-primary/20 text-accent-primary'
-                    : 'text-foreground/60 hover:text-foreground'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterStatus('published')}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  filterStatus === 'published'
-                    ? 'bg-accent-primary/20 text-accent-primary'
-                    : 'text-foreground/60 hover:text-foreground'
-                }`}
-              >
-                Published
-              </button>
-              <button
-                onClick={() => setFilterStatus('draft')}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  filterStatus === 'draft'
-                    ? 'bg-accent-primary/20 text-accent-primary'
-                    : 'text-foreground/60 hover:text-foreground'
-                }`}
-              >
-                Drafts
-              </button>
+            <div className="overflow-hidden">
+              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+              <p className="text-xs text-foreground/40 truncate">{user.email}</p>
             </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-7xl mx-auto p-4">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-pulse text-foreground/60">Loading posts...</div>
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-foreground/5 flex items-center justify-center">
-              <Search size={32} className="text-foreground/20" />
+      {/* RIGHT: Main Content */}
+      <main className="flex-1 h-screen overflow-y-auto bg-background/50">
+        <div className="max-w-5xl mx-auto p-8">
+          
+          {/* Top Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-foreground">Posts</h2>
+              <p className="text-foreground/60 mt-1">Manage and create new content</p>
             </div>
-            <p className="text-foreground/60 mb-2">
-              {searchQuery || filterStatus !== 'all' ? 'No posts found' : 'No posts yet'}
-            </p>
-            {!searchQuery && filterStatus === 'all' && (
+            <div className="flex gap-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2.5 bg-white border border-foreground/10 rounded-xl text-sm focus:outline-none focus:ring-2 ring-accent-primary/20 shadow-sm w-64"
+                />
+              </div>
               <button
                 onClick={() => router.push('/admin/new')}
-                className="text-accent-primary hover:underline text-sm"
+                className="flex items-center gap-2 px-5 py-2.5 bg-black text-white hover:bg-black/80 rounded-xl transition-all text-sm font-medium shadow-lg shadow-black/20"
               >
-                Create your first post
+                <Plus size={18} />
+                <span>Create Post</span>
               </button>
-            )}
+            </div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredPosts.map((post) => (
-              <article
-                key={post.id}
-                className="group bg-foreground/5 border border-foreground/10 rounded-xl overflow-hidden hover:border-accent-primary/30 hover:shadow-lg transition-all"
-              >
-                <div className="md:flex">
-                  {/* Cover Image */}
-                  <div className="md:w-72 md:h-48 h-56 bg-foreground/10 relative flex-shrink-0">
+
+          {/* Post List */}
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="animate-spin w-8 h-8 border-2 border-foreground/20 border-t-accent-primary rounded-full mx-auto mb-4"/>
+              <p className="text-foreground/40 text-sm">Loading content...</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="bg-white border border-foreground/10 rounded-2xl p-12 text-center">
+              <div className="w-16 h-16 bg-foreground/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search size={24} className="text-foreground/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">No posts found</h3>
+              <p className="text-foreground/40 text-sm mb-6">Try adjusting your search or filters</p>
+              <button onClick={() => router.push('/admin/new')} className="text-accent-primary text-sm font-medium hover:underline">
+                Create new post
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {filteredPosts.map((post) => (
+                <div 
+                  key={post.id}
+                  className="group bg-white border border-foreground/10 hover:border-accent-primary/30 rounded-2xl p-4 flex gap-6 transition-all hover:shadow-md items-start"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-32 h-24 bg-foreground/5 rounded-lg flex-shrink-0 overflow-hidden relative border border-foreground/5">
                     {post.coverImage ? (
-                      <Image
-                        src={post.coverImage}
-                        alt={post.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 288px"
-                        className="object-cover"
+                      <Image 
+                        src={post.coverImage} 
+                        alt="Cover" 
+                        fill 
+                        className="object-cover transition-transform group-hover:scale-105" 
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-accent-primary/10 flex items-center justify-center">
-                            <Calendar size={28} className="text-accent-primary/40" />
-                          </div>
-                          <p className="text-xs text-foreground/30">No cover image</p>
-                        </div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Calendar size={20} className="text-foreground/20" />
                       </div>
                     )}
-                    {/* Status badge */}
-                    <div className="absolute top-3 left-3">
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 py-1">
+                    <div className="flex items-start justify-between gap-4 mb-1">
+                      <h3 className="text-lg font-bold text-foreground truncate group-hover:text-accent-primary m-0 p-0 leading-tight">
+                        {post.title || 'Untitled Post'}
+                      </h3>
                       {post.published ? (
-                        <span className="px-3 py-1 bg-green-500/90 backdrop-blur-sm text-white text-xs rounded-full font-medium flex items-center gap-1.5">
-                          <Eye size={12} />
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-md flex-shrink-0">
                           Published
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-yellow-500/90 backdrop-blur-sm text-white text-xs rounded-full font-medium flex items-center gap-1.5">
-                          <EyeOff size={12} />
+                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase tracking-wider rounded-md flex-shrink-0">
                           Draft
                         </span>
                       )}
                     </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 p-5 flex flex-col">
-                    {/* Title */}
-                    <h2 className="text-xl font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-accent-primary transition-colors">
-                      {post.title}
-                    </h2>
-
-                    {/* Excerpt */}
-                    <p className="text-sm text-foreground/60 line-clamp-2 mb-4 flex-1">
-                      {post.excerpt || 'No excerpt available'}
+                    
+                    <p className="text-sm text-foreground/50 line-clamp-2 mb-3 h-10">
+                      {post.excerpt || 'No description available for this post...'}
                     </p>
 
-                    {/* Meta Info */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/40 mb-4">
-                      <div className="flex items-center gap-1.5">
-                        <User size={12} />
-                        <span>{post.authorName}</span>
+                    <div className="flex items-center justify-between border-t border-foreground/5 pt-3 mt-auto">
+                      <div className="flex items-center gap-4 text-xs text-foreground/40">
+                        <span className="flex items-center gap-1.5">
+                          <User size={12} />
+                          {post.authorName}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={12} />
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <Calendar size={12} />
-                        <span>{new Date(post.createdAt).toLocaleDateString('th-TH', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}</span>
-                      </div>
-                      {post.tags.length > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <Tag size={12} />
-                          <span>{post.tags.length} tags</span>
-                        </div>
-                      )}
-                    </div>
 
-                    {/* Tags */}
-                    {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {post.tags.slice(0, 4).map((tag, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] px-2 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                        {post.tags.length > 4 && (
-                          <span className="text-[10px] px-2 py-1 bg-foreground/10 text-foreground/40 rounded-full">
-                            +{post.tags.length - 4} more
-                          </span>
-                        )}
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => router.push(`/admin/edit/${post.id}`)}
+                          className="p-1.5 text-foreground/40 hover:text-accent-primary hover:bg-accent-primary/10 rounded-md transition-colors"
+                          title="Edit"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button 
+                          onClick={() => deletePost(post.id)}
+                          className="p-1.5 text-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-4 border-t border-foreground/10">
-                      <button
-                        onClick={() => togglePublish(post.id, post.published)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 hover:bg-foreground/10 rounded-lg transition-colors text-xs font-medium"
-                        title={post.published ? 'Unpublish' : 'Publish'}
-                      >
-                        {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
-                        <span>{post.published ? 'Unpublish' : 'Publish'}</span>
-                      </button>
-                      <button
-                        onClick={() => router.push(`/admin/edit/${post.id}`)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-accent-primary/10 hover:bg-accent-primary/20 text-accent-primary rounded-lg transition-colors text-xs font-medium"
-                        title="Edit"
-                      >
-                        <Edit size={14} />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => deletePost(post.id)}
-                        className="px-3 py-2 hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
                     </div>
                   </div>
                 </div>
-              </article>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
