@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 
 async function handler(
   request: NextRequest,
+  user: { id: string; email: string; name: string; role: string },
   context: { params: Promise<{ id: string }> }
 ) {
   try {
