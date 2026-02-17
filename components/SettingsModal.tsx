@@ -74,8 +74,8 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           <div className="flex items-center gap-3">
             <Zap className="text-accent-primary animate-pulse" />
             <div>
-              <h2 className="text-xl font-light tracking-tight text-foreground">Formational Lab</h2>
-              <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">Design & Interaction</p>
+              <h2 className="text-xl font-light tracking-tight text-foreground">Setting</h2>
+              <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">site(.)moss</p>
             </div>
           </div>
           <button 

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -97,8 +97,15 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => router.push('/')}
+              className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
+              title="Back to home"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <div className="flex-1">
               <h1 className="text-4xl font-light tracking-tight text-foreground">Admin Panel</h1>
               <p className="text-sm text-foreground/60 mt-2">Manage your blog content</p>
             </div>
