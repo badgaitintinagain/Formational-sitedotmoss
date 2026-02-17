@@ -6,10 +6,10 @@ import { eq, and } from 'drizzle-orm';
 // Like a post
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    const { id: postId } = await params;
     const { userId } = await req.json();
 
     if (!userId) {
@@ -71,10 +71,10 @@ export async function POST(
 // Unlike a post
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    const { id: postId } = await params;
     const { userId } = await req.json();
 
     if (!userId) {
@@ -116,10 +116,10 @@ export async function DELETE(
 // Get like status and count
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const postId = params.id;
+    const { id: postId } = await params;
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
 
