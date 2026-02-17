@@ -1,12 +1,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, X, Upload, ImageIcon } from 'lucide-react';
+import { Save, Upload, ImageIcon, Eye, EyeOff, ArrowLeft, Trash2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 export default function NewPostPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentFileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -71,8 +75,7 @@ export default function NewPostPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setLoading(true);
 
     try {
@@ -86,6 +89,7 @@ export default function NewPostPage() {
       });
 
       if (response.ok) {
+        alert('Post created successfully!');
         router.push('/admin');
       } else {
         alert('Failed to create post');
@@ -99,128 +103,117 @@ export default function NewPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-4xl font-light tracking-tight text-foreground">New Post</h1>
-          <button
-            onClick={() => router.push('/admin')}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-foreground/10 rounded-lg transition-colors"
-          >
-            <X size={18} />
-            <span>Cancel</span>
-          </button>
-        </header>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Title *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-              placeholder="My Awesome Blog Post"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Excerpt
-            </label>
-            <textarea
-              value={formData.excerpt}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all resize-none"
-              rows={3}
-              placeholder="Short description of your post..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Content * (Markdown supported)
-            </label>
-            <textarea
-              required
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all resize-none font-mono text-sm"
-              rows={15}
-              placeholder="# Your Content Here&#10;&#10;Write your post in **Markdown** format...&#10;&#10;You can use:&#10;- ![alt text](image-url) for images&#10;- **bold**, *italic*&#10;- ## Headings&#10;- [Links](url)"
-            />
-            <div className="mt-2">
+    <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/admin')}
+                className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
+                title="Back to admin"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div>
+                <h1 className="text-lg font-medium text-foreground">Create New Post</h1>
+                <p className="text-xs text-foreground/40">Write and publish your content</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => contentFileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2 bg-foreground/10 hover:bg-foreground/20 disabled:opacity-50 text-foreground rounded-lg transition-all text-sm"
+                onClick={() => setShowPreview(!showPreview)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
+                  showPreview 
+                    ? 'bg-accent-primary/20 text-accent-primary' 
+                    : 'bg-foreground/10 text-foreground hover:bg-foreground/20'
+                }`}
               >
-                <ImageIcon size={16} />
-                <span>{uploading ? 'Uploading...' : 'Insert Image to Content'}</span>
+                {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
+                <span className="hidden md:inline">{showPreview ? 'Hide' : 'Show'} Preview</span>
               </button>
-              <input
-                ref={contentFileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file, false);
-                }}
-                className="hidden"
-              />
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary font-medium rounded-lg transition-all text-sm"
+              >
+                <Save size={16} />
+                <span>{loading ? 'Creating...' : 'Create Post'}</span>
+              </button>
             </div>
           </div>
+        </div>
+      </header>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Cover Image URL
-            </label>
-            <div className="space-y-2">
+      <div className="max-w-7xl mx-auto p-4">
+        <div className={`grid ${showPreview ? 'lg:grid-cols-2' : 'grid-cols-1'} gap-6`}>
+          {/* Edit Form */}
+          <div className="space-y-4">
+            {/* Title */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
+                Title *
+              </label>
               <input
-                type="url"
-                value={formData.coverImage}
-                onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-                placeholder="https://images.unsplash.com/..."
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full bg-transparent border-0 text-2xl font-semibold text-foreground focus:outline-none placeholder:text-foreground/30"
+                placeholder="Enter your post title..."
               />
-              <div className="flex gap-2">
+            </div>
+
+            {/* Cover Image */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <label className="block text-xs font-medium text-foreground/60 mb-3 uppercase tracking-wide">
+                Cover Image
+              </label>
+              {formData.coverImage ? (
+                <div className="relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={formData.coverImage}
+                    alt="Cover"
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, coverImage: '' })}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <Trash2 size={14} />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary rounded-lg transition-all text-sm"
+                  className="w-full h-64 border-2 border-dashed border-foreground/20 rounded-lg hover:border-accent-primary/50 hover:bg-accent-primary/5 transition-all flex flex-col items-center justify-center gap-3 group"
                 >
-                  <Upload size={16} />
-                  <span>{uploading ? 'Uploading...' : 'Upload Cover Image'}</span>
-                </button>
-                {formData.coverImage && (
-                  <div className="flex-1 flex items-center gap-2 text-xs text-foreground/60">
-                    <ImageIcon size={14} className="text-green-500" />
-                    <span className="truncate text-green-600 dark:text-green-400">Image uploaded successfully!</span>
+                  <div className="w-16 h-16 rounded-full bg-accent-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Upload size={28} className="text-accent-primary" />
                   </div>
-                )}
-              </div>
-              {/* Image Preview */}
-              {formData.coverImage && (
-                <div className="mt-3 relative group">
-                  <img
-                    src={formData.coverImage}
-                    alt="Cover preview"
-                    className="w-full h-48 object-cover rounded-lg border border-foreground/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, coverImage: '' })}
-                    className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove image"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-foreground">
+                      {uploading ? 'Uploading...' : 'Click to upload cover image'}
+                    </p>
+                    <p className="text-xs text-foreground/40 mt-1">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </button>
               )}
               <input
                 ref={fileInputRef}
@@ -233,52 +226,182 @@ export default function NewPostPage() {
                 className="hidden"
               />
             </div>
+
+            {/* Excerpt */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
+                Excerpt
+              </label>
+              <textarea
+                value={formData.excerpt}
+                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none"
+                rows={2}
+                placeholder="Brief description of your post..."
+              />
+            </div>
+
+            {/* Content */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
+                  Content * (Markdown)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => contentFileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-primary/10 hover:bg-accent-primary/20 disabled:opacity-50 text-accent-primary rounded-lg transition-all text-xs font-medium"
+                >
+                  <ImageIcon size={14} />
+                  <span>Insert Image</span>
+                </button>
+                <input
+                  ref={contentFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(file, false);
+                  }}
+                  className="hidden"
+                />
+              </div>
+              <textarea
+                required
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none font-mono"
+                rows={20}
+                placeholder="# Write your content here&#10;&#10;Use **Markdown** formatting:&#10;- **bold**, *italic*&#10;- ## Headings&#10;- [Links](url)&#10;- ![Images](url)"
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
+                Tags
+              </label>
+              <input
+                type="text"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
+                placeholder="tech, design, tutorial (comma separated)"
+              />
+              {formData.tags && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.tags.split(',').map((tag, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1 bg-accent-primary/10 text-accent-primary text-xs rounded-full"
+                    >
+                      #{tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Published Toggle */}
+            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
+                    Publish Status
+                  </label>
+                  <p className="text-xs text-foreground/40 mt-1">
+                    {formData.published ? 'Post will be visible immediately' : 'Save as draft'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, published: !formData.published })}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                    formData.published ? 'bg-green-500' : 'bg-foreground/20'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                      formData.published ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Tags (comma separated)
-            </label>
-            <input
-              type="text"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-              placeholder="tech, design, tutorial"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="published"
-              checked={formData.published}
-              onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-              className="w-4 h-4 rounded border-foreground/20"
-            />
-            <label htmlFor="published" className="text-sm text-foreground">
-              Publish immediately
-            </label>
-          </div>
-
-          <div className="flex items-center gap-4 pt-4 border-t border-foreground/10">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-3 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary font-medium rounded-lg transition-all"
-            >
-              <Save size={18} />
-              <span>{loading ? 'Creating...' : 'Create Post'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push('/admin')}
-              className="px-6 py-3 hover:bg-foreground/10 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          {/* Preview Panel */}
+          {showPreview && (
+            <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
+              <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-foreground/10">
+                  <Eye size={16} className="text-accent-primary" />
+                  <h2 className="text-sm font-medium text-foreground">Live Preview</h2>
+                </div>
+                
+                {/* Preview Content */}
+                <article>
+                  {formData.coverImage && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={formData.coverImage}
+                      alt="Cover"
+                      className="w-full h-48 object-cover rounded-lg mb-4"
+                    />
+                  )}
+                  
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                    {formData.title || 'Untitled Post'}
+                  </h1>
+                  
+                  {formData.excerpt && (
+                    <p className="text-sm text-foreground/60 mb-4 italic">
+                      {formData.excerpt}
+                    </p>
+                  )}
+                  
+                  {formData.tags && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {formData.tags.split(',').map((tag, i) => (
+                        <span
+                          key={i}
+                          className="text-xs px-2 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
+                        >
+                          #{tag.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="prose prose-sm dark:prose-invert max-w-none
+                    prose-headings:text-foreground prose-p:text-foreground/80 
+                    prose-a:text-accent-primary prose-strong:text-foreground
+                    prose-code:text-accent-primary prose-code:bg-accent-primary/10
+                    prose-img:rounded-lg prose-img:w-full prose-img:h-auto">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      components={{
+                        img: ({...props}) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img 
+                            {...props} 
+                            alt={props.alt || 'Blog image'}
+                            className="w-full h-auto rounded-lg my-4"
+                            loading="lazy"
+                          />
+                        ),
+                      }}
+                    >
+                      {formData.content || '*No content yet...*'}
+                    </ReactMarkdown>
+                  </div>
+                </article>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

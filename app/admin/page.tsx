@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Search, Image as ImageIcon, Calendar, MessageSquare } from 'lucide-react';
+import Image from 'next/image';
 
 interface Post {
   id: string;
@@ -11,13 +12,17 @@ interface Post {
   published: boolean;
   createdAt: Date;
   tags: string[];
+  coverImage?: string;
 }
 
 export default function AdminPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string; name: string; role: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
 
   useEffect(() => {
     const init = async () => {
@@ -27,6 +32,28 @@ export default function AdminPage() {
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    let filtered = [...posts];
+    
+    // Filter by status
+    if (filterStatus === 'published') {
+      filtered = filtered.filter(p => p.published);
+    } else if (filterStatus === 'draft') {
+      filtered = filtered.filter(p => !p.published);
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+    
+    setFilteredPosts(filtered);
+  }, [posts, searchQuery, filterStatus]);
 
   const checkAuth = async () => {
     try {
@@ -88,108 +115,236 @@ export default function AdminPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Checking authentication...</div>
+        <div className="text-center">
+          <div className="animate-pulse text-foreground/60">Checking authentication...</div>
+        </div>
       </div>
     );
   }
 
+  const stats = {
+    total: posts.length,
+    published: posts.filter(p => p.published).length,
+    draft: posts.filter(p => !p.published).length,
+  };
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
-              title="Back to home"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <div className="flex-1">
-              <h1 className="text-4xl font-light tracking-tight text-foreground">Admin Panel</h1>
-              <p className="text-sm text-foreground/60 mt-2">Manage your blog content</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/')}
+                className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
+                title="Back to home"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground">Admin Console</h1>
+                <p className="text-xs text-foreground/40">Welcome back, {user.name}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => router.push('/admin/comments')}
+                className="flex items-center gap-2 px-4 py-2 bg-foreground/10 hover:bg-foreground/20 text-foreground rounded-lg transition-all text-sm"
+              >
+                <MessageSquare size={16} />
+                <span className="hidden md:inline">Comments</span>
+              </button>
+              <button
+                onClick={() => router.push('/admin/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary font-medium rounded-lg transition-all text-sm"
+              >
+                <Plus size={16} />
+                <span>New Post</span>
+              </button>
             </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => router.push('/admin/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 text-accent-primary rounded-lg transition-all"
-            >
-              <Plus size={18} />
-              <span>New Post</span>
-            </button>
-            <button
-              onClick={() => router.push('/admin/comments')}
-              className="flex items-center gap-2 px-4 py-2 bg-foreground/10 hover:bg-foreground/20 text-foreground rounded-lg transition-all"
-            >
-              <span>Manage Comments</span>
-            </button>
-          </div>
-        </header>
 
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="bg-foreground/5 rounded-lg p-3 border border-foreground/10">
+              <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+              <p className="text-xs text-foreground/40">Total Posts</p>
+            </div>
+            <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.published}</p>
+              <p className="text-xs text-green-600/60 dark:text-green-400/60">Published</p>
+            </div>
+            <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20">
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.draft}</p>
+              <p className="text-xs text-yellow-600/60 dark:text-yellow-400/60">Drafts</p>
+            </div>
+          </div>
+
+          {/* Search and Filter */}
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-foreground/5 border border-foreground/10 rounded-lg text-sm text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
+              />
+            </div>
+            <div className="flex gap-1 bg-foreground/5 rounded-lg p-1 border border-foreground/10">
+              <button
+                onClick={() => setFilterStatus('all')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  filterStatus === 'all'
+                    ? 'bg-accent-primary/20 text-accent-primary'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilterStatus('published')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  filterStatus === 'published'
+                    ? 'bg-accent-primary/20 text-accent-primary'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+              >
+                Published
+              </button>
+              <button
+                onClick={() => setFilterStatus('draft')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  filterStatus === 'draft'
+                    ? 'bg-accent-primary/20 text-accent-primary'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+              >
+                Drafts
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto p-4">
         {loading ? (
-          <div className="text-center text-foreground/60">Loading posts...</div>
-        ) : posts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-foreground/60 mb-4">No posts yet</p>
-            <button
-              onClick={() => router.push('/admin/new')}
-              className="text-accent-primary hover:underline"
-            >
-              Create your first post
-            </button>
+            <div className="animate-pulse text-foreground/60">Loading posts...</div>
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-foreground/5 flex items-center justify-center">
+              <Search size={32} className="text-foreground/20" />
+            </div>
+            <p className="text-foreground/60 mb-2">
+              {searchQuery || filterStatus !== 'all' ? 'No posts found' : 'No posts yet'}
+            </p>
+            {!searchQuery && filterStatus === 'all' && (
+              <button
+                onClick={() => router.push('/admin/new')}
+                className="text-accent-primary hover:underline text-sm"
+              >
+                Create your first post
+              </button>
+            )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {posts.map((post) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredPosts.map((post) => (
               <div
                 key={post.id}
-                className="bg-foreground/5 border border-foreground/10 rounded-xl p-6 hover:bg-foreground/10 transition-all"
+                className="group bg-foreground/5 border border-foreground/10 rounded-xl overflow-hidden hover:border-accent-primary/30 hover:shadow-lg transition-all"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-xl font-medium text-foreground">{post.title}</h2>
-                      {post.published ? (
-                        <span className="px-2 py-1 bg-green-500/20 text-green-600 dark:text-green-400 text-xs rounded-full">
-                          Published
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-xs rounded-full">
-                          Draft
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-foreground/60 mb-3">{post.excerpt}</p>
-                    <div className="flex items-center gap-4 text-xs text-foreground/40">
-                      <span>/{post.slug}</span>
-                      {post.tags.length > 0 && (
-                        <span>Tags: {post.tags.join(', ')}</span>
-                      )}
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    </div>
+                {/* Cover Image */}
+                {post.coverImage ? (
+                  <div className="relative w-full h-48 bg-foreground/10">
+                    <Image
+                      src={post.coverImage}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover"
+                    />
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                ) : (
+                  <div className="w-full h-48 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 flex items-center justify-center">
+                    <ImageIcon size={48} className="text-foreground/10" />
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-base font-semibold text-foreground line-clamp-2 flex-1">
+                      {post.title}
+                    </h3>
+                    {post.published ? (
+                      <span className="flex-shrink-0 px-2 py-0.5 bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] rounded-full font-medium">
+                        Published
+                      </span>
+                    ) : (
+                      <span className="flex-shrink-0 px-2 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] rounded-full font-medium">
+                        Draft
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-foreground/60 line-clamp-2 mb-3">
+                    {post.excerpt || 'No excerpt available'}
+                  </p>
+
+                  {/* Tags */}
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {post.tags.slice(0, 3).map((tag, i) => (
+                        <span
+                          key={i}
+                          className="text-[10px] px-2 py-0.5 bg-accent-primary/10 text-accent-primary rounded-full"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                      {post.tags.length > 3 && (
+                        <span className="text-[10px] px-2 py-0.5 bg-foreground/10 text-foreground/40 rounded-full">
+                          +{post.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Meta */}
+                  <div className="flex items-center gap-2 text-[10px] text-foreground/40 mb-3 pb-3 border-b border-foreground/10">
+                    <Calendar size={10} />
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => togglePublish(post.id, post.published)}
-                      className="p-2 hover:bg-foreground/10 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 p-2 hover:bg-foreground/10 rounded-lg transition-colors text-xs"
                       title={post.published ? 'Unpublish' : 'Publish'}
                     >
-                      {post.published ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
+                      <span className="hidden sm:inline">{post.published ? 'Hide' : 'Show'}</span>
                     </button>
                     <button
                       onClick={() => router.push(`/admin/edit/${post.id}`)}
-                      className="p-2 hover:bg-foreground/10 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-accent-primary/10 hover:bg-accent-primary/20 text-accent-primary rounded-lg transition-colors text-xs font-medium"
                       title="Edit"
                     >
-                      <Edit size={18} />
+                      <Edit size={14} />
+                      <span className="hidden sm:inline">Edit</span>
                     </button>
                     <button
                       onClick={() => deletePost(post.id)}
                       className="p-2 hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg transition-colors"
                       title="Delete"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -197,7 +352,7 @@ export default function AdminPage() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
