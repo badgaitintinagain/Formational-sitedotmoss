@@ -253,11 +253,29 @@ export default function EditPostPage() {
                 </button>
                 {formData.coverImage && (
                   <div className="flex-1 flex items-center gap-2 text-xs text-foreground/60">
-                    <ImageIcon size={14} />
-                    <span className="truncate">Image uploaded</span>
+                    <ImageIcon size={14} className="text-green-500" />
+                    <span className="truncate text-green-600 dark:text-green-400">Image uploaded successfully!</span>
                   </div>
                 )}
               </div>
+              {/* Image Preview */}
+              {formData.coverImage && (
+                <div className="mt-3 relative group">
+                  <img
+                    src={formData.coverImage}
+                    alt="Cover preview"
+                    className="w-full h-48 object-cover rounded-lg border border-foreground/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, coverImage: '' })}
+                    className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove image"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"

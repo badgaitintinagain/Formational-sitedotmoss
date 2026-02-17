@@ -127,7 +127,7 @@ const AIChatTile: React.FC<AIProps> = ({ size = '2x2', accent = 'secondary', opa
               <div className="flex items-center gap-3">
                 <BrainCircuit className="text-accent-primary" />
                 <div>
-                  <h2 className="text-xl font-light tracking-tight text-foreground">Micronversation</h2>
+                  <h2 className="text-xl font-light tracking-tight text-foreground">Micronversation // Temporary Close... </h2>
                   <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">
                     Running on Hugging Face CPU
                     (Model: Micronversation-V1.5-106M)
