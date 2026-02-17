@@ -43,8 +43,8 @@ export default function BlogListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-xl py-3">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-white/5 backdrop-blur-xl py-3">
         <div className="max-w-[935px] mx-auto px-3 md:px-4">
           <div className="flex items-center justify-between">
             <button
@@ -59,7 +59,7 @@ export default function BlogListPage() {
         </div>
       </header>
 
-      <main className="max-w-[935px] mx-auto px-1 md:px-2 py-4 md:py-6">
+      <main className="max-w-[935px] mx-auto px-4 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-sm text-foreground/60">Loading...</div>
@@ -71,41 +71,54 @@ export default function BlogListPage() {
             <p className="text-xs text-foreground/40 mt-1">Check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {posts.map((post) => (
               <article
                 key={post.id}
                 onClick={() => setSelectedSlug(post.slug)}
-                className="group cursor-pointer bg-background overflow-hidden transition-all duration-200"
+                className="group cursor-pointer flex flex-col gap-3"
               >
-                {/* รูปแบบ IG - รูปสี่เหลี่ยมจัตุรัส */}
-                <div className="aspect-square bg-foreground/5 overflow-hidden relative">
+                {/* Image */}
+                <div className="aspect-[4/3] bg-foreground/5 overflow-hidden relative rounded-xl border border-white/20 shadow-sm transition-transform duration-300 group-hover:-translate-y-1">
                   {post.coverImage ? (
                     <Image
                       src={post.coverImage}
                       alt={post.title}
                       fill
-                      sizes="(max-width: 640px) 33vw, (max-width: 935px) 33vw, 300px"
-                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 935px) 50vw, 450px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
                       <FileText size={32} className="text-foreground/20" />
                     </div>
                   )}
-                  {/* Hover overlay แบบ IG */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="text-white flex gap-4">
-                      <div className="flex items-center gap-2">
-                        <Heart size={20} fill="white" />
-                        <span className="font-semibold">{post.likesCount || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle size={20} fill="white" />
-                        <span className="font-semibold">{post.commentsCount || 0}</span>
-                      </div>
+                  {/* Stats Overlay */}
+                  <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md rounded-full px-2 py-1 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 text-white text-xs">
+                      <Heart size={12} fill="white" />
+                      <span>{post.likesCount || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-white text-xs">
+                      <MessageCircle size={12} fill="white" />
+                      <span>{post.commentsCount || 0}</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Content */}
+                <div className="space-y-1 px-1">
+                  <div className="flex items-center justify-between text-xs text-foreground/50 uppercase tracking-wider font-medium">
+                     <span>{new Date(post.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  </div>
+                  
+                  <h2 className="text-lg font-bold text-foreground leading-snug group-hover:text-accent-primary transition-colors">
+                    {post.title}
+                  </h2>
+                  
+                  <p className="text-sm text-foreground/70 line-clamp-2 leading-relaxed">
+                    {post.excerpt || "No summary available."}
+                  </p>
                 </div>
               </article>
             ))}

@@ -8,7 +8,6 @@ import ClockTile from "@/components/ClockTile";
 import AIChatTile from "@/components/MicronversationTile";
 import BlogTile from "@/components/BlogTile";
 import SettingsModal from "@/components/SettingsModal";
-import Background from "@/components/Background";
 import ThemeToggle from "@/components/ThemeToggle";
 import ProfileButton from "@/components/ProfileButton";
 import gsap from "gsap";
@@ -123,7 +122,6 @@ const Home = () => {
 
   return (
     <div ref={containerRef} className="relative min-h-screen w-full overflow-x-hidden overflow-y-auto font-sans flex items-center justify-center">
-      <Background />
       <ThemeToggle />
       <ProfileButton />
       <div className="absolute inset-0 bg-white/5 dark:bg-black/10 z-10 backdrop-blur-[1px]" />

@@ -23,6 +23,8 @@ export const viewport: Viewport = {
   ],
 };
 
+import Background from "@/components/Background";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,6 +40,7 @@ export default function RootLayout({
         className={`${dmSans.variable} font-sans antialiased`}
       >
         <ThemeProvider>
+          <Background />
           {children}
         </ThemeProvider>
       </body>
