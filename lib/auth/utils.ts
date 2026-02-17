@@ -16,8 +16,12 @@ export function generateId(): string {
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .trim()
+    // แปลงอักขระพิเศษและช่องว่างเป็น dash
+    .replace(/[^\w\s-]/g, '') // เอาอักขระพิเศษออก แต่เก็บตัวเลข ตัวอักษร space และ dash
+    .replace(/[\s_]+/g, '-') // แปลง space และ underscore เป็น dash
+    .replace(/-+/g, '-') // ลบ dash ซ้ำๆ
+    .replace(/^-+|-+$/g, ''); // ตัด dash ที่ต้นและท้าย
 }
 
 // Session management (simple cookie-based for demo)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, posts } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { withAuth } from '@/lib/middleware/auth';
+import { generateSlug } from '@/lib/auth/utils';
 
 // GET - Fetch a single post by ID (for admin edit)
 async function getPostHandler(
@@ -53,11 +54,8 @@ async function updatePostHandler(
     const body = await request.json();
     const { title, content, excerpt, coverImage, tags, published } = body;
 
-    // Generate slug from title
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    // Generate slug from title using shared utility
+    const slug = generateSlug(title);
 
     await db
       .update(posts)

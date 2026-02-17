@@ -36,7 +36,7 @@ export default function BlogPostPage() {
 
   const fetchPost = async () => {
     try {
-      const response = await fetch(`/api/blog/posts/by-slug/${slug}`);
+      const response = await fetch(`/api/blog/posts/by-slug?slug=${encodeURIComponent(slug)}`);
       if (response.ok) {
         const data = await response.json();
         setPost(data.post);
@@ -50,7 +50,7 @@ export default function BlogPostPage() {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`/api/blog/comments/by-post/${slug}`);
+      const response = await fetch(`/api/blog/comments/by-post?slug=${encodeURIComponent(slug)}`);
       if (response.ok) {
         const data = await response.json();
         setComments(data.comments || []);

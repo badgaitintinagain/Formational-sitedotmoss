@@ -112,11 +112,11 @@ const ProfileButton: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-6 md:top-8 right-14 md:right-24 z-50" ref={dropdownRef}>
+      <div className="fixed top-6 md:top-8 right-16 md:right-20 z-50" ref={dropdownRef}>
         {/* Profile Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-2.5 md:px-3 py-2 rounded-full bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 transition-all duration-200 group backdrop-blur-xl shadow-lg hover:shadow-xl"
+          className="flex items-center gap-2 p-2 rounded-full bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 transition-all duration-200 group backdrop-blur-xl shadow-lg hover:shadow-xl"
         >
           <div className="w-8 h-8 rounded-full bg-accent-primary/20 border-2 border-accent-primary/30 flex items-center justify-center overflow-hidden group-hover:border-accent-primary/50 transition-all">
             {user?.avatar ? (
@@ -125,11 +125,6 @@ const ProfileButton: React.FC = () => {
               <User size={16} className="text-accent-primary" />
             )}
           </div>
-          {user && (
-            <span className="hidden lg:block text-sm font-medium text-foreground">
-              {user.name}
-            </span>
-          )}
         </button>
 
         {/* Dropdown Menu */}
