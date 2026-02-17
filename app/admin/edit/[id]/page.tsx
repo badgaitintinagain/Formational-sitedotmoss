@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Save, X } from 'lucide-react';
+import { Save, X, Upload, ImageIcon } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -21,6 +21,9 @@ export default function EditPostPage() {
   
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentFileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -75,6 +78,41 @@ export default function EditPostPage() {
       router.push('/admin');
     } finally {
       setFetching(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File, isCover: boolean = true) => {
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/blog/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (isCover) {
+          setFormData(prev => ({ ...prev, coverImage: data.url }));
+        } else {
+          const markdownImage = `\n![Image](${data.url})\n`;
+          setFormData(prev => ({ 
+            ...prev, 
+            content: prev.content + markdownImage 
+          }));
+        }
+      } else {
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -166,21 +204,71 @@ export default function EditPostPage() {
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all resize-none font-mono text-sm"
               rows={15}
-              placeholder="# Your Content Here&#10;&#10;Write your post in **Markdown** format..."
+              placeholder="# Your Content Here&#10;&#10;Write your post in **Markdown** format...&#10;&#10;You can use:&#10;- ![alt text](image-url) for images&#10;- **bold**, *italic*&#10;- ## Headings&#10;- [Links](url)"
             />
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => contentFileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-2 px-4 py-2 bg-foreground/10 hover:bg-foreground/20 disabled:opacity-50 text-foreground rounded-lg transition-all text-sm"
+              >
+                <ImageIcon size={16} />
+                <span>{uploading ? 'Uploading...' : 'Insert Image to Content'}</span>
+              </button>
+              <input
+                ref={contentFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file, false);
+                }}
+                className="hidden"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               Cover Image URL
             </label>
-            <input
-              type="url"
-              value={formData.coverImage}
-              onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
-              placeholder="https://images.unsplash.com/..."
-            />
+            <div className="space-y-2">
+              <input
+                type="url"
+                value={formData.coverImage}
+                onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-3 px-4 text-foreground focus:outline-none focus:border-accent-primary/50 transition-all"
+                placeholder="https://images.unsplash.com/..."
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary rounded-lg transition-all text-sm"
+                >
+                  <Upload size={16} />
+                  <span>{uploading ? 'Uploading...' : 'Upload Cover Image'}</span>
+                </button>
+                {formData.coverImage && (
+                  <div className="flex-1 flex items-center gap-2 text-xs text-foreground/60">
+                    <ImageIcon size={14} />
+                    <span className="truncate">Image uploaded</span>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file, true);
+                }}
+                className="hidden"
+              />
+            </div>
           </div>
 
           <div>

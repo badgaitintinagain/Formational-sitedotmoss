@@ -14,6 +14,7 @@
   "dependencies": {
     "@gradio/client": "^2.0.4",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
     "dotenv": "^17.3.1",
     "gsap": "^3.14.2",
     "lucide-react": "^0.562.0",
@@ -22,7 +23,10 @@
     "openmeteo": "^1.2.3",
     "react": "19.2.3",
     "react-calendar": "^6.0.0",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@libsql/client": "^0.17.0",

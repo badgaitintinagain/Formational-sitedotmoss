@@ -26,9 +26,17 @@ export const comments = sqliteTable("comments", {
   authorAvatar: text("author_avatar"),
   content: text("content").notNull(),
   parentId: text("parent_id"), // For nested comments
-  status: text("status").default("pending"), // pending, approved, spam
+  status: text("status").default("approved"), // approved, spam (auto-approve now)
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// Post Likes Table
+export const postLikes = sqliteTable("post_likes", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull(),
+  userId: text("user_id"), // anonymous user identifier (IP or session)
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
 // Reactions Table (optional - for likes, etc.)
@@ -56,5 +64,7 @@ export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 export type Comment = typeof comments.$inferSelect;
 export type NewComment = typeof comments.$inferInsert;
+export type PostLike = typeof postLikes.$inferSelect;
+export type NewPostLike = typeof postLikes.$inferInsert;
 export type Reaction = typeof reactions.$inferSelect;
 export type User = typeof users.$inferSelect;

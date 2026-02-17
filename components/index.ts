@@ -15,3 +15,4 @@ export { default as Tile } from '@/components/Tile';
 export { default as ClockTile } from '@/components/ClockTile';
 export { default as WeatherTile } from '@/components/WeatherTile';
 export { default as CalendarTile } from '@/components/CalendarTile';
+export { default as BlogModal } from '@/components/BlogModal';

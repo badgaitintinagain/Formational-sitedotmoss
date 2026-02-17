@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FileText, Tag, ArrowLeft } from 'lucide-react';
+import { FileText, ArrowLeft, Heart, MessageCircle } from 'lucide-react';
+import BlogModal from '@/components/BlogModal';
 
 interface BlogPost {
   id: string;
@@ -13,12 +14,15 @@ interface BlogPost {
   authorName: string;
   tags: string[];
   createdAt: Date;
+  likesCount?: number;
+  commentsCount?: number;
 }
 
 export default function BlogListPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -71,7 +75,7 @@ export default function BlogListPage() {
             {posts.map((post) => (
               <article
                 key={post.id}
-                onClick={() => router.push(`/blog/${post.slug}`)}
+                onClick={() => setSelectedSlug(post.slug)}
                 className="group cursor-pointer bg-background overflow-hidden transition-all duration-200"
               >
                 {/* รูปแบบ IG - รูปสี่เหลี่ยมจัตุรัส */}
@@ -89,10 +93,17 @@ export default function BlogListPage() {
                       <FileText size={32} className="text-foreground/20" />
                     </div>
                   )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="text-white text-xs font-medium px-3 text-center line-clamp-2">
-                      {post.title}
+                  {/* Hover overlay แบบ IG */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="text-white flex gap-4">
+                      <div className="flex items-center gap-2">
+                        <Heart size={20} fill="white" />
+                        <span className="font-semibold">{post.likesCount || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle size={20} fill="white" />
+                        <span className="font-semibold">{post.commentsCount || 0}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -101,6 +112,15 @@ export default function BlogListPage() {
           </div>
         )}
       </main>
+
+      {/* Blog Modal */}
+      {selectedSlug && (
+        <BlogModal
+          slug={selectedSlug}
+          isOpen={!!selectedSlug}
+          onClose={() => setSelectedSlug(null)}
+        />
+      )}
     </div>
   );
 }

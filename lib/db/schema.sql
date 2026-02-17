@@ -37,10 +37,19 @@ CREATE TABLE IF NOT EXISTS comments (
   author_avatar TEXT,
   content TEXT NOT NULL,
   parent_id TEXT,
-  status TEXT DEFAULT 'pending',
+  status TEXT DEFAULT 'approved',
   created_at INTEGER DEFAULT (unixepoch()),
   updated_at INTEGER DEFAULT (unixepoch()),
   FOREIGN KEY (parent_id) REFERENCES comments(id)
+);
+
+-- Post Likes Table
+CREATE TABLE IF NOT EXISTS post_likes (
+  id TEXT PRIMARY KEY,
+  post_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (post_id) REFERENCES posts(id)
 );
 
 -- Reactions Table
@@ -59,3 +68,5 @@ CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published, created_at DE
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_slug, created_at);
 CREATE INDEX IF NOT EXISTS idx_comments_parent ON comments(parent_id);
 CREATE INDEX IF NOT EXISTS idx_comments_status ON comments(status);
+CREATE INDEX IF NOT EXISTS idx_post_likes_post ON post_likes(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_likes_user ON post_likes(user_id, post_id);

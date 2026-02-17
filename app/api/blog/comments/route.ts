@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { postSlug, name, email, content } = body;
+    const { postSlug, name, email, content, parentId } = body;
 
     // Validation
     if (!postSlug || !name || !email || !content) {
@@ -64,12 +64,13 @@ export async function POST(request: NextRequest) {
       authorName: name,
       authorEmail: email,
       content: sanitizedContent,
-      status: 'pending', // Require admin approval
+      parentId: parentId || null,
+      status: 'approved', // Auto-approve comments now
     });
 
     return NextResponse.json({ 
       success: true,
-      message: 'Comment submitted for approval'
+      message: 'Comment posted successfully'
     });
   } catch (error) {
     console.error('Error creating comment:', error);

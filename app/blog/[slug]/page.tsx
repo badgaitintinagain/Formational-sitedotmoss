@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowLeft, User, Send } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 interface Post {
   id: string;
@@ -189,14 +192,28 @@ export default function BlogPostPage() {
               </div>
 
               {/* เนื้อหาโพสต์ */}
-              <div className="prose prose-sm dark:prose-invert max-w-none mb-6">
-                {post.content.split('\n').map((paragraph, i) => (
-                  paragraph.trim() && (
-                    <p key={i} className="text-sm text-foreground/80 leading-relaxed mb-3">
-                      {paragraph}
-                    </p>
-                  )
-                ))}
+              <div className="prose prose-sm dark:prose-invert max-w-none mb-6 
+                prose-headings:text-foreground prose-p:text-foreground/80 
+                prose-a:text-accent-primary prose-strong:text-foreground
+                prose-code:text-accent-primary prose-code:bg-accent-primary/10
+                prose-img:rounded-lg prose-img:w-full prose-img:h-auto">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    img: ({...props}) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        {...props} 
+                        alt={props.alt || 'Blog image'}
+                        className="w-full h-auto rounded-lg my-4"
+                        loading="lazy"
+                      />
+                    ),
+                  }}
+                >
+                  {post.content}
+                </ReactMarkdown>
               </div>
 
               {/* ส่วน Comments */}

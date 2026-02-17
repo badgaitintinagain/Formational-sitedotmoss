@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, posts } from '@/lib/db';
+import { db, posts, postLikes, comments } from '@/lib/db';
 import { desc, eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -14,14 +14,25 @@ export async function GET(request: NextRequest) {
       .orderBy(desc(posts.createdAt))
       .limit(limit);
 
-    // Parse tags from JSON string
-    const postsWithParsedTags = allPosts.map(post => ({
-      ...post,
-      tags: post.tags ? JSON.parse(post.tags) : [],
-    }));
+    // Get likes and comments counts for each post
+    const postsWithCounts = await Promise.all(
+      allPosts.map(async (post) => {
+        const [likesData, commentsData] = await Promise.all([
+          db.select().from(postLikes).where(eq(postLikes.postId, post.id)),
+          db.select().from(comments).where(eq(comments.postSlug, post.slug)),
+        ]);
+
+        return {
+          ...post,
+          tags: post.tags ? JSON.parse(post.tags) : [],
+          likesCount: likesData.length,
+          commentsCount: commentsData.length,
+        };
+      })
+    );
 
     return NextResponse.json({ 
-      posts: postsWithParsedTags,
+      posts: postsWithCounts,
       total: allPosts.length 
     });
   } catch (error) {
