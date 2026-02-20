@@ -24,6 +24,7 @@ export const viewport: Viewport = {
 };
 
 import Background from "@/components/Background";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function RootLayout({
   children,
@@ -41,6 +42,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <Background />
+          <ThemeToggle />
           {children}
         </ThemeProvider>
       </body>
