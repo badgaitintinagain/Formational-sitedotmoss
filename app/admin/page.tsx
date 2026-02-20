@@ -128,23 +128,23 @@ export default function AdminPage() {
     post.images?.[0] || post.coverImage || null;
 
   return (
-    <div className="min-h-screen bg-background flex pb-16 md:pb-0">
+    <div className="min-h-screen bg-background flex pb-16 md:pb-0 relative z-10">
 
       {/* ─── Sidebar (Desktop) ─── */}
-      <aside className="w-60 bg-foreground/[0.04] backdrop-blur-xl border-r-2 border-foreground/25 hidden md:flex flex-col sticky top-0 h-screen overflow-y-auto z-40 shadow-lg">
+      <aside className="w-60 bg-background border-r border-foreground/15 hidden md:flex flex-col sticky top-0 h-screen overflow-y-auto z-40">
         {/* Logo area */}
-        <div className="p-5 pb-3 border-b-2 border-foreground/20">
+        <div className="p-5 pb-3 border-b border-foreground/10">
           <div className="flex items-center gap-2">
             <LayoutDashboard size={20} className="text-accent-primary" />
             <p className="font-bold text-lg text-foreground">Admin</p>
           </div>
           <div className="flex items-center gap-2.5 mt-3 px-1">
-            <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-accent-primary/15 flex items-center justify-center">
               <span className="text-accent-primary font-bold text-xs">{user.name.charAt(0).toUpperCase()}</span>
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
-              <p className="text-[11px] text-foreground/60 truncate">{user.email}</p>
+              <p className="text-[11px] text-foreground/70 truncate">{user.email}</p>
             </div>
           </div>
         </div>
@@ -163,27 +163,27 @@ export default function AdminPage() {
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
                 filterStatus === item.value
                   ? 'bg-accent-primary/15 text-accent-primary font-semibold'
-                  : 'text-foreground/80 hover:bg-foreground/15 hover:text-foreground'
+                  : 'text-foreground/70 hover:bg-foreground/[0.08] hover:text-foreground'
               }`}
             >
               <span>{item.label}</span>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                filterStatus === item.value ? 'bg-accent-primary/20' : 'bg-foreground/20'
+                filterStatus === item.value ? 'bg-accent-primary/20' : 'bg-foreground/10'
               }`}>{item.count}</span>
             </button>
           ))}
 
-          <div className="pt-3 mt-3 border-t-2 border-foreground/20 space-y-1">
+          <div className="pt-3 mt-3 border-t border-foreground/10 space-y-1">
             <button
               onClick={() => router.push('/admin/comments')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-foreground/15 hover:text-foreground transition-all"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/70 hover:bg-foreground/[0.08] hover:text-foreground transition-all"
             >
               <MessageSquare size={16} />
               <span>Comments</span>
             </button>
             <button
               onClick={() => router.push('/')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-foreground/15 hover:text-foreground transition-all"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/70 hover:bg-foreground/[0.08] hover:text-foreground transition-all"
             >
               <ArrowLeft size={16} />
               <span>Back to Site</span>
@@ -193,27 +193,27 @@ export default function AdminPage() {
       </aside>
 
       {/* ─── Mobile Bottom Navigation ─── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t-2 border-foreground/25 px-2 py-1.5 flex items-center justify-around shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-foreground/15 px-2 py-1.5 flex items-center justify-around">
         <button onClick={() => router.push('/admin')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-accent-primary">
-          <LayoutDashboard size={20} />
+          <LayoutDashboard size={18} />
           <span className="text-[10px] font-medium">Posts</span>
         </button>
-        <button onClick={() => router.push('/admin/comments')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/65">
-          <MessageSquare size={20} />
+        <button onClick={() => router.push('/admin/comments')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/70">
+          <MessageSquare size={18} />
           <span className="text-[10px] font-medium">Comments</span>
         </button>
         <button
           onClick={() => router.push('/admin/new')}
-          className="flex items-center justify-center w-11 h-11 bg-accent-primary text-white rounded-full shadow-lg -mt-4"
+          className="flex items-center justify-center w-10 h-10 bg-accent-primary text-white rounded-full shadow-md -mt-3"
         >
           <Plus size={22} />
         </button>
-        <button onClick={() => router.push('/blog')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/65">
-          <Eye size={20} />
+        <button onClick={() => router.push('/blog')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/70">
+          <Eye size={18} />
           <span className="text-[10px] font-medium">View Blog</span>
         </button>
-        <button onClick={() => router.push('/')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/65">
-          <Home size={20} />
+        <button onClick={() => router.push('/')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/70">
+          <Home size={18} />
           <span className="text-[10px] font-medium">Home</span>
         </button>
       </div>
@@ -221,7 +221,7 @@ export default function AdminPage() {
       {/* ─── Main Content ─── */}
       <main className="flex-1 min-h-screen overflow-y-auto">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b-2 border-foreground/25 px-4 md:px-6 py-3 shadow-sm">
+        <div className="sticky top-0 z-30 bg-background border-b border-foreground/15 px-4 md:px-6 py-3">
           <div className="flex items-center gap-3 max-w-5xl mx-auto">
             {/* Mobile title */}
             <div className="md:hidden flex items-center gap-2">
@@ -231,13 +231,13 @@ export default function AdminPage() {
 
             {/* Search */}
             <div className="relative flex-1 max-w-sm">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/55" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/50" />
               <input
                 type="text"
                 placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-foreground/[0.08] border-2 border-foreground/20 rounded-xl text-sm focus:outline-none focus:border-accent-primary/50 focus:bg-foreground/[0.05] text-foreground transition-all placeholder:text-foreground/50 shadow-inner"
+                className="w-full pl-9 pr-3 py-2 bg-foreground/[0.06] border border-foreground/15 rounded-xl text-sm focus:outline-none focus:border-accent-primary/50 text-foreground transition-all placeholder:text-foreground/40"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function AdminPage() {
                   key={f.key}
                   onClick={() => setFilterStatus(f.key)}
                   className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                    filterStatus === f.key ? 'bg-accent-primary/15 text-accent-primary border border-accent-primary/25' : 'bg-foreground/10 text-foreground/70 border border-foreground/20'
+                    filterStatus === f.key ? 'bg-accent-primary/15 text-accent-primary border border-accent-primary/25' : 'bg-foreground/[0.06] text-foreground/70 border border-foreground/12'
                   }`}
                 >
                   {f.label}
@@ -265,18 +265,18 @@ export default function AdminPage() {
 
             <div className="flex items-center gap-2 ml-auto">
               {/* View toggle */}
-              <div className="hidden sm:flex bg-foreground/[0.08] border-2 border-foreground/20 rounded-lg p-0.5">
-                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-accent-primary/15 text-accent-primary shadow-sm' : 'text-foreground/55 hover:text-foreground/70'}`}>
+              <div className="hidden sm:flex bg-foreground/[0.06] border border-foreground/12 rounded-lg p-0.5">
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-accent-primary/15 text-accent-primary' : 'text-foreground/60 hover:text-foreground'}`}>
                   <Grid size={15} />
                 </button>
-                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-accent-primary/15 text-accent-primary shadow-sm' : 'text-foreground/55 hover:text-foreground/70'}`}>
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-accent-primary/15 text-accent-primary' : 'text-foreground/60 hover:text-foreground'}`}>
                   <List size={15} />
                 </button>
               </div>
 
               <button
                 onClick={() => router.push('/admin/new')}
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity"
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-accent-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity"
               >
                 <Plus size={16} />
                 <span className="hidden sm:inline">New Post</span>
@@ -289,17 +289,17 @@ export default function AdminPage() {
         <div className="p-4 md:p-6 max-w-5xl mx-auto">
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-foreground/[0.08] backdrop-blur-sm border-2 border-foreground/25 rounded-2xl p-4 text-center shadow-sm">
+            <div className="bg-foreground/[0.05] border border-foreground/10 rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-              <p className="text-xs text-foreground/70 mt-0.5">Total Posts</p>
+              <p className="text-xs text-foreground/60 mt-0.5">Total Posts</p>
             </div>
-            <div className="bg-green-500/10 border-2 border-green-500/25 rounded-2xl p-4 text-center shadow-sm">
+            <div className="bg-green-500/8 border border-green-500/20 rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.published}</p>
-              <p className="text-xs text-foreground/70 mt-0.5">Published</p>
+              <p className="text-xs text-foreground/60 mt-0.5">Published</p>
             </div>
-            <div className="bg-yellow-500/10 border-2 border-yellow-500/25 rounded-2xl p-4 text-center shadow-sm">
+            <div className="bg-yellow-500/8 border border-yellow-500/20 rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.draft}</p>
-              <p className="text-xs text-foreground/70 mt-0.5">Drafts</p>
+              <p className="text-xs text-foreground/60 mt-0.5">Drafts</p>
             </div>
           </div>
 
@@ -311,26 +311,26 @@ export default function AdminPage() {
             </div>
           ) : filteredPosts.length === 0 ? (
             <div className="py-20 text-center">
-              <div className="w-16 h-16 bg-foreground/[0.08] border-2 border-foreground/25 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <Search size={24} className="text-foreground/40" />
+              <div className="w-16 h-16 bg-foreground/[0.05] border border-foreground/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search size={24} className="text-foreground/35" />
               </div>
               <p className="font-semibold text-foreground text-lg">No posts found</p>
-              <p className="text-sm text-foreground/70 mt-1 max-w-xs mx-auto">Try adjusting your search or filters, or create a new post to get started.</p>
-              <button onClick={() => router.push('/admin/new')} className="mt-5 px-5 py-2.5 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity">
+              <p className="text-sm text-foreground/60 mt-1 max-w-xs mx-auto">Try adjusting your search or filters, or create a new post to get started.</p>
+              <button onClick={() => router.push('/admin/new')} className="mt-5 px-5 py-2.5 bg-accent-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity">
                 <Plus size={16} className="inline mr-1.5 -mt-0.5" />
                 Create Post
               </button>
             </div>
           ) : viewMode === 'grid' ? (
             /* ── Grid View ── */
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2">
               {filteredPosts.map(post => {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
                 const isDeleting = deletingId === post.id;
                 const isToggling = togglingId === post.id;
                 return (
-                  <div key={post.id} className={`relative aspect-square bg-foreground/10 overflow-hidden rounded-lg group border border-foreground/20 shadow-sm ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div key={post.id} className={`relative aspect-square bg-foreground/[0.06] overflow-hidden rounded-xl group border border-foreground/10 ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
                     {thumb ? (
                       <Image src={thumb} alt={post.title} fill className="object-cover" />
                     ) : (
@@ -400,9 +400,9 @@ export default function AdminPage() {
                 const hasMultiple = (post.images?.length ?? 0) > 1;
                 const isDeleting = deletingId === post.id;
                 return (
-                  <div key={post.id} className={`flex items-center gap-4 bg-foreground/[0.08] hover:bg-foreground/[0.12] border-2 border-foreground/25 rounded-2xl p-3 transition-all shadow-sm hover:shadow-md ${isDeleting ? 'opacity-50' : ''}`}>
+                  <div key={post.id} className={`flex items-center gap-4 bg-foreground/[0.04] hover:bg-foreground/[0.08] border border-foreground/10 rounded-2xl p-3 transition-all ${isDeleting ? 'opacity-50' : ''}`}>
                     {/* Thumbnail */}
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-foreground/10">
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-foreground/[0.06]">
                       {thumb ? (
                         <Image src={thumb} alt={post.title} fill className="object-cover" />
                       ) : (
@@ -428,7 +428,7 @@ export default function AdminPage() {
                         </span>
                       </div>
                       <p className="text-xs text-foreground/70 truncate">{post.excerpt || 'No description'}</p>
-                      <div className="flex items-center gap-3 mt-1.5 text-[11px] text-foreground/60">
+                      <div className="flex items-center gap-3 mt-1.5 text-[11px] text-foreground/55">
                         <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                         {post.tags.slice(0, 2).map(tag => (
                           <span key={tag} className="text-accent-primary">#{tag}</span>
@@ -440,21 +440,21 @@ export default function AdminPage() {
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => router.push(`/admin/edit/${post.id}`)}
-                        className="p-2.5 text-foreground/65 hover:text-accent-primary hover:bg-accent-primary/10 rounded-xl transition-colors"
+                        className="p-2 text-foreground/60 hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => togglePublish(post.id, post.published)}
-                        className={`p-2.5 rounded-xl transition-colors ${post.published ? 'text-green-500 hover:bg-green-500/10' : 'text-foreground/65 hover:bg-foreground/15 hover:text-foreground'}`}
+                        className={`p-2 rounded-lg transition-colors ${post.published ? 'text-green-500 hover:bg-green-500/10' : 'text-foreground/60 hover:bg-foreground/[0.08] hover:text-foreground'}`}
                         title={post.published ? 'Unpublish' : 'Publish'}
                       >
                         {post.published ? <Eye size={16} /> : <EyeOff size={16} />}
                       </button>
                       <button
                         onClick={() => deletePost(post.id)}
-                        className="p-2.5 text-foreground/65 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                        className="p-2 text-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 size={16} />

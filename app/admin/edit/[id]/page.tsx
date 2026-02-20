@@ -155,7 +155,7 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative z-10">
       {/* Saved toast */}
       {saved && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-green-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-[fadeIn_0.2s_ease]">
@@ -165,9 +165,9 @@ export default function EditPostPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-2 border-foreground/25 bg-background/95 backdrop-blur-xl flex-shrink-0 shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-foreground/15 bg-background flex-shrink-0">
         <div className="flex items-center justify-between px-4 py-3 max-w-5xl mx-auto w-full">
-          <button onClick={() => router.push('/admin')} className="flex items-center gap-2 p-2 hover:bg-foreground/15 rounded-xl transition-colors text-foreground/70 hover:text-foreground">
+          <button onClick={() => router.push('/admin')} className="flex items-center gap-2 p-2 hover:bg-foreground/[0.08] rounded-xl transition-colors text-foreground/70 hover:text-foreground">
             <ArrowLeft size={20} />
             <span className="text-sm font-medium hidden sm:inline">Back</span>
           </button>
@@ -268,9 +268,9 @@ export default function EditPostPage() {
         </div>
 
         {/* RIGHT: Form Section */}
-        <div className="lg:w-[40%] border-l-2 border-foreground/25 bg-background flex flex-col">
+        <div className="lg:w-[40%] border-l border-foreground/15 bg-background flex flex-col">
           {/* User Info */}
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b-2 border-foreground/20 flex-shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-foreground/10 flex-shrink-0">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/30 to-accent-secondary/30 flex items-center justify-center flex-shrink-0">
               <span className="text-accent-primary font-bold text-sm">{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
             </div>
@@ -283,32 +283,32 @@ export default function EditPostPage() {
           <div className="flex-1 overflow-y-auto">
 
             {/* Title */}
-            <div className="px-4 py-4 border-b-2 border-foreground/20">
-              <label className="block text-xs font-bold text-foreground/75 uppercase tracking-wider mb-2">Title <span className="text-red-400">*</span></label>
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-xs font-bold text-foreground/65 uppercase tracking-wider mb-2">Title <span className="text-red-400">*</span></label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Post title"
-                className="w-full px-3.5 py-3 bg-foreground/[0.08] border-2 border-foreground/20 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/40 transition-all shadow-inner"
+                className="w-full px-3.5 py-2.5 bg-foreground/[0.05] border border-foreground/15 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/50 placeholder:text-foreground/35 transition-all"
               />
             </div>
 
             {/* Excerpt */}
-            <div className="px-4 py-4 border-b-2 border-foreground/20">
-              <label className="block text-xs font-bold text-foreground/75 uppercase tracking-wider mb-2">Excerpt</label>
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-xs font-bold text-foreground/65 uppercase tracking-wider mb-2">Excerpt</label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Short description shown in blog list (auto-generated if empty)"
-                className="w-full px-3.5 py-3 bg-foreground/[0.08] border-2 border-foreground/20 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/40 resize-none leading-relaxed transition-all shadow-inner"
+                className="w-full px-3.5 py-2.5 bg-foreground/[0.05] border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 placeholder:text-foreground/35 resize-none leading-relaxed transition-all"
                 rows={2}
               />
             </div>
 
             {/* Content */}
-            <div className="px-4 py-4 border-b-2 border-foreground/20">
-              <label className="block text-xs font-bold text-foreground/75 uppercase tracking-wider mb-2">
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-xs font-bold text-foreground/65 uppercase tracking-wider mb-2">
                 Content
                 <span className="text-foreground/40 font-normal normal-case ml-1">(Markdown supported)</span>
               </label>
@@ -316,7 +316,7 @@ export default function EditPostPage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your post content..."
-                className="w-full px-3.5 py-3 min-h-[180px] bg-foreground/[0.08] border-2 border-foreground/20 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/40 resize-none leading-relaxed transition-all font-mono shadow-inner"
+                className="w-full px-3.5 py-2.5 min-h-[180px] bg-foreground/[0.05] border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 placeholder:text-foreground/35 resize-none leading-relaxed transition-all font-mono"
               />
               {content.length > 0 && (
                 <p className="text-[11px] text-foreground/50 mt-1.5 text-right">{content.length} characters</p>
@@ -324,16 +324,16 @@ export default function EditPostPage() {
             </div>
 
             {/* Tags */}
-            <div className="px-4 py-4 border-b-2 border-foreground/20">
-              <label className="block text-xs font-bold text-foreground/75 uppercase tracking-wider mb-2">Tags</label>
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-xs font-bold text-foreground/65 uppercase tracking-wider mb-2">Tags</label>
               <input
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="travel, food, lifestyle"
-                className="w-full px-3.5 py-3 bg-foreground/[0.08] border-2 border-foreground/20 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/40 transition-all shadow-inner"
+                className="w-full px-3.5 py-2.5 bg-foreground/[0.05] border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 placeholder:text-foreground/35 transition-all"
               />
-              <p className="text-[11px] text-foreground/60 mt-1.5">Separate tags with commas</p>
+              <p className="text-[11px] text-foreground/50 mt-1.5">Separate tags with commas</p>
               {parsedTags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
                   {parsedTags.map((tag, i) => (
@@ -344,11 +344,11 @@ export default function EditPostPage() {
             </div>
 
             {/* Publish Toggle */}
-            <div className="px-4 py-4 border-b-2 border-foreground/20">
+            <div className="px-4 py-4 border-b border-foreground/10">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-foreground">Publish Status</p>
-                  <p className="text-xs text-foreground/65 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft, not visible'}</p>
+                  <p className="text-xs text-foreground/55 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft, not visible'}</p>
                 </div>
                 <button
                   onClick={() => setPublished(p => !p)}
@@ -372,7 +372,7 @@ export default function EditPostPage() {
           </div>
 
           {/* Save button (mobile) */}
-          <div className="lg:hidden border-t-2 border-foreground/25 p-4 flex gap-3 flex-shrink-0 bg-background shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+          <div className="lg:hidden border-t border-foreground/15 p-4 flex gap-3 flex-shrink-0 bg-background">
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
@@ -383,7 +383,7 @@ export default function EditPostPage() {
             </button>
             <button
               onClick={() => router.push('/admin')}
-              className="px-5 py-3 text-sm font-semibold bg-foreground/15 border border-foreground/25 text-foreground rounded-xl hover:bg-foreground/20 transition-colors"
+              className="px-5 py-3 text-sm font-semibold bg-foreground/[0.08] border border-foreground/15 text-foreground rounded-xl hover:bg-foreground/[0.12] transition-colors"
             >
               Done
             </button>
