@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Plus, Layers, ImageIcon } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Plus, Layers, ImageIcon, FileText, Image as ImageLucide } from 'lucide-react';
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -109,34 +109,61 @@ export default function NewPostPage() {
         <div className="flex items-center justify-between px-4 py-3 max-w-5xl mx-auto w-full">
           <button
             onClick={() => step === 'edit' ? setStep('images') : router.push('/admin')}
-            className="p-2 hover:bg-foreground/10 rounded-full transition-colors"
+            className="flex items-center gap-2 p-2 hover:bg-foreground/10 rounded-xl transition-colors text-foreground/70 hover:text-foreground"
           >
-            <ArrowLeft size={20} className="text-foreground" />
+            <ArrowLeft size={20} />
+            <span className="text-sm font-medium hidden sm:inline">{step === 'edit' ? 'Photos' : 'Back'}</span>
           </button>
-          <span className="font-semibold text-foreground">New Post</span>
+
+          {/* Step indicator (mobile) */}
+          <div className="lg:hidden flex items-center gap-3">
+            <button
+              onClick={() => setStep('images')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                step === 'images' ? 'bg-accent-primary/15 text-accent-primary' : 'text-foreground/40'
+              }`}
+            >
+              <ImageLucide size={14} />
+              Photos
+            </button>
+            <div className="w-6 h-px bg-foreground/20" />
+            <button
+              onClick={() => setStep('edit')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                step === 'edit' ? 'bg-accent-primary/15 text-accent-primary' : 'text-foreground/40'
+              }`}
+            >
+              <FileText size={14} />
+              Details
+            </button>
+          </div>
+
+          <span className="font-semibold text-foreground hidden lg:block">New Post</span>
+
           <div className="flex items-center gap-2">
             <div className="lg:hidden">
               {step === 'images' ? (
-                <button onClick={() => setStep('edit')} className="text-sm font-semibold text-accent-primary px-2 py-1">
-                  Next →
+                <button onClick={() => setStep('edit')} className="flex items-center gap-1 px-3 py-1.5 text-sm font-semibold text-white bg-accent-primary rounded-xl hover:opacity-90 transition-opacity">
+                  Next
+                  <ChevronRight size={16} />
                 </button>
               ) : (
                 <div className="flex gap-2">
-                  <button onClick={() => handleSubmit(false)} disabled={loading} className="px-3 py-1.5 text-xs font-medium bg-foreground/10 text-foreground rounded-lg disabled:opacity-50">
-                    {loading ? '...' : 'Draft'}
+                  <button onClick={() => handleSubmit(false)} disabled={loading} className="px-3 py-1.5 text-xs font-semibold bg-foreground/10 text-foreground rounded-xl disabled:opacity-50 hover:bg-foreground/15 transition-colors">
+                    {loading ? 'Saving...' : 'Save Draft'}
                   </button>
-                  <button onClick={() => handleSubmit(true)} disabled={loading} className="px-3 py-1.5 text-xs font-semibold bg-accent-primary text-white rounded-lg disabled:opacity-50">
-                    {loading ? '...' : 'Share'}
+                  <button onClick={() => handleSubmit(true)} disabled={loading} className="px-3 py-1.5 text-xs font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
+                    {loading ? 'Posting...' : 'Publish'}
                   </button>
                 </div>
               )}
             </div>
             <div className="hidden lg:flex gap-2">
-              <button onClick={() => handleSubmit(false)} disabled={loading} className="px-4 py-1.5 text-sm font-medium bg-foreground/10 text-foreground rounded-lg disabled:opacity-50 hover:bg-foreground/15 transition-colors">
+              <button onClick={() => handleSubmit(false)} disabled={loading} className="px-4 py-2 text-sm font-semibold bg-foreground/10 text-foreground rounded-xl disabled:opacity-50 hover:bg-foreground/15 transition-colors">
                 {loading ? 'Saving...' : 'Save Draft'}
               </button>
-              <button onClick={() => handleSubmit(true)} disabled={loading} className="px-4 py-1.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
-                {loading ? 'Posting...' : 'Share'}
+              <button onClick={() => handleSubmit(true)} disabled={loading} className="px-4 py-2 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
+                {loading ? 'Posting...' : 'Publish'}
               </button>
             </div>
           </div>
@@ -154,27 +181,25 @@ export default function NewPostPage() {
               <>
                 <Image src={images[activeIndex]} alt="Preview" fill className="object-contain" priority />
                 {activeIndex > 0 && (
-                  <button onClick={() => setActiveIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
-                    <ChevronLeft size={18} />
+                  <button onClick={() => setActiveIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronLeft size={20} />
                   </button>
                 )}
                 {activeIndex < images.length - 1 && (
-                  <button onClick={() => setActiveIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
-                    <ChevronRight size={18} />
+                  <button onClick={() => setActiveIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronRight size={20} />
                   </button>
                 )}
                 {images.length > 1 && (
                   <>
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                       {images.map((_, i) => (
-                        <button key={i} onClick={() => setActiveIndex(i)} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeIndex ? 'bg-accent-primary scale-125' : 'bg-white/60'}`} />
+                        <button key={i} onClick={() => setActiveIndex(i)} className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? 'bg-accent-primary scale-125' : 'bg-white/60'}`} />
                       ))}
                     </div>
-                    <div className="absolute top-3 right-3 z-10 bg-black/50 rounded-full p-1.5">
-                      <Layers size={16} className="text-white" />
-                    </div>
-                    <div className="absolute top-3 left-3 z-10 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full font-medium">
-                      {activeIndex + 1}/{images.length}
+                    <div className="absolute top-3 right-3 z-10 bg-black/50 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <Layers size={14} className="text-white" />
+                      <span className="text-white text-xs font-medium">{activeIndex + 1}/{images.length}</span>
                     </div>
                   </>
                 )}
@@ -197,7 +222,7 @@ export default function NewPostPage() {
             {images.map((img, i) => (
               <div key={i} onClick={() => setActiveIndex(i)} className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${i === activeIndex ? 'border-white opacity-100' : 'border-transparent opacity-55 hover:opacity-80'}`}>
                 <Image src={img} alt="" fill className="object-cover" />
-                <button onClick={(e) => { e.stopPropagation(); removeImage(i); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/75 rounded-full flex items-center justify-center text-white hover:bg-black transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); removeImage(i); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/75 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors">
                   <X size={10} />
                 </button>
               </div>
@@ -209,7 +234,7 @@ export default function NewPostPage() {
                 ) : (
                   <>
                     <Plus size={18} />
-                    <span className="text-[9px]">{images.length}/5</span>
+                    <span className="text-[10px] font-medium">{images.length}/5</span>
                   </>
                 )}
               </button>
@@ -225,64 +250,70 @@ export default function NewPostPage() {
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/30 to-accent-secondary/30 flex items-center justify-center flex-shrink-0">
               <span className="text-accent-primary font-bold text-sm">{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
             </div>
-            <span className="font-semibold text-sm text-foreground">{user?.name || 'Admin'}</span>
+            <div>
+              <span className="font-semibold text-sm text-foreground block">{user?.name || 'Admin'}</span>
+              <span className="text-[11px] text-foreground/40">Creating new post</span>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
 
             {/* Title */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Title <span className="text-red-400">*</span></label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Title <span className="text-red-400">*</span></label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Post title"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 transition-all"
               />
             </div>
 
             {/* Excerpt */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Excerpt</label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Excerpt</label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Short description shown in blog list (auto-generated if empty)"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 resize-none leading-relaxed transition-all"
                 rows={2}
               />
             </div>
 
             {/* Content */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Content <span className="text-foreground/30 font-normal normal-case">(Markdown)</span></label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">
+                Content
+                <span className="text-foreground/30 font-normal normal-case ml-1">(Markdown supported)</span>
+              </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your post content..."
-                className="w-full px-3 py-2.5 min-h-[180px] bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
+                className="w-full px-3.5 py-3 min-h-[180px] bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 resize-none leading-relaxed transition-all font-mono"
               />
               {content.length > 0 && (
-                <p className="text-[10px] text-foreground/35 mt-1 text-right">{content.length} chars</p>
+                <p className="text-[11px] text-foreground/35 mt-1.5 text-right">{content.length} characters</p>
               )}
             </div>
 
             {/* Tags */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Tags</label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Tags</label>
               <input
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="travel, food, lifestyle"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 transition-all"
               />
-              <p className="text-[11px] text-foreground/35 mt-1.5">Separate tags with commas</p>
+              <p className="text-[11px] text-foreground/40 mt-1.5">Separate tags with commas</p>
               {parsedTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
                   {parsedTags.map((tag, i) => (
-                    <span key={i} className="text-xs text-accent-primary font-medium bg-accent-primary/15 px-2.5 py-0.5 rounded-full">#{tag}</span>
+                    <span key={i} className="text-xs text-accent-primary font-semibold bg-accent-primary/10 px-2.5 py-1 rounded-lg">#{tag}</span>
                   ))}
                 </div>
               )}
@@ -290,22 +321,24 @@ export default function NewPostPage() {
 
             {/* Photo count */}
             {images.length > 0 && (
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/10 text-sm text-foreground/60">
-                <Layers size={14} />
-                <span>{images.length} photo{images.length > 1 ? 's' : ''} selected</span>
-                <button onClick={() => setStep('images')} className="ml-auto text-accent-primary text-xs font-medium hover:underline lg:hidden">Edit photos</button>
+              <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-foreground/10 text-sm text-foreground/60">
+                <div className="w-8 h-8 bg-accent-primary/10 rounded-lg flex items-center justify-center">
+                  <Layers size={16} className="text-accent-primary" />
+                </div>
+                <span className="font-medium">{images.length} photo{images.length > 1 ? 's' : ''} selected</span>
+                <button onClick={() => setStep('images')} className="ml-auto text-accent-primary text-xs font-semibold hover:underline lg:hidden">Edit photos</button>
               </div>
             )}
 
           </div>
 
           {/* Mobile bottom buttons */}
-          <div className="lg:hidden border-t border-foreground/10 p-4 flex gap-3 flex-shrink-0">
-            <button onClick={() => handleSubmit(false)} disabled={loading} className="flex-1 py-2.5 text-sm font-medium bg-foreground/10 text-foreground rounded-xl disabled:opacity-50">
+          <div className="lg:hidden border-t border-foreground/10 p-4 flex gap-3 flex-shrink-0 bg-background">
+            <button onClick={() => handleSubmit(false)} disabled={loading} className="flex-1 py-3 text-sm font-semibold bg-foreground/10 text-foreground rounded-xl disabled:opacity-50 hover:bg-foreground/15 transition-colors">
               {loading ? 'Saving...' : 'Save Draft'}
             </button>
-            <button onClick={() => handleSubmit(true)} disabled={loading} className="flex-1 py-2.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90">
-              {loading ? 'Posting...' : 'Share'}
+            <button onClick={() => handleSubmit(true)} disabled={loading} className="flex-1 py-3 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
+              {loading ? 'Posting...' : 'Publish'}
             </button>
           </div>
         </div>

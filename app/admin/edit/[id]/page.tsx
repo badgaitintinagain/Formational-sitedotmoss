@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Plus, Layers, ImageIcon, Save } from 'lucide-react';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Plus, Layers, ImageIcon, Save, Eye, EyeOff } from 'lucide-react';
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function EditPostPage() {
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [published, setPublished] = useState(false);
+  const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -126,7 +127,8 @@ export default function EditPostPage() {
         }),
       });
       if (res.ok) {
-        router.push('/admin');
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
       } else {
         const err = await res.json();
         alert(err.error || 'Failed to update post');
@@ -154,29 +156,41 @@ export default function EditPostPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Saved toast */}
+      {saved && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-green-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-[fadeIn_0.2s_ease]">
+          <Save size={16} />
+          Changes saved successfully
+        </div>
+      )}
+
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/95 backdrop-blur-xl flex-shrink-0">
         <div className="flex items-center justify-between px-4 py-3 max-w-5xl mx-auto w-full">
-          <button onClick={() => router.push('/admin')} className="p-2 hover:bg-foreground/10 rounded-full transition-colors">
-            <ArrowLeft size={20} className="text-foreground" />
+          <button onClick={() => router.push('/admin')} className="flex items-center gap-2 p-2 hover:bg-foreground/10 rounded-xl transition-colors text-foreground/70 hover:text-foreground">
+            <ArrowLeft size={20} />
+            <span className="text-sm font-medium hidden sm:inline">Back</span>
           </button>
           <span className="font-semibold text-foreground">Edit Post</span>
           <div className="flex items-center gap-2">
-            {/* Publish status toggle badge */}
+            {/* Publish status toggle */}
             <button
               onClick={() => setPublished(p => !p)}
-              className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
-                published ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'
+              className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors ${
+                published
+                  ? 'bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/25'
+                  : 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/25'
               }`}
             >
+              {published ? <Eye size={14} /> : <EyeOff size={14} />}
               {published ? 'Published' : 'Draft'}
             </button>
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
-              <Save size={14} />
+              <Save size={15} />
               {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
@@ -194,27 +208,25 @@ export default function EditPostPage() {
               <>
                 <Image src={images[activeIndex]} alt="Preview" fill className="object-contain" priority />
                 {activeIndex > 0 && (
-                  <button onClick={() => setActiveIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
-                    <ChevronLeft size={18} />
+                  <button onClick={() => setActiveIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronLeft size={20} />
                   </button>
                 )}
                 {activeIndex < images.length - 1 && (
-                  <button onClick={() => setActiveIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
-                    <ChevronRight size={18} />
+                  <button onClick={() => setActiveIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronRight size={20} />
                   </button>
                 )}
                 {images.length > 1 && (
                   <>
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                       {images.map((_, i) => (
-                        <button key={i} onClick={() => setActiveIndex(i)} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeIndex ? 'bg-accent-primary scale-125' : 'bg-white/60'}`} />
+                        <button key={i} onClick={() => setActiveIndex(i)} className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? 'bg-accent-primary scale-125' : 'bg-white/60'}`} />
                       ))}
                     </div>
-                    <div className="absolute top-3 right-3 z-10 bg-black/50 rounded-full p-1.5">
-                      <Layers size={16} className="text-white" />
-                    </div>
-                    <div className="absolute top-3 left-3 z-10 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full font-medium">
-                      {activeIndex + 1}/{images.length}
+                    <div className="absolute top-3 right-3 z-10 bg-black/50 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <Layers size={14} className="text-white" />
+                      <span className="text-white text-xs font-medium">{activeIndex + 1}/{images.length}</span>
                     </div>
                   </>
                 )}
@@ -234,7 +246,7 @@ export default function EditPostPage() {
             {images.map((img, i) => (
               <div key={i} onClick={() => setActiveIndex(i)} className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${i === activeIndex ? 'border-white opacity-100' : 'border-transparent opacity-55 hover:opacity-80'}`}>
                 <Image src={img} alt="" fill className="object-cover" />
-                <button onClick={(e) => { e.stopPropagation(); removeImage(i); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/75 rounded-full flex items-center justify-center text-white hover:bg-black transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); removeImage(i); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/75 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors">
                   <X size={10} />
                 </button>
               </div>
@@ -246,7 +258,7 @@ export default function EditPostPage() {
                 ) : (
                   <>
                     <Plus size={18} />
-                    <span className="text-[9px]">{images.length}/5</span>
+                    <span className="text-[10px] font-medium">{images.length}/5</span>
                   </>
                 )}
               </button>
@@ -262,64 +274,70 @@ export default function EditPostPage() {
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/30 to-accent-secondary/30 flex items-center justify-center flex-shrink-0">
               <span className="text-accent-primary font-bold text-sm">{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
             </div>
-            <span className="font-semibold text-sm text-foreground">{user?.name || 'Admin'}</span>
+            <div>
+              <span className="font-semibold text-sm text-foreground block">{user?.name || 'Admin'}</span>
+              <span className="text-[11px] text-foreground/40">Editing post</span>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
 
             {/* Title */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Title <span className="text-red-400">*</span></label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Title <span className="text-red-400">*</span></label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Post title"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 transition-all"
               />
             </div>
 
             {/* Excerpt */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Excerpt</label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Excerpt</label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Short description shown in blog list (auto-generated if empty)"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 resize-none leading-relaxed transition-all"
                 rows={2}
               />
             </div>
 
             {/* Content */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Content <span className="text-foreground/30 font-normal normal-case">(Markdown)</span></label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">
+                Content
+                <span className="text-foreground/30 font-normal normal-case ml-1">(Markdown supported)</span>
+              </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your post content..."
-                className="w-full px-3 py-2.5 min-h-[180px] bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
+                className="w-full px-3.5 py-3 min-h-[180px] bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 resize-none leading-relaxed transition-all font-mono"
               />
               {content.length > 0 && (
-                <p className="text-[10px] text-foreground/35 mt-1 text-right">{content.length} chars</p>
+                <p className="text-[11px] text-foreground/35 mt-1.5 text-right">{content.length} characters</p>
               )}
             </div>
 
             {/* Tags */}
             <div className="px-4 py-4 border-b border-foreground/10">
-              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Tags</label>
+              <label className="block text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Tags</label>
               <input
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="travel, food, lifestyle"
-                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
+                className="w-full px-3.5 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/50 focus:ring-2 focus:ring-accent-primary/20 placeholder:text-foreground/30 transition-all"
               />
-              <p className="text-[11px] text-foreground/35 mt-1.5">Separate tags with commas</p>
+              <p className="text-[11px] text-foreground/40 mt-1.5">Separate tags with commas</p>
               {parsedTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
                   {parsedTags.map((tag, i) => (
-                    <span key={i} className="text-xs text-accent-primary font-medium bg-accent-primary/15 px-2.5 py-0.5 rounded-full">#{tag}</span>
+                    <span key={i} className="text-xs text-accent-primary font-semibold bg-accent-primary/10 px-2.5 py-1 rounded-lg">#{tag}</span>
                   ))}
                 </div>
               )}
@@ -330,36 +348,44 @@ export default function EditPostPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-foreground">Publish Status</p>
-                  <p className="text-xs text-foreground/50 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft'}</p>
+                  <p className="text-xs text-foreground/50 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft, not visible'}</p>
                 </div>
                 <button
                   onClick={() => setPublished(p => !p)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${published ? 'bg-green-500' : 'bg-foreground/20'}`}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${published ? 'bg-green-500' : 'bg-foreground/20'}`}
                 >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${published ? 'translate-x-6' : 'translate-x-1'}`} />
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${published ? 'translate-x-6' : 'translate-x-1'}`} />
                 </button>
               </div>
             </div>
 
             {/* Photo count */}
             {images.length > 0 && (
-              <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground/60">
-                <Layers size={14} />
-                <span>{images.length} photo{images.length > 1 ? 's' : ''}</span>
+              <div className="flex items-center gap-2.5 px-4 py-3.5 text-sm text-foreground/60">
+                <div className="w-8 h-8 bg-accent-primary/10 rounded-lg flex items-center justify-center">
+                  <Layers size={16} className="text-accent-primary" />
+                </div>
+                <span className="font-medium">{images.length} photo{images.length > 1 ? 's' : ''}</span>
               </div>
             )}
 
           </div>
 
           {/* Save button (mobile) */}
-          <div className="lg:hidden border-t border-foreground/10 p-4 flex-shrink-0">
+          <div className="lg:hidden border-t border-foreground/10 p-4 flex gap-3 flex-shrink-0 bg-background">
             <button
               onClick={() => handleSubmit()}
               disabled={loading}
-              className="w-full py-2.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 flex items-center justify-center gap-2"
+              className="flex-1 py-3 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 flex items-center justify-center gap-2"
             >
-              <Save size={15} />
+              <Save size={16} />
               {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button
+              onClick={() => router.push('/admin')}
+              className="px-5 py-3 text-sm font-semibold bg-foreground/10 text-foreground rounded-xl hover:bg-foreground/15 transition-colors"
+            >
+              Done
             </button>
           </div>
         </div>

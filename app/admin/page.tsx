@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Search,
-  MessageSquare, Layers, Grid, List
+  MessageSquare, Layers, Grid, List, Home, LayoutDashboard
 } from 'lucide-react';
 
 interface Post {
@@ -31,6 +31,8 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -77,6 +79,7 @@ export default function AdminPage() {
   };
 
   const togglePublish = async (id: string, current: boolean) => {
+    setTogglingId(id);
     try {
       const res = await fetch(`/api/blog/posts/${id}/publish`, {
         method: 'PATCH',
@@ -89,15 +92,18 @@ export default function AdminPage() {
         alert(err.error || 'Failed to update post status');
       }
     } catch (err) { console.error(err); alert('Network error. Please try again.'); }
+    finally { setTogglingId(null); }
   };
 
   const deletePost = async (id: string) => {
     if (!confirm('Delete this post? This cannot be undone.')) return;
+    setDeletingId(id);
     try {
       const res = await fetch(`/api/blog/posts/${id}`, { method: 'DELETE' });
       if (res.ok) fetchPosts();
       else alert('Failed to delete post');
     } catch (err) { console.error(err); }
+    finally { setDeletingId(null); }
   };
 
   if (!user) {
@@ -122,18 +128,24 @@ export default function AdminPage() {
     post.images?.[0] || post.coverImage || null;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex pb-16 md:pb-0">
 
-      {/* ─── Sidebar ─── */}
+      {/* ─── Sidebar (Desktop) ─── */}
       <aside className="w-60 bg-background border-r border-foreground/10 hidden md:flex flex-col sticky top-0 h-screen overflow-y-auto z-40">
         {/* Logo area */}
         <div className="p-5 pb-3 border-b border-foreground/10">
-          <p className="font-bold text-lg text-foreground">Admin</p>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-7 h-7 rounded-full bg-accent-primary/20 flex items-center justify-center">
-              <span className="text-accent-primary font-bold text-xs">{user.name.charAt(0)}</span>
+          <div className="flex items-center gap-2">
+            <LayoutDashboard size={20} className="text-accent-primary" />
+            <p className="font-bold text-lg text-foreground">Admin</p>
+          </div>
+          <div className="flex items-center gap-2.5 mt-3 px-1">
+            <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center">
+              <span className="text-accent-primary font-bold text-xs">{user.name.charAt(0).toUpperCase()}</span>
             </div>
-            <p className="text-xs text-foreground/60 truncate">{user.name}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+              <p className="text-[11px] text-foreground/40 truncate">{user.email}</p>
+            </div>
           </div>
         </div>
 
@@ -180,15 +192,42 @@ export default function AdminPage() {
         </nav>
       </aside>
 
+      {/* ─── Mobile Bottom Navigation ─── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-foreground/10 px-2 py-1.5 flex items-center justify-around">
+        <button onClick={() => router.push('/admin')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-accent-primary">
+          <LayoutDashboard size={20} />
+          <span className="text-[10px] font-medium">Posts</span>
+        </button>
+        <button onClick={() => router.push('/admin/comments')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/50">
+          <MessageSquare size={20} />
+          <span className="text-[10px] font-medium">Comments</span>
+        </button>
+        <button
+          onClick={() => router.push('/admin/new')}
+          className="flex items-center justify-center w-11 h-11 bg-accent-primary text-white rounded-full shadow-lg -mt-4"
+        >
+          <Plus size={22} />
+        </button>
+        <button onClick={() => router.push('/blog')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/50">
+          <Eye size={20} />
+          <span className="text-[10px] font-medium">View Blog</span>
+        </button>
+        <button onClick={() => router.push('/')} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-foreground/50">
+          <Home size={20} />
+          <span className="text-[10px] font-medium">Home</span>
+        </button>
+      </div>
+
       {/* ─── Main Content ─── */}
       <main className="flex-1 min-h-screen overflow-y-auto">
         {/* Top bar */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-foreground/10 px-4 md:px-6 py-3">
           <div className="flex items-center gap-3 max-w-5xl mx-auto">
-            {/* Mobile back */}
-            <button onClick={() => router.push('/')} className="md:hidden p-2 hover:bg-foreground/10 rounded-lg">
-              <ArrowLeft size={18} className="text-foreground" />
-            </button>
+            {/* Mobile title */}
+            <div className="md:hidden flex items-center gap-2">
+              <LayoutDashboard size={18} className="text-accent-primary" />
+              <span className="font-bold text-foreground">Admin</span>
+            </div>
 
             {/* Search */}
             <div className="relative flex-1 max-w-sm">
@@ -198,39 +237,46 @@ export default function AdminPage() {
                 placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-foreground/10 border border-foreground/15 rounded-xl text-sm focus:outline-none focus:border-accent-primary/50 text-foreground transition-colors placeholder:text-foreground/40"
+                className="w-full pl-9 pr-3 py-2 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-accent-primary/50 focus:bg-foreground/8 text-foreground transition-all placeholder:text-foreground/40"
               />
             </div>
 
             {/* Mobile filter pills */}
-            <div className="md:hidden flex gap-1.5 overflow-x-auto">
-              {(['all', 'published', 'draft'] as const).map(f => (
+            <div className="md:hidden flex gap-1.5 overflow-x-auto no-scrollbar">
+              {([
+                { key: 'all' as const, label: 'All', count: stats.total },
+                { key: 'published' as const, label: 'Published', count: stats.published },
+                { key: 'draft' as const, label: 'Drafts', count: stats.draft },
+              ]).map(f => (
                 <button
-                  key={f}
-                  onClick={() => setFilterStatus(f)}
-                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                    filterStatus === f ? 'bg-accent-primary/15 text-accent-primary' : 'bg-foreground/10 text-foreground/70'
+                  key={f.key}
+                  onClick={() => setFilterStatus(f.key)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    filterStatus === f.key ? 'bg-accent-primary/15 text-accent-primary' : 'bg-foreground/5 text-foreground/60'
                   }`}
                 >
-                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                  {f.label}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                    filterStatus === f.key ? 'bg-accent-primary/20' : 'bg-foreground/10'
+                  }`}>{f.count}</span>
                 </button>
               ))}
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
               {/* View toggle */}
-              <div className="hidden sm:flex bg-foreground/10 rounded-lg p-0.5">
-                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow text-foreground' : 'text-foreground/50'}`}>
+              <div className="hidden sm:flex bg-foreground/5 border border-foreground/10 rounded-lg p-0.5">
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-accent-primary/15 text-accent-primary shadow-sm' : 'text-foreground/40 hover:text-foreground/60'}`}>
                   <Grid size={15} />
                 </button>
-                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-background shadow text-foreground' : 'text-foreground/50'}`}>
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-accent-primary/15 text-accent-primary shadow-sm' : 'text-foreground/40 hover:text-foreground/60'}`}>
                   <List size={15} />
                 </button>
               </div>
 
               <button
                 onClick={() => router.push('/admin/new')}
-                className="flex items-center gap-2 px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity"
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity"
               >
                 <Plus size={16} />
                 <span className="hidden sm:inline">New Post</span>
@@ -243,16 +289,16 @@ export default function AdminPage() {
         <div className="p-4 md:p-6 max-w-5xl mx-auto">
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-foreground/10 border border-foreground/15 rounded-2xl p-4 text-center">
+            <div className="bg-foreground/5 border border-foreground/10 rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-foreground">{stats.total}</p>
               <p className="text-xs text-foreground/50 mt-0.5">Total Posts</p>
             </div>
             <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-500">{stats.published}</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.published}</p>
               <p className="text-xs text-foreground/50 mt-0.5">Published</p>
             </div>
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-yellow-500">{stats.draft}</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.draft}</p>
               <p className="text-xs text-foreground/50 mt-0.5">Drafts</p>
             </div>
           </div>
@@ -265,64 +311,80 @@ export default function AdminPage() {
             </div>
           ) : filteredPosts.length === 0 ? (
             <div className="py-20 text-center">
-              <div className="w-14 h-14 bg-foreground/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search size={22} className="text-foreground/30" />
+              <div className="w-16 h-16 bg-foreground/5 border border-foreground/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search size={24} className="text-foreground/25" />
               </div>
-              <p className="font-semibold text-foreground">No posts found</p>
-              <p className="text-sm text-foreground/40 mt-1">Try different filters or create a new post</p>
-              <button onClick={() => router.push('/admin/new')} className="mt-4 px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity">
+              <p className="font-semibold text-foreground text-lg">No posts found</p>
+              <p className="text-sm text-foreground/50 mt-1 max-w-xs mx-auto">Try adjusting your search or filters, or create a new post to get started.</p>
+              <button onClick={() => router.push('/admin/new')} className="mt-5 px-5 py-2.5 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity">
+                <Plus size={16} className="inline mr-1.5 -mt-0.5" />
                 Create Post
               </button>
             </div>
           ) : viewMode === 'grid' ? (
-            /* ── Grid View (Instagram-style) ── */
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+            /* ── Grid View ── */
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
               {filteredPosts.map(post => {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
+                const isDeleting = deletingId === post.id;
+                const isToggling = togglingId === post.id;
                 return (
-                  <div key={post.id} className="relative aspect-square bg-foreground/5 overflow-hidden rounded-sm">
+                  <div key={post.id} className={`relative aspect-square bg-foreground/5 overflow-hidden rounded-lg group ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
                     {thumb ? (
                       <Image src={thumb} alt={post.title} fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/10 to-accent-secondary/10">
-                        <span className="text-2xl font-bold text-foreground/20">{post.title.charAt(0)}</span>
+                        <span className="text-3xl font-bold text-foreground/15">{post.title.charAt(0)}</span>
                       </div>
                     )}
 
                     {/* Multi-image indicator */}
                     {hasMultiple && (
-                      <div className="absolute top-2 right-2">
-                        <Layers size={16} className="text-white drop-shadow-lg" />
+                      <div className="absolute top-2.5 right-2.5 bg-black/50 rounded-md px-1.5 py-0.5 flex items-center gap-1">
+                        <Layers size={12} className="text-white" />
+                        <span className="text-white text-[10px] font-semibold">{post.images?.length}</span>
                       </div>
                     )}
 
-                    {/* Status dot */}
-                    <div className={`absolute top-2 left-2 w-2 h-2 rounded-full shadow ${post.published ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                    {/* Status badge */}
+                    <div className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                      post.published
+                        ? 'bg-green-500/80 text-white'
+                        : 'bg-yellow-500/80 text-white'
+                    }`}>
+                      {post.published ? 'Live' : 'Draft'}
+                    </div>
 
                     {/* Always-visible action bar */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-10 px-2 pb-2">
-                      <p className="text-white text-[10px] font-medium truncate mb-1.5 px-0.5">{post.title}</p>
-                      <div className="flex items-center gap-1">
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 px-2.5 pb-2.5">
+                      <p className="text-white text-xs font-semibold truncate mb-2">{post.title}</p>
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => router.push(`/admin/edit/${post.id}`)}
-                          className="flex-1 py-1.5 bg-white/25 hover:bg-white/35 active:bg-white/45 rounded-lg text-white text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors"
+                          className="flex-1 py-2 bg-white/20 hover:bg-white/30 active:bg-white/40 backdrop-blur-sm rounded-lg text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                         >
-                          <Edit size={11} /> Edit
+                          <Edit size={13} /> Edit
                         </button>
                         <button
                           onClick={() => togglePublish(post.id, post.published)}
-                          className="p-1.5 bg-white/25 hover:bg-white/35 active:bg-white/45 rounded-lg text-white transition-colors"
+                          disabled={isToggling}
+                          className={`p-2 backdrop-blur-sm rounded-lg text-white transition-colors disabled:opacity-50 ${
+                            post.published
+                              ? 'bg-green-500/40 hover:bg-green-500/60'
+                              : 'bg-white/20 hover:bg-white/30'
+                          }`}
                           title={post.published ? 'Unpublish' : 'Publish'}
                         >
-                          {post.published ? <EyeOff size={12} /> : <Eye size={12} />}
+                          {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
                         <button
                           onClick={() => deletePost(post.id)}
-                          className="p-1.5 bg-red-500/70 hover:bg-red-500 active:bg-red-600 rounded-lg text-white transition-colors"
+                          disabled={isDeleting}
+                          className="p-2 bg-red-500/60 hover:bg-red-500/80 active:bg-red-600 backdrop-blur-sm rounded-lg text-white transition-colors disabled:opacity-50"
                           title="Delete"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -336,20 +398,21 @@ export default function AdminPage() {
               {filteredPosts.map(post => {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
+                const isDeleting = deletingId === post.id;
                 return (
-                  <div key={post.id} className="flex items-center gap-4 bg-foreground/10 hover:bg-foreground/15 border border-foreground/15 rounded-2xl p-3 transition-all">
+                  <div key={post.id} className={`flex items-center gap-4 bg-foreground/5 hover:bg-foreground/8 border border-foreground/10 rounded-2xl p-3 transition-all ${isDeleting ? 'opacity-50' : ''}`}>
                     {/* Thumbnail */}
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-foreground/5">
                       {thumb ? (
                         <Image src={thumb} alt={post.title} fill className="object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/10 to-accent-secondary/10">
                           <span className="text-xl font-bold text-foreground/20">{post.title.charAt(0)}</span>
                         </div>
                       )}
                       {hasMultiple && (
-                        <div className="absolute top-1 right-1">
-                          <Layers size={11} className="text-white drop-shadow" />
+                        <div className="absolute top-1 right-1 bg-black/50 rounded-sm px-1">
+                          <Layers size={10} className="text-white" />
                         </div>
                       )}
                     </div>
@@ -358,8 +421,8 @@ export default function AdminPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-semibold text-foreground text-sm truncate">{post.title || 'Untitled'}</p>
-                        <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          post.published ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'
+                        <span className={`flex-shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                          post.published ? 'bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400'
                         }`}>
                           {post.published ? 'Live' : 'Draft'}
                         </span>
@@ -374,27 +437,27 @@ export default function AdminPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => router.push(`/admin/edit/${post.id}`)}
-                        className="p-2 text-foreground/60 hover:text-foreground hover:bg-foreground/10 rounded-lg transition-colors"
+                        className="p-2.5 text-foreground/50 hover:text-accent-primary hover:bg-accent-primary/10 rounded-xl transition-colors"
                         title="Edit"
                       >
-                        <Edit size={15} />
+                        <Edit size={16} />
                       </button>
                       <button
                         onClick={() => togglePublish(post.id, post.published)}
-                        className={`p-2 rounded-lg transition-colors ${post.published ? 'text-green-500 hover:bg-green-500/10' : 'text-foreground/60 hover:bg-foreground/10 hover:text-foreground'}`}
+                        className={`p-2.5 rounded-xl transition-colors ${post.published ? 'text-green-500 hover:bg-green-500/10' : 'text-foreground/50 hover:bg-foreground/10 hover:text-foreground'}`}
                         title={post.published ? 'Unpublish' : 'Publish'}
                       >
-                        {post.published ? <Eye size={15} /> : <EyeOff size={15} />}
+                        {post.published ? <Eye size={16} /> : <EyeOff size={16} />}
                       </button>
                       <button
                         onClick={() => deletePost(post.id)}
-                        className="p-2 text-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2.5 text-foreground/50 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
                         title="Delete"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
