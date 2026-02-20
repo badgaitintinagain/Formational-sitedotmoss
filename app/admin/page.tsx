@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Search,
-  MessageSquare, Layers, Heart, Grid, List
+  MessageSquare, Layers, Grid, List
 } from 'lucide-react';
 
 interface Post {
@@ -241,10 +241,10 @@ export default function AdminPage() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
               { label: 'Total Posts', value: stats.total, color: 'text-foreground' },
-              { label: 'Published', value: stats.published, color: 'text-green-600' },
-              { label: 'Drafts', value: stats.draft, color: 'text-yellow-600' },
+              { label: 'Published', value: stats.published, color: 'text-green-600 dark:text-green-400' },
+              { label: 'Drafts', value: stats.draft, color: 'text-yellow-500 dark:text-yellow-400' },
             ].map(stat => (
-              <div key={stat.label} className="bg-foreground/3 border border-foreground/8 rounded-2xl p-4 text-center">
+              <div key={stat.label} className="bg-foreground/6 border border-foreground/12 rounded-2xl p-4 text-center">
                 <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                 <p className="text-xs text-foreground/50 mt-0.5">{stat.label}</p>
               </div>
@@ -275,9 +275,9 @@ export default function AdminPage() {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
                 return (
-                  <div key={post.id} className="group relative aspect-square bg-foreground/5 overflow-hidden cursor-pointer rounded-sm">
+                  <div key={post.id} className="relative aspect-square bg-foreground/5 overflow-hidden rounded-sm">
                     {thumb ? (
-                      <Image src={thumb} alt={post.title} fill className="object-cover transition-transform group-hover:scale-105" />
+                      <Image src={thumb} alt={post.title} fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/10 to-accent-secondary/10">
                         <span className="text-2xl font-bold text-foreground/20">{post.title.charAt(0)}</span>
@@ -291,37 +291,32 @@ export default function AdminPage() {
                       </div>
                     )}
 
-                    {/* Status badge */}
-                    <div className={`absolute top-2 left-2 w-2 h-2 rounded-full ${post.published ? 'bg-green-400' : 'bg-yellow-400'} shadow`} />
+                    {/* Status dot */}
+                    <div className={`absolute top-2 left-2 w-2 h-2 rounded-full shadow ${post.published ? 'bg-green-400' : 'bg-yellow-400'}`} />
 
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 p-3">
-                      <p className="text-white text-xs font-semibold text-center line-clamp-2 leading-snug">{post.title}</p>
-                      <div className="flex items-center gap-3 text-white/80 text-xs">
-                        <span className="flex items-center gap-1"><Heart size={12} />{post.likesCount || 0}</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={12} />{post.commentsCount || 0}</span>
-                      </div>
-                      <div className="flex gap-2 mt-1">
+                    {/* Always-visible action bar */}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-10 px-2 pb-2">
+                      <p className="text-white text-[10px] font-medium truncate mb-1.5 px-0.5">{post.title}</p>
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => router.push(`/admin/edit/${post.id}`)}
-                          className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white"
-                          title="Edit"
+                          className="flex-1 py-1.5 bg-white/25 hover:bg-white/35 active:bg-white/45 rounded-lg text-white text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors"
                         >
-                          <Edit size={14} />
+                          <Edit size={11} /> Edit
                         </button>
                         <button
                           onClick={() => togglePublish(post.id, post.published)}
-                          className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white"
+                          className="p-1.5 bg-white/25 hover:bg-white/35 active:bg-white/45 rounded-lg text-white transition-colors"
                           title={post.published ? 'Unpublish' : 'Publish'}
                         >
-                          {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
+                          {post.published ? <EyeOff size={12} /> : <Eye size={12} />}
                         </button>
                         <button
                           onClick={() => deletePost(post.id)}
-                          className="p-2 bg-red-500/70 hover:bg-red-500 rounded-lg transition-colors text-white"
+                          className="p-1.5 bg-red-500/70 hover:bg-red-500 active:bg-red-600 rounded-lg text-white transition-colors"
                           title="Delete"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
@@ -336,7 +331,7 @@ export default function AdminPage() {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
                 return (
-                  <div key={post.id} className="group flex items-center gap-4 bg-foreground/3 hover:bg-foreground/5 border border-foreground/8 hover:border-foreground/15 rounded-2xl p-3 transition-all">
+                  <div key={post.id} className="flex items-center gap-4 bg-foreground/6 hover:bg-foreground/8 border border-foreground/12 rounded-2xl p-3 transition-all">
                     {/* Thumbnail */}
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-foreground/5">
                       {thumb ? (
@@ -358,7 +353,7 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-semibold text-foreground text-sm truncate">{post.title || 'Untitled'}</p>
                         <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          post.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          post.published ? 'bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400'
                         }`}>
                           {post.published ? 'Live' : 'Draft'}
                         </span>
@@ -376,21 +371,21 @@ export default function AdminPage() {
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
                         onClick={() => router.push(`/admin/edit/${post.id}`)}
-                        className="p-2 text-foreground/40 hover:text-foreground hover:bg-foreground/10 rounded-lg transition-colors"
+                        className="p-2 text-foreground/60 hover:text-foreground hover:bg-foreground/10 rounded-lg transition-colors"
                         title="Edit"
                       >
                         <Edit size={15} />
                       </button>
                       <button
                         onClick={() => togglePublish(post.id, post.published)}
-                        className={`p-2 rounded-lg transition-colors ${post.published ? 'text-green-500 hover:bg-green-50' : 'text-foreground/40 hover:bg-foreground/10 hover:text-foreground'}`}
+                        className={`p-2 rounded-lg transition-colors ${post.published ? 'text-green-500 hover:bg-green-500/10' : 'text-foreground/60 hover:bg-foreground/10 hover:text-foreground'}`}
                         title={post.published ? 'Unpublish' : 'Publish'}
                       >
                         {post.published ? <Eye size={15} /> : <EyeOff size={15} />}
                       </button>
                       <button
                         onClick={() => deletePost(post.id)}
-                        className="p-2 text-foreground/40 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Delete"
                       >
                         <Trash2 size={15} />

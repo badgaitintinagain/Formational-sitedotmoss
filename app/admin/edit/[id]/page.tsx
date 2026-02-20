@@ -273,7 +273,7 @@ export default function EditPostPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Add a title..."
-                className="w-full px-4 py-3.5 bg-transparent text-foreground font-semibold text-lg focus:outline-none placeholder:text-foreground/30"
+                className="w-full px-4 py-3.5 bg-background text-foreground font-semibold text-lg focus:outline-none placeholder:text-foreground/30"
               />
             </div>
 
@@ -283,7 +283,7 @@ export default function EditPostPage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write a caption... (Markdown supported)"
-                className="w-full px-4 py-3.5 min-h-[200px] bg-transparent text-sm text-foreground focus:outline-none placeholder:text-foreground/35 resize-none leading-relaxed"
+                className="w-full px-4 py-3.5 min-h-[200px] bg-background text-sm text-foreground focus:outline-none placeholder:text-foreground/35 resize-none leading-relaxed"
               />
               {content.length > 0 && (
                 <span className="absolute bottom-2 right-3 text-[10px] text-foreground/30">{content.length} chars</span>
@@ -299,7 +299,7 @@ export default function EditPostPage() {
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="Add tags (comma-separated)"
-                  className="flex-1 bg-transparent text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
+                  className="flex-1 bg-background text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
                 />
               </div>
               {parsedTags.length > 0 && (
