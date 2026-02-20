@@ -181,3 +181,31 @@ body {
   from { opacity: 0; transform: translate(-50%, -8px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* ─── Admin Glass Panel Utilities ─── */
+.admin-card {
+  @apply bg-foreground/[0.08] backdrop-blur-sm border border-foreground/25 shadow-sm;
+}
+
+.admin-card-hover {
+  @apply bg-foreground/[0.08] backdrop-blur-sm border border-foreground/25 shadow-sm
+         hover:bg-foreground/[0.12] hover:border-foreground/30 hover:shadow-md transition-all;
+}
+
+.admin-input {
+  @apply bg-foreground/[0.08] border-2 border-foreground/20 shadow-inner
+         focus:border-accent-primary/60 focus:ring-2 focus:ring-accent-primary/20
+         focus:bg-foreground/[0.05] transition-all;
+}
+
+.admin-sidebar {
+  @apply bg-foreground/[0.04] backdrop-blur-xl border-r-2 border-foreground/20;
+}
+
+.admin-topbar {
+  @apply bg-background/90 backdrop-blur-xl border-b-2 border-foreground/20 shadow-sm;
+}
+
+.admin-divider {
+  @apply border-foreground/20;
+}
