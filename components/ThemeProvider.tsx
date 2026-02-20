@@ -1,6 +1,5 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import gsap from 'gsap';
 
 type Theme = 'light' | 'dark';
 export type PaletteId = 'serene' | 'clay' | 'moss' | 'desert' | 'ocean' | 'spring' | 'sunset' | 'vintage';
@@ -24,7 +23,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>('light');
-  const themeInitialized = React.useRef(false);
   const [paletteId, setPaletteIdState] = useState<PaletteId>('serene');
   const [isGrayscale, setGrayscaleState] = useState<boolean>(false);
   const [bgType, setBgTypeState] = useState<'color' | 'image'>('color');
@@ -66,34 +64,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  // Use GSAP for smooth color transition on the root
-  useEffect(() => {
-    const root = document.documentElement;
-    const bgColor = theme === 'dark' ? '#1A1410' : '#F2EBE3';
-    const fgColor = theme === 'dark' ? '#F2EBE3' : '#1A1410';
-
-    if (!themeInitialized.current) {
-      // On first render: set correct values instantly (no animation)
-      // This prevents the race condition where GSAP inline styles override .dark class CSS rules
-      root.style.setProperty('--background', bgColor);
-      root.style.setProperty('--foreground', fgColor);
-      root.style.setProperty('--tile-text', fgColor);
-      themeInitialized.current = true;
-      return;
-    }
-
-    // User-triggered theme change: animate smoothly
-    gsap.killTweensOf(root, '--background,--foreground,--tile-text');
-    gsap.to(root, {
-      '--background': bgColor,
-      '--foreground': fgColor,
-      '--tile-text': fgColor,
-      duration: 1.2,
-      ease: 'power3.out',
-      overwrite: 'auto',
-    });
   }, [theme]);
 
   useEffect(() => {

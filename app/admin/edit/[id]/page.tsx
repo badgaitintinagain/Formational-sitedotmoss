@@ -16,6 +16,7 @@ export default function EditPostPage() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [title, setTitle] = useState('');
+  const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [published, setPublished] = useState(false);
@@ -52,6 +53,7 @@ export default function EditPostPage() {
         const post = data.post;
         setTitle(post.title || '');
         setContent(post.content || '');
+        setExcerpt(post.excerpt || '');
         setTags(Array.isArray(post.tags) ? post.tags.join(', ') : '');
         setPublished(post.published || false);
         // Load images: prefer images array, fall back to coverImage
@@ -116,7 +118,7 @@ export default function EditPostPage() {
         body: JSON.stringify({
           title: title.trim(),
           content: content.trim() || ' ',
-          excerpt: content.trim().substring(0, 150) || title.trim(),
+          excerpt: excerpt.trim() || content.trim().substring(0, 150) || title.trim(),
           coverImage: images[0] || '',
           images,
           tags: tags.split(',').map(t => t.trim()).filter(Boolean),
@@ -164,9 +166,7 @@ export default function EditPostPage() {
             <button
               onClick={() => setPublished(p => !p)}
               className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
-                published
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-yellow-100 text-yellow-700'
+                published ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'
               }`}
             >
               {published ? 'Published' : 'Draft'}
@@ -266,57 +266,71 @@ export default function EditPostPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto">
+
             {/* Title */}
-            <div className="border-b border-foreground/10">
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Title <span className="text-red-400">*</span></label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Add a title..."
-                className="w-full px-4 py-3.5 bg-background text-foreground font-semibold text-lg focus:outline-none placeholder:text-foreground/30"
+                placeholder="Post title"
+                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-foreground font-semibold text-base focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
               />
             </div>
 
-            {/* Content / Caption */}
-            <div className="border-b border-foreground/10 relative">
+            {/* Excerpt */}
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Excerpt</label>
+              <textarea
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                placeholder="Short description shown in blog list (auto-generated if empty)"
+                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
+                rows={2}
+              />
+            </div>
+
+            {/* Content */}
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Content <span className="text-foreground/30 font-normal normal-case">(Markdown)</span></label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Write a caption... (Markdown supported)"
-                className="w-full px-4 py-3.5 min-h-[200px] bg-background text-sm text-foreground focus:outline-none placeholder:text-foreground/35 resize-none leading-relaxed"
+                placeholder="Write your post content..."
+                className="w-full px-3 py-2.5 min-h-[180px] bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 resize-none leading-relaxed transition-colors"
               />
               {content.length > 0 && (
-                <span className="absolute bottom-2 right-3 text-[10px] text-foreground/30">{content.length} chars</span>
+                <p className="text-[10px] text-foreground/35 mt-1 text-right">{content.length} chars</p>
               )}
             </div>
 
             {/* Tags */}
-            <div className="border-b border-foreground/10 px-4 py-3.5">
-              <div className="flex items-center gap-2">
-                <span className="text-foreground/40 text-sm">#</span>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  placeholder="Add tags (comma-separated)"
-                  className="flex-1 bg-background text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
-                />
-              </div>
+            <div className="px-4 py-4 border-b border-foreground/10">
+              <label className="block text-[11px] font-bold text-foreground/50 uppercase tracking-widest mb-2">Tags</label>
+              <input
+                type="text"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="travel, food, lifestyle"
+                className="w-full px-3 py-2.5 bg-foreground/8 border border-foreground/15 rounded-xl text-sm text-foreground focus:outline-none focus:border-accent-primary/60 placeholder:text-foreground/30 transition-colors"
+              />
+              <p className="text-[11px] text-foreground/35 mt-1.5">Separate tags with commas</p>
               {parsedTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   {parsedTags.map((tag, i) => (
-                    <span key={i} className="text-xs text-accent-primary font-medium bg-accent-primary/10 px-2.5 py-0.5 rounded-full">#{tag}</span>
+                    <span key={i} className="text-xs text-accent-primary font-medium bg-accent-primary/15 px-2.5 py-0.5 rounded-full">#{tag}</span>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Publish Toggle */}
-            <div className="border-b border-foreground/10 px-4 py-3.5">
+            <div className="px-4 py-4 border-b border-foreground/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Publish Status</p>
-                  <p className="text-xs text-foreground/40 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft'}</p>
+                  <p className="text-sm font-semibold text-foreground">Publish Status</p>
+                  <p className="text-xs text-foreground/50 mt-0.5">{published ? 'Visible to everyone' : 'Saved as draft'}</p>
                 </div>
                 <button
                   onClick={() => setPublished(p => !p)}
@@ -329,11 +343,12 @@ export default function EditPostPage() {
 
             {/* Photo count */}
             {images.length > 0 && (
-              <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground/50">
+              <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground/60">
                 <Layers size={14} />
                 <span>{images.length} photo{images.length > 1 ? 's' : ''}</span>
               </div>
             )}
+
           </div>
 
           {/* Save button (mobile) */}
