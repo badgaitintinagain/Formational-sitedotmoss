@@ -14,7 +14,8 @@ interface BlogPost {
   images: string[];
   authorName: string;
   tags: string[];
-  createdAt: Date;
+  createdAt: string;
+  updatedAt?: string;
   likesCount?: number;
   commentsCount?: number;
 }
@@ -76,47 +77,61 @@ export default function BlogListPage() {
             {posts.map((post) => {
               const thumbnail = post.images?.[0] || post.coverImage || null;
               const hasMultiple = (post.images?.length ?? 0) > 1;
+              const displayDate = post.updatedAt && post.updatedAt !== post.createdAt
+                ? new Date(post.updatedAt)
+                : new Date(post.createdAt);
+              const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
               return (
                 <article
                   key={post.id}
                   onClick={() => setSelectedSlug(post.slug)}
-                  className="group cursor-pointer bg-foreground/5 relative overflow-hidden transition-all duration-200 aspect-square"
+                  className="group cursor-pointer bg-foreground/5 relative overflow-hidden transition-all duration-200"
                 >
                   {/* Square thumbnail */}
-                  {thumbnail ? (
-                    <Image
-                      src={thumbnail}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 640px) 33vw, (max-width: 935px) 33vw, 300px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
-                      <FileText size={32} className="text-foreground/20" />
-                    </div>
-                  )}
+                  <div className="relative aspect-square">
+                    {thumbnail ? (
+                      <Image
+                        src={thumbnail}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 640px) 33vw, (max-width: 935px) 33vw, 300px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
+                        <FileText size={32} className="text-foreground/20" />
+                      </div>
+                    )}
 
-                  {/* Multi-image indicator */}
-                  {hasMultiple && (
-                    <div className="absolute top-2 right-2 z-10 drop-shadow-lg">
-                      <Layers size={16} className="text-white" />
-                    </div>
-                  )}
+                    {/* Multi-image indicator */}
+                    {hasMultiple && (
+                      <div className="absolute top-2 right-2 z-10 drop-shadow-lg">
+                        <Layers size={16} className="text-white" />
+                      </div>
+                    )}
 
-                  {/* Hover overlay (Instagram-style) */}
-                  <div className="absolute inset-0 bg-black/55 transition-all duration-200 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 p-3 text-center gap-2">
-                    <div className="flex items-center gap-4 text-white">
-                      <span className="flex items-center gap-1.5 font-bold text-sm">
-                        <Heart size={18} fill="white" />
-                        {post.likesCount || 0}
-                      </span>
-                      <span className="flex items-center gap-1.5 font-bold text-sm">
-                        <MessageCircle size={18} fill="white" />
-                        {post.commentsCount || 0}
-                      </span>
+                    {/* Hover overlay (Instagram-style) */}
+                    <div className="absolute inset-0 bg-black/55 transition-all duration-200 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 p-3 text-center gap-2">
+                      <div className="flex items-center gap-4 text-white">
+                        <span className="flex items-center gap-1.5 font-bold text-sm">
+                          <Heart size={18} fill="white" />
+                          {post.likesCount || 0}
+                        </span>
+                        <span className="flex items-center gap-1.5 font-bold text-sm">
+                          <MessageCircle size={18} fill="white" />
+                          {post.commentsCount || 0}
+                        </span>
+                      </div>
                     </div>
-                    <h3 className="text-white font-semibold text-xs line-clamp-2 leading-snug">{post.title}</h3>
+                  </div>
+
+                  {/* Title & Date */}
+                  <div className="px-1.5 md:px-2 py-1.5 md:py-2">
+                    <h3 className="text-foreground text-xs md:text-sm font-semibold line-clamp-1 leading-snug">{post.title}</h3>
+                    <p className="text-foreground/50 text-[10px] md:text-xs mt-0.5">
+                      {isUpdated ? 'Updated ' : ''}
+                      {displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
                   </div>
                 </article>
               );

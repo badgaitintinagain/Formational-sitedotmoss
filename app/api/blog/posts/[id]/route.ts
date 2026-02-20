@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, posts } from '@/lib/db';
+import { db, posts, comments } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { withAuth } from '@/lib/middleware/auth';
 import { generateSlug } from '@/lib/auth/utils';
@@ -55,6 +55,10 @@ async function updatePostHandler(
     const body = await request.json();
     const { title, content, excerpt, coverImage, images, tags, published } = body;
 
+    // Fetch the current post to get the old slug
+    const existing = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
+    const oldSlug = existing[0]?.slug;
+
     // Generate slug from title using shared utility
     const slug = generateSlug(title);
     const imageList: string[] = Array.isArray(images) ? images.slice(0, 5) : [];
@@ -74,6 +78,14 @@ async function updatePostHandler(
         updatedAt: new Date(),
       })
       .where(eq(posts.id, id));
+
+    // If the slug changed, migrate comments to the new slug
+    if (oldSlug && oldSlug !== slug) {
+      await db
+        .update(comments)
+        .set({ postSlug: slug })
+        .where(eq(comments.postSlug, oldSlug));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
