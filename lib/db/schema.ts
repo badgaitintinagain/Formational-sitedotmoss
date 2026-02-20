@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 // Blog Posts Table
 export const posts = sqliteTable("posts", {
@@ -16,7 +16,9 @@ export const posts = sqliteTable("posts", {
   published: integer("published", { mode: "boolean" }).default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-});
+}, (table) => ([
+  index("idx_posts_published").on(table.published, table.createdAt),
+]));
 
 // Comments Table
 export const comments = sqliteTable("comments", {
@@ -30,7 +32,10 @@ export const comments = sqliteTable("comments", {
   status: text("status").default("approved"), // approved, spam (auto-approve now)
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-});
+}, (table) => ([
+  index("idx_comments_post").on(table.postSlug, table.createdAt),
+  index("idx_comments_status").on(table.status),
+]));
 
 // Post Likes Table
 export const postLikes = sqliteTable("post_likes", {
@@ -38,7 +43,10 @@ export const postLikes = sqliteTable("post_likes", {
   postId: text("post_id").notNull(),
   userId: text("user_id"), // anonymous user identifier (IP or session)
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
-});
+}, (table) => ([
+  index("idx_post_likes_post").on(table.postId),
+  index("idx_post_likes_user_post").on(table.userId, table.postId),
+]));
 
 // Reactions Table (optional - for likes, etc.)
 export const reactions = sqliteTable("reactions", {

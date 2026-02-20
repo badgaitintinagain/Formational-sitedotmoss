@@ -1,52 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, posts, postLikes, comments } from '@/lib/db';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql, count } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
-    
+
+    // Single query with subqueries for counts — no N+1
     const allPosts = await db
-      .select()
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        excerpt: posts.excerpt,
+        content: posts.content,
+        coverImage: posts.coverImage,
+        images: posts.images,
+        authorId: posts.authorId,
+        authorName: posts.authorName,
+        tags: posts.tags,
+        published: posts.published,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        likesCount: sql<number>`(SELECT COUNT(*) FROM post_likes WHERE post_likes.post_id = ${posts.id})`.as('likes_count'),
+        commentsCount: sql<number>`(SELECT COUNT(*) FROM comments WHERE comments.post_slug = ${posts.slug})`.as('comments_count'),
+      })
       .from(posts)
       .where(eq(posts.published, true))
       .orderBy(desc(posts.createdAt))
       .limit(limit);
 
-    // Get likes and comments counts for each post
-    // Handle gracefully if tables don't exist yet
-    const postsWithCounts = await Promise.all(
-      allPosts.map(async (post) => {
-        let likesCount = 0;
-        let commentsCount = 0;
+    const postsWithParsed = allPosts.map(post => ({
+      ...post,
+      tags: post.tags ? JSON.parse(post.tags) : [],
+      images: post.images ? JSON.parse(post.images) : [],
+    }));
 
-        try {
-          const [likesData, commentsData] = await Promise.all([
-            db.select().from(postLikes).where(eq(postLikes.postId, post.id)).catch(() => []),
-            db.select().from(comments).where(eq(comments.postSlug, post.slug)).catch(() => []),
-          ]);
-
-          likesCount = likesData.length;
-          commentsCount = commentsData.length;
-        } catch (error) {
-          // If tables don't exist yet, just return 0
-          console.log('Could not fetch counts:', error);
-        }
-
-        return {
-          ...post,
-          tags: post.tags ? JSON.parse(post.tags) : [],
-          images: post.images ? JSON.parse(post.images) : [],
-          likesCount,
-          commentsCount,
-        };
-      })
-    );
-
-    return NextResponse.json({ 
-      posts: postsWithCounts,
-      total: allPosts.length 
+    return NextResponse.json({
+      posts: postsWithParsed,
+      total: allPosts.length
     });
   } catch (error) {
     console.error('Error fetching posts:', error);

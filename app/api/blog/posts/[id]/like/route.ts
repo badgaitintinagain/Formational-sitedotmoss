@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { postLikes } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 
 // Like a post
 export async function POST(
@@ -48,15 +48,15 @@ export async function POST(
 
     await db.insert(postLikes).values(newLike);
 
-    // Get total likes
-    const allLikes = await db
-      .select()
+    // Get total likes using COUNT
+    const [result] = await db
+      .select({ count: count() })
       .from(postLikes)
       .where(eq(postLikes.postId, postId));
 
     return NextResponse.json({
       success: true,
-      likesCount: allLikes.length,
+      likesCount: result.count,
       isLiked: true,
     });
   } catch (error) {
@@ -93,15 +93,15 @@ export async function DELETE(
         )
       );
 
-    // Get total likes
-    const allLikes = await db
-      .select()
+    // Get total likes using COUNT
+    const [result] = await db
+      .select({ count: count() })
       .from(postLikes)
       .where(eq(postLikes.postId, postId));
 
     return NextResponse.json({
       success: true,
-      likesCount: allLikes.length,
+      likesCount: result.count,
       isLiked: false,
     });
   } catch (error) {
@@ -123,19 +123,23 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
 
-    const allLikes = await db
-      .select()
+    const [likesResult] = await db
+      .select({ count: count() })
       .from(postLikes)
       .where(eq(postLikes.postId, postId));
 
     let isLiked = false;
     if (userId) {
-      const userLike = allLikes.find(like => like.userId === userId);
-      isLiked = !!userLike;
+      const userLike = await db
+        .select({ id: postLikes.id })
+        .from(postLikes)
+        .where(and(eq(postLikes.postId, postId), eq(postLikes.userId, userId)))
+        .limit(1);
+      isLiked = userLike.length > 0;
     }
 
     return NextResponse.json({
-      likesCount: allLikes.length,
+      likesCount: likesResult.count,
       isLiked,
     });
   } catch (error) {
