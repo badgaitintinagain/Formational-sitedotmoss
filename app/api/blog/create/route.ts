@@ -6,7 +6,7 @@ import { withAuth } from '@/lib/middleware/auth';
 async function createPostHandler(request: NextRequest, user: { id: string; email: string; name: string; role: string }) {
   try {
     const body = await request.json();
-    const { title, content, excerpt, coverImage, tags, published } = body;
+    const { title, content, excerpt, coverImage, images, tags, published } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -17,6 +17,8 @@ async function createPostHandler(request: NextRequest, user: { id: string; email
 
     const postId = generateId();
     const slug = generateSlug(title);
+    const imageList: string[] = Array.isArray(images) ? images.slice(0, 5) : [];
+    const primaryImage = imageList[0] || coverImage || null;
 
     await db.insert(posts).values({
       id: postId,
@@ -24,7 +26,8 @@ async function createPostHandler(request: NextRequest, user: { id: string; email
       slug,
       excerpt: excerpt || content.substring(0, 150) + '...',
       content,
-      coverImage,
+      coverImage: primaryImage,
+      images: JSON.stringify(imageList),
       authorId: user.id,
       authorName: user.name,
       tags: JSON.stringify(tags || []),

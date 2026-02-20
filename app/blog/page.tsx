@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FileText, ArrowLeft, Heart, MessageCircle } from 'lucide-react';
+import { FileText, ArrowLeft, Heart, MessageCircle, Layers } from 'lucide-react';
 import BlogModal from '@/components/BlogModal';
 
 interface BlogPost {
@@ -11,6 +11,7 @@ interface BlogPost {
   slug: string;
   excerpt: string;
   coverImage?: string;
+  images: string[];
   authorName: string;
   tags: string[];
   createdAt: Date;
@@ -71,52 +72,55 @@ export default function BlogListPage() {
             <p className="text-xs text-foreground/40 mt-1">Check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-1">
-            {posts.map((post) => (
-              <article
-                key={post.id}
-                onClick={() => setSelectedSlug(post.slug)}
-                className="group cursor-pointer bg-background relative overflow-hidden transition-all duration-200 aspect-square"
-              >
-                {/* รูปแบบ IG - รูปสี่เหลี่ยมจัตุรัส */}
-                {post.coverImage ? (
-                  <Image
-                    src={post.coverImage}
-                    alt={post.title}
-                    fill
-                    sizes="(max-width: 640px) 33vw, (max-width: 935px) 33vw, 300px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
-                    <FileText size={32} className="text-foreground/20" />
-                  </div>
-                )}
-                
-                {/* Hover overlay แบบ IG */}
-                <div className="absolute inset-0 bg-black/50 transition-all duration-200 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 p-4 text-center">
-                  <div className="text-white flex gap-6 mb-3">
-                    <div className="flex items-center gap-2">
-                      <Heart size={20} fill="white" />
-                      <span className="font-bold">{post.likesCount || 0}</span>
+          <div className="grid grid-cols-3 gap-0.5 md:gap-1">
+            {posts.map((post) => {
+              const thumbnail = post.images?.[0] || post.coverImage || null;
+              const hasMultiple = (post.images?.length ?? 0) > 1;
+              return (
+                <article
+                  key={post.id}
+                  onClick={() => setSelectedSlug(post.slug)}
+                  className="group cursor-pointer bg-foreground/5 relative overflow-hidden transition-all duration-200 aspect-square"
+                >
+                  {/* Square thumbnail */}
+                  {thumbnail ? (
+                    <Image
+                      src={thumbnail}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 640px) 33vw, (max-width: 935px) 33vw, 300px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20">
+                      <FileText size={32} className="text-foreground/20" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle size={20} fill="white" />
-                      <span className="font-bold">{post.commentsCount || 0}</span>
+                  )}
+
+                  {/* Multi-image indicator */}
+                  {hasMultiple && (
+                    <div className="absolute top-2 right-2 z-10 drop-shadow-lg">
+                      <Layers size={16} className="text-white" />
                     </div>
+                  )}
+
+                  {/* Hover overlay (Instagram-style) */}
+                  <div className="absolute inset-0 bg-black/55 transition-all duration-200 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 p-3 text-center gap-2">
+                    <div className="flex items-center gap-4 text-white">
+                      <span className="flex items-center gap-1.5 font-bold text-sm">
+                        <Heart size={18} fill="white" />
+                        {post.likesCount || 0}
+                      </span>
+                      <span className="flex items-center gap-1.5 font-bold text-sm">
+                        <MessageCircle size={18} fill="white" />
+                        {post.commentsCount || 0}
+                      </span>
+                    </div>
+                    <h3 className="text-white font-semibold text-xs line-clamp-2 leading-snug">{post.title}</h3>
                   </div>
-                  
-                  {/* เพิ่ม Title และ Date ใน Overlay ตามที่ขอ แต่คง format IG ไว้ */}
-                  <h3 className="text-white font-bold text-sm line-clamp-2 mb-1">{post.title}</h3>
-                  <p className="text-white/80 text-xs text-center line-clamp-2 mb-2">
-                    {post.excerpt || "No summary available."}
-                  </p>
-                  <p className="text-white/60 text-[10px] uppercase tracking-wider">
-                    {new Date(post.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                  </p>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
       </main>

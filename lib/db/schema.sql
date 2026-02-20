@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS posts (
   excerpt TEXT,
   content TEXT NOT NULL,
   cover_image TEXT,
+  images TEXT,
   author_id TEXT NOT NULL,
   author_name TEXT NOT NULL,
   tags TEXT,

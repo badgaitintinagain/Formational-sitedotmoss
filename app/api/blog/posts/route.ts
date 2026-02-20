@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         return {
           ...post,
           tags: post.tags ? JSON.parse(post.tags) : [],
+          images: post.images ? JSON.parse(post.images) : [],
           likesCount,
           commentsCount,
         };

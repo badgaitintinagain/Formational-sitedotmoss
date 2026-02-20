@@ -9,6 +9,7 @@ export const posts = sqliteTable("posts", {
   excerpt: text("excerpt"),
   content: text("content").notNull(),
   coverImage: text("cover_image"),
+  images: text("images"), // JSON array of image URLs (max 5)
   authorId: text("author_id").notNull(),
   authorName: text("author_name").notNull(),
   tags: text("tags"), // JSON string array

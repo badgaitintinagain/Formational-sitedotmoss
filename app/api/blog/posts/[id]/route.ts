@@ -32,6 +32,7 @@ async function getPostHandler(
       post: {
         ...post,
         tags: post.tags ? JSON.parse(post.tags) : [],
+        images: post.images ? JSON.parse(post.images) : [],
       }
     });
   } catch (error) {
@@ -52,10 +53,12 @@ async function updatePostHandler(
   try {
     const { id } = await context.params;
     const body = await request.json();
-    const { title, content, excerpt, coverImage, tags, published } = body;
+    const { title, content, excerpt, coverImage, images, tags, published } = body;
 
     // Generate slug from title using shared utility
     const slug = generateSlug(title);
+    const imageList: string[] = Array.isArray(images) ? images.slice(0, 5) : [];
+    const primaryImage = imageList[0] || coverImage || null;
 
     await db
       .update(posts)
@@ -64,7 +67,8 @@ async function updatePostHandler(
         slug,
         content,
         excerpt,
-        coverImage: coverImage || null,
+        coverImage: primaryImage,
+        images: JSON.stringify(imageList),
         tags: JSON.stringify(tags || []),
         published: published ?? false,
         updatedAt: new Date(),

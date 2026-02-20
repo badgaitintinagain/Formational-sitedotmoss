@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Heart, Send, Trash2, MessageCircle, CornerDownRight } from 'lucide-react';
+import { X, Heart, Send, Trash2, MessageCircle, CornerDownRight, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -12,6 +12,7 @@ interface Post {
   content: string;
   excerpt: string;
   coverImage?: string;
+  images: string[];
   authorName: string;
   tags: string[];
   createdAt: Date;
@@ -43,6 +44,7 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
   const [userId, setUserId] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [imageIndex, setImageIndex] = useState(0);
 
   useEffect(() => {
     // Generate or retrieve user ID
@@ -59,7 +61,8 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
 
   useEffect(() => {
     if (isOpen && slug) {
-      fetchPost(); // This will also fetch likes
+      setImageIndex(0);
+      fetchPost();
       fetchComments();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +184,15 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
 
   const topLevelComments = comments.filter(c => !c.parentId);
 
+  // Build the images array for carousel
+  const allImages = post
+    ? post.images?.length
+      ? post.images
+      : post.coverImage
+        ? [post.coverImage]
+        : []
+    : [];
+
   if (!isOpen) return null;
 
   if (loading) {
@@ -194,60 +206,102 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
   if (!post) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-6xl h-[90vh] bg-background rounded-lg overflow-hidden flex flex-col md:flex-row">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+      <div className="relative w-full max-w-6xl h-[95vh] md:h-[90vh] bg-background rounded-xl overflow-hidden flex flex-col md:flex-row shadow-2xl">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+          className="absolute top-3 right-3 z-20 p-2 bg-black/60 hover:bg-black/80 rounded-full text-white transition-colors"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
-        {/* Left: Image */}
-        {post.coverImage && (
-          <div className="md:w-3/5 bg-black flex items-center justify-center relative">
+        {/* Left: Image Carousel */}
+        {allImages.length > 0 && (
+          <div className="md:w-3/5 bg-black flex items-center justify-center relative flex-shrink-0 h-56 md:h-auto">
             <Image
-              src={post.coverImage}
+              src={allImages[imageIndex]}
               alt={post.title}
               fill
               className="object-contain"
               priority
             />
+
+            {/* Navigation: prev */}
+            {imageIndex > 0 && (
+              <button
+                onClick={() => setImageIndex(i => i - 1)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
+              >
+                <ChevronLeft size={18} />
+              </button>
+            )}
+
+            {/* Navigation: next */}
+            {imageIndex < allImages.length - 1 && (
+              <button
+                onClick={() => setImageIndex(i => i + 1)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors z-10"
+              >
+                <ChevronRight size={18} />
+              </button>
+            )}
+
+            {/* Dot indicators */}
+            {allImages.length > 1 && (
+              <>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                  {allImages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setImageIndex(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${
+                        i === imageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+                {/* Multi-image icon */}
+                <div className="absolute top-3 right-3 z-10">
+                  <Layers size={20} className="text-white drop-shadow-lg" />
+                </div>
+                {/* Image counter */}
+                <div className="absolute top-3 left-3 z-10 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                  {imageIndex + 1} / {allImages.length}
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {/* Right: Content & Comments */}
-        <div className={`${post.coverImage ? 'md:w-2/5' : 'w-full'} flex flex-col bg-background`}>
+        <div className={`${allImages.length > 0 ? 'md:w-2/5' : 'w-full'} flex flex-col bg-background min-h-0`}>
           {/* Header */}
-          <div className="border-b border-foreground/10 p-4">
+          <div className="border-b border-foreground/10 p-4 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent-primary/20 flex items-center justify-center">
-                <span className="text-accent-primary font-medium text-sm">
+              <div className="w-9 h-9 rounded-full bg-accent-primary/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-accent-primary font-semibold text-sm">
                   {post.authorName[0]}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-foreground">{post.authorName}</p>
-                <p className="text-xs text-foreground/60">
-                  {new Date(post.createdAt).toLocaleDateString('th-TH')}
+                <p className="font-semibold text-foreground text-sm">{post.authorName}</p>
+                <p className="text-xs text-foreground/50">
+                  {new Date(post.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Content & Comments - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {/* Post Title & Content */}
             <div className="space-y-2">
-              <h1 className="text-xl font-medium text-foreground">{post.title}</h1>
+              <h1 className="text-lg font-semibold text-foreground leading-snug">{post.title}</h1>
               {post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {post.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-2 py-0.5 bg-accent-primary/10 text-accent-primary rounded-full"
-                    >
+                    <span key={i} className="text-xs text-accent-primary font-medium">
                       #{tag}
                     </span>
                   ))}
@@ -278,41 +332,41 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
             </div>
 
             {/* Comments */}
-            <div className="space-y-3 pt-4 border-t border-foreground/10">
-              <h3 className="font-medium text-foreground flex items-center gap-2">
-                <MessageCircle size={16} />
+            <div className="space-y-3 pt-3 border-t border-foreground/10">
+              <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+                <MessageCircle size={15} />
                 Comments ({comments.length})
               </h3>
               
               {topLevelComments.map((comment) => (
                 <div key={comment.id} className="space-y-2">
                   <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs text-accent-primary font-medium">
+                    <div className="w-7 h-7 rounded-full bg-accent-primary/15 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[11px] text-accent-primary font-semibold">
                         {comment.authorName[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-foreground text-sm">{comment.authorName}</p>
-                        <span className="text-xs text-foreground/40">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <p className="font-semibold text-foreground text-xs">{comment.authorName}</p>
+                        <span className="text-[10px] text-foreground/40">
                           {new Date(comment.createdAt).toLocaleDateString('th-TH')}
                         </span>
                         {isAdmin && (
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
-                            className="ml-auto text-red-500 hover:text-red-700 transition-colors"
+                            className="ml-auto text-red-400 hover:text-red-600 transition-colors"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={12} />
                           </button>
                         )}
                       </div>
                       <p className="text-sm text-foreground/80 leading-relaxed">{comment.content}</p>
                       <button
                         onClick={() => setReplyingTo(comment.id)}
-                        className="text-xs text-accent-primary hover:underline mt-1 flex items-center gap-1"
+                        className="text-xs text-foreground/40 hover:text-accent-primary transition-colors mt-1 flex items-center gap-1"
                       >
-                        <CornerDownRight size={12} />
+                        <CornerDownRight size={11} />
                         Reply
                       </button>
                     </div>
@@ -320,50 +374,54 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
 
                   {/* Nested Replies */}
                   {getReplies(comment.id).map((reply) => (
-                    <div key={reply.id} className="ml-8 flex gap-2">
-                      <div className="w-7 h-7 rounded-full bg-accent-primary/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-accent-primary font-medium">
+                    <div key={reply.id} className="ml-9 flex gap-2">
+                      <div className="w-6 h-6 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] text-foreground/60 font-semibold">
                           {reply.authorName[0]}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-foreground text-xs">{reply.authorName}</p>
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <p className="font-semibold text-foreground text-xs">{reply.authorName}</p>
                           <span className="text-[10px] text-foreground/40">
                             {new Date(reply.createdAt).toLocaleDateString('th-TH')}
                           </span>
                           {isAdmin && (
                             <button
                               onClick={() => handleDeleteComment(reply.id)}
-                              className="ml-auto text-red-500 hover:text-red-700 transition-colors"
+                              className="ml-auto text-red-400 hover:text-red-600 transition-colors"
                             >
-                              <Trash2 size={12} />
+                              <Trash2 size={11} />
                             </button>
                           )}
                         </div>
-                        <p className="text-xs text-foreground/80 leading-relaxed">{reply.content}</p>
+                        <p className="text-xs text-foreground/75 leading-relaxed">{reply.content}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ))}
+
+              {topLevelComments.length === 0 && (
+                <p className="text-xs text-foreground/40 text-center py-4">No comments yet. Be first!</p>
+              )}
             </div>
           </div>
 
           {/* Like & Comment Form */}
-          <div className="border-t border-foreground/10 p-4 space-y-3 bg-background">
+          <div className="border-t border-foreground/10 p-4 space-y-3 bg-background flex-shrink-0">
             {/* Like Button */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleLike}
-                className={`flex items-center gap-2 transition-all ${
+                className={`flex items-center gap-1.5 transition-all active:scale-95 ${
                   isLiked ? 'text-red-500' : 'text-foreground/60 hover:text-red-500'
                 }`}
               >
-                <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />
+                <Heart size={22} fill={isLiked ? 'currentColor' : 'none'} className="transition-transform" />
               </button>
-              <span className="text-sm text-foreground/80 font-medium">
+              <span className="text-sm text-foreground/70 font-medium">
                 {likesCount} {likesCount === 1 ? 'like' : 'likes'}
               </span>
             </div>
@@ -371,16 +429,10 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
             {/* Comment Form */}
             <form onSubmit={handleCommentSubmit} className="space-y-2">
               {replyingTo && (
-                <div className="flex items-center justify-between bg-accent-primary/10 p-2 rounded text-xs">
-                  <span className="text-accent-primary">
-                    Replying to comment...
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setReplyingTo(null)}
-                    className="text-foreground/60 hover:text-foreground"
-                  >
-                    <X size={14} />
+                <div className="flex items-center justify-between bg-accent-primary/10 px-3 py-2 rounded-lg text-xs">
+                  <span className="text-accent-primary font-medium">Replying to comment...</span>
+                  <button type="button" onClick={() => setReplyingTo(null)} className="text-foreground/50 hover:text-foreground">
+                    <X size={13} />
                   </button>
                 </div>
               )}
@@ -390,7 +442,7 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
                 placeholder="Your name"
                 value={commentForm.name}
                 onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                className="bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/50 mb-2"
+                className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-xs text-foreground focus:outline-none focus:border-accent-primary/40 transition-colors"
               />
               <div className="flex gap-2">
                 <input
@@ -399,14 +451,14 @@ export default function BlogModal({ slug, isOpen, onClose }: BlogModalProps) {
                   placeholder="Add a comment..."
                   value={commentForm.content}
                   onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
-                  className="flex-1 bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-sm text-foreground focus:outline-none focus:border-accent-primary/50"
+                  className="flex-1 bg-foreground/5 border border-foreground/10 rounded-lg py-2 px-3 text-sm text-foreground focus:outline-none focus:border-accent-primary/40 transition-colors"
                 />
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary rounded-lg transition-all"
+                  disabled={submitting || !commentForm.name || !commentForm.content}
+                  className="px-3 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-40 text-accent-primary rounded-lg transition-all"
                 >
-                  <Send size={16} />
+                  <Send size={15} />
                 </button>
               </div>
             </form>

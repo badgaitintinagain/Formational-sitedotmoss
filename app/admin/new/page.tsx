@@ -1,26 +1,21 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Upload, ImageIcon, Eye, EyeOff, ArrowLeft, Trash2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
+import Image from 'next/image';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Plus, Layers, ImageIcon } from 'lucide-react';
 
 export default function NewPostPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'images' | 'edit'>('images');
+  const [images, setImages] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [tags, setTags] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const contentFileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    excerpt: '',
-    coverImage: '',
-    tags: '',
-    published: false,
-  });
 
   useEffect(() => {
     checkAuth();
@@ -29,380 +24,278 @@ export default function NewPostPage() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me');
-      const data = await response.json();
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
       if (!data.user || data.user.role !== 'admin') {
         router.push('/');
+      } else {
+        setUser(data.user);
       }
     } catch {
       router.push('/');
     }
   };
 
-  const handleImageUpload = async (file: File, isCover: boolean = true) => {
-    if (!file) return;
-
+  const handleFileSelect = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const remaining = 5 - images.length;
+    if (remaining <= 0) return;
+    const toUpload = Array.from(files).slice(0, remaining);
     setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/blog/upload-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (isCover) {
-          setFormData(prev => ({ ...prev, coverImage: data.url }));
-        } else {
-          // สำหรับรูปในเนื้อหา - ใส่ markdown syntax
-          const markdownImage = `\n![Image](${data.url})\n`;
-          setFormData(prev => ({ 
-            ...prev, 
-            content: prev.content + markdownImage 
-          }));
+    const uploaded: string[] = [];
+    for (const file of toUpload) {
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/blog/upload-image', { method: 'POST', body: fd });
+        if (res.ok) {
+          const data = await res.json();
+          uploaded.push(data.url);
         }
-      } else {
-        alert('Failed to upload image');
+      } catch (err) {
+        console.error('Upload error:', err);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Error uploading image');
-    } finally {
-      setUploading(false);
     }
+    setImages(prev => [...prev, ...uploaded].slice(0, 5));
+    setUploading(false);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const removeImage = (index: number) => {
+    setImages(prev => {
+      const next = prev.filter((_, i) => i !== index);
+      if (activeIndex >= next.length) setActiveIndex(Math.max(0, next.length - 1));
+      return next;
+    });
+  };
 
+  const handleSubmit = async (publishNow: boolean) => {
+    if (!title.trim()) { alert('Please enter a title'); return; }
+    setLoading(true);
     try {
-      const response = await fetch('/api/blog/create', {
+      const res = await fetch('/api/blog/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+          title: title.trim(),
+          content: content.trim() || ' ',
+          excerpt: content.trim().substring(0, 150) || title.trim(),
+          coverImage: images[0] || '',
+          images,
+          tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+          published: publishNow,
         }),
       });
-
-      if (response.ok) {
-        alert('Post created successfully!');
+      if (res.ok) {
         router.push('/admin');
       } else {
-        alert('Failed to create post');
+        const err = await res.json();
+        alert(err.error || 'Failed to create post');
       }
-    } catch (error) {
-      console.error('Error creating post:', error);
+    } catch (err) {
+      console.error(err);
       alert('Error creating post');
     } finally {
       setLoading(false);
     }
   };
 
+  const parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push('/admin')}
-                className="p-2 hover:bg-foreground/10 rounded-lg transition-colors text-foreground"
-                title="Back to admin"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <div>
-                <h1 className="text-lg font-medium text-foreground">Create New Post</h1>
-                <p className="text-xs text-foreground/40">Write and publish your content</p>
-              </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/95 backdrop-blur-xl flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 max-w-5xl mx-auto w-full">
+          <button
+            onClick={() => step === 'edit' ? setStep('images') : router.push('/admin')}
+            className="p-2 hover:bg-foreground/10 rounded-full transition-colors"
+          >
+            <ArrowLeft size={20} className="text-foreground" />
+          </button>
+          <span className="font-semibold text-foreground">New Post</span>
+          <div className="flex items-center gap-2">
+            <div className="lg:hidden">
+              {step === 'images' ? (
+                <button onClick={() => setStep('edit')} className="text-sm font-semibold text-accent-primary px-2 py-1">
+                  Next →
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => handleSubmit(false)} disabled={loading} className="px-3 py-1.5 text-xs font-medium bg-foreground/10 text-foreground rounded-lg disabled:opacity-50">
+                    {loading ? '...' : 'Draft'}
+                  </button>
+                  <button onClick={() => handleSubmit(true)} disabled={loading} className="px-3 py-1.5 text-xs font-semibold bg-accent-primary text-white rounded-lg disabled:opacity-50">
+                    {loading ? '...' : 'Share'}
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowPreview(!showPreview)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
-                  showPreview 
-                    ? 'bg-accent-primary/20 text-accent-primary' 
-                    : 'bg-foreground/10 text-foreground hover:bg-foreground/20'
-                }`}
-              >
-                {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
-                <span className="hidden md:inline">{showPreview ? 'Hide' : 'Show'} Preview</span>
+            <div className="hidden lg:flex gap-2">
+              <button onClick={() => handleSubmit(false)} disabled={loading} className="px-4 py-1.5 text-sm font-medium bg-foreground/10 text-foreground rounded-lg disabled:opacity-50 hover:bg-foreground/15 transition-colors">
+                {loading ? 'Saving...' : 'Save Draft'}
               </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-accent-primary/20 hover:bg-accent-primary/30 disabled:opacity-50 text-accent-primary font-medium rounded-lg transition-all text-sm"
-              >
-                <Save size={16} />
-                <span>{loading ? 'Creating...' : 'Create Post'}</span>
+              <button onClick={() => handleSubmit(true)} disabled={loading} className="px-4 py-1.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity">
+                {loading ? 'Posting...' : 'Share'}
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-4">
-        <div className={`grid ${showPreview ? 'lg:grid-cols-2' : 'grid-cols-1'} gap-6`}>
-          {/* Edit Form */}
-          <div className="space-y-4">
+      {/* Main */}
+      <div className="flex-1 flex flex-col lg:flex-row lg:max-w-5xl lg:mx-auto lg:w-full lg:border-x lg:border-foreground/10">
+
+        {/* LEFT: Image Section */}
+        <div className={`lg:w-[60%] bg-black flex flex-col flex-shrink-0 ${step === 'edit' ? 'hidden lg:flex' : 'flex'}`}>
+          {/* Main Preview */}
+          <div className="relative aspect-square w-full">
+            {images.length > 0 ? (
+              <>
+                <Image src={images[activeIndex]} alt="Preview" fill className="object-contain" priority />
+                {activeIndex > 0 && (
+                  <button onClick={() => setActiveIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronLeft size={18} />
+                  </button>
+                )}
+                {activeIndex < images.length - 1 && (
+                  <button onClick={() => setActiveIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white z-10 transition-colors">
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+                {images.length > 1 && (
+                  <>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                      {images.map((_, i) => (
+                        <button key={i} onClick={() => setActiveIndex(i)} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeIndex ? 'bg-accent-primary scale-125' : 'bg-white/60'}`} />
+                      ))}
+                    </div>
+                    <div className="absolute top-3 right-3 z-10 bg-black/50 rounded-full p-1.5">
+                      <Layers size={16} className="text-white" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-10 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                      {activeIndex + 1}/{images.length}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/50 hover:text-white/80 transition-colors group">
+                <div className="w-20 h-20 border-2 border-white/25 group-hover:border-white/50 rounded-full flex items-center justify-center transition-colors">
+                  <ImageIcon size={30} />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium">{uploading ? 'Uploading...' : 'Select Photos'}</p>
+                  <p className="text-xs text-white/35 mt-1">Up to 5 images per post</p>
+                </div>
+              </button>
+            )}
+          </div>
+
+          {/* Thumbnail strip */}
+          <div className="flex items-center gap-2 p-3 bg-black/80 overflow-x-auto min-h-[84px]">
+            {images.map((img, i) => (
+              <div key={i} onClick={() => setActiveIndex(i)} className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${i === activeIndex ? 'border-white opacity-100' : 'border-transparent opacity-55 hover:opacity-80'}`}>
+                <Image src={img} alt="" fill className="object-cover" />
+                <button onClick={(e) => { e.stopPropagation(); removeImage(i); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/75 rounded-full flex items-center justify-center text-white hover:bg-black transition-colors">
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+            {images.length < 5 && (
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex-shrink-0 w-16 h-16 border-2 border-dashed border-white/25 rounded-lg flex flex-col items-center justify-center gap-1 text-white/50 hover:text-white/80 hover:border-white/50 transition-all disabled:opacity-40">
+                {uploading ? (
+                  <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Plus size={18} />
+                    <span className="text-[9px]">{images.length}/5</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e.target.files)} className="hidden" />
+        </div>
+
+        {/* RIGHT: Form Section */}
+        <div className={`lg:w-[40%] border-l border-foreground/10 bg-background flex flex-col ${step === 'images' ? 'hidden lg:flex' : 'flex'}`}>
+          {/* User Info */}
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-foreground/10 flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary/30 to-accent-secondary/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-accent-primary font-bold text-sm">{user?.name?.charAt(0).toUpperCase() || 'A'}</span>
+            </div>
+            <span className="font-semibold text-sm text-foreground">{user?.name || 'Admin'}</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
             {/* Title */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
-                Title *
-              </label>
+            <div className="border-b border-foreground/10">
               <input
                 type="text"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-transparent border-0 text-2xl font-semibold text-foreground focus:outline-none placeholder:text-foreground/30"
-                placeholder="Enter your post title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Add a title..."
+                className="w-full px-4 py-3.5 bg-transparent text-foreground font-semibold text-lg focus:outline-none placeholder:text-foreground/30"
               />
             </div>
 
-            {/* Cover Image */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-3 uppercase tracking-wide">
-                Cover Image
-              </label>
-              {formData.coverImage ? (
-                <div className="relative group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={formData.coverImage}
-                    alt="Cover"
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                    >
-                      Change
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, coverImage: '' })}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium flex items-center gap-2"
-                    >
-                      <Trash2 size={14} />
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full h-64 border-2 border-dashed border-foreground/20 rounded-lg hover:border-accent-primary/50 hover:bg-accent-primary/5 transition-all flex flex-col items-center justify-center gap-3 group"
-                >
-                  <div className="w-16 h-16 rounded-full bg-accent-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Upload size={28} className="text-accent-primary" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-foreground">
-                      {uploading ? 'Uploading...' : 'Click to upload cover image'}
-                    </p>
-                    <p className="text-xs text-foreground/40 mt-1">PNG, JPG, GIF up to 10MB</p>
-                  </div>
-                </button>
+            {/* Caption / Content */}
+            <div className="border-b border-foreground/10 relative">
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write a caption... (Markdown supported)"
+                className="w-full px-4 py-3.5 min-h-[200px] bg-transparent text-sm text-foreground focus:outline-none placeholder:text-foreground/35 resize-none leading-relaxed"
+              />
+              {content.length > 0 && (
+                <span className="absolute bottom-2 right-3 text-[10px] text-foreground/30">{content.length} chars</span>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file, true);
-                }}
-                className="hidden"
-              />
-            </div>
-
-            {/* Excerpt */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
-                Excerpt
-              </label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none"
-                rows={2}
-                placeholder="Brief description of your post..."
-              />
-            </div>
-
-            {/* Content */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
-                  Content * (Markdown)
-                </label>
-                <button
-                  type="button"
-                  onClick={() => contentFileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-primary/10 hover:bg-accent-primary/20 disabled:opacity-50 text-accent-primary rounded-lg transition-all text-xs font-medium"
-                >
-                  <ImageIcon size={14} />
-                  <span>Insert Image</span>
-                </button>
-                <input
-                  ref={contentFileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload(file, false);
-                  }}
-                  className="hidden"
-                />
-              </div>
-              <textarea
-                required
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30 resize-none font-mono"
-                rows={20}
-                placeholder="# Write your content here&#10;&#10;Use **Markdown** formatting:&#10;- **bold**, *italic*&#10;- ## Headings&#10;- [Links](url)&#10;- ![Images](url)"
-              />
             </div>
 
             {/* Tags */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <label className="block text-xs font-medium text-foreground/60 mb-2 uppercase tracking-wide">
-                Tags
-              </label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                className="w-full bg-transparent border-0 text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
-                placeholder="tech, design, tutorial (comma separated)"
-              />
-              {formData.tags && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.tags.split(',').map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-accent-primary/10 text-accent-primary text-xs rounded-full"
-                    >
-                      #{tag.trim()}
-                    </span>
+            <div className="border-b border-foreground/10 px-4 py-3.5">
+              <div className="flex items-center gap-2">
+                <span className="text-foreground/40 text-sm">#</span>
+                <input
+                  type="text"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="Add tags (comma-separated)"
+                  className="flex-1 bg-transparent text-sm text-foreground focus:outline-none placeholder:text-foreground/30"
+                />
+              </div>
+              {parsedTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {parsedTags.map((tag, i) => (
+                    <span key={i} className="text-xs text-accent-primary font-medium bg-accent-primary/10 px-2.5 py-0.5 rounded-full">#{tag}</span>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Published Toggle */}
-            <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-xs font-medium text-foreground/60 uppercase tracking-wide">
-                    Publish Status
-                  </label>
-                  <p className="text-xs text-foreground/40 mt-1">
-                    {formData.published ? 'Post will be visible immediately' : 'Save as draft'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, published: !formData.published })}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                    formData.published ? 'bg-green-500' : 'bg-foreground/20'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                      formData.published ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+            {/* Photo count */}
+            {images.length > 0 && (
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/10 text-sm text-foreground/50">
+                <Layers size={14} />
+                <span>{images.length} photo{images.length > 1 ? 's' : ''} selected</span>
+                <button onClick={() => setStep('images')} className="ml-auto text-accent-primary text-xs hover:underline lg:hidden">Edit photos</button>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Preview Panel */}
-          {showPreview && (
-            <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
-              <div className="bg-foreground/5 border border-foreground/10 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-foreground/10">
-                  <Eye size={16} className="text-accent-primary" />
-                  <h2 className="text-sm font-medium text-foreground">Live Preview</h2>
-                </div>
-                
-                {/* Preview Content */}
-                <article>
-                  {formData.coverImage && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={formData.coverImage}
-                      alt="Cover"
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                  )}
-                  
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-                    {formData.title || 'Untitled Post'}
-                  </h1>
-                  
-                  {formData.excerpt && (
-                    <p className="text-sm text-foreground/60 mb-4 italic">
-                      {formData.excerpt}
-                    </p>
-                  )}
-                  
-                  {formData.tags && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {formData.tags.split(',').map((tag, i) => (
-                        <span
-                          key={i}
-                          className="text-xs px-2 py-1 bg-accent-primary/10 text-accent-primary rounded-full"
-                        >
-                          #{tag.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="prose prose-sm dark:prose-invert max-w-none
-                    prose-headings:text-foreground prose-p:text-foreground/80 
-                    prose-a:text-accent-primary prose-strong:text-foreground
-                    prose-code:text-accent-primary prose-code:bg-accent-primary/10
-                    prose-img:rounded-lg prose-img:w-full prose-img:h-auto">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                      components={{
-                        img: ({...props}) => (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img 
-                            {...props} 
-                            alt={props.alt || 'Blog image'}
-                            className="w-full h-auto rounded-lg my-4"
-                            loading="lazy"
-                          />
-                        ),
-                      }}
-                    >
-                      {formData.content || '*No content yet...*'}
-                    </ReactMarkdown>
-                  </div>
-                </article>
-              </div>
-            </div>
-          )}
+          {/* Mobile bottom buttons */}
+          <div className="lg:hidden border-t border-foreground/10 p-4 flex gap-3 flex-shrink-0">
+            <button onClick={() => handleSubmit(false)} disabled={loading} className="flex-1 py-2.5 text-sm font-medium bg-foreground/10 text-foreground rounded-xl disabled:opacity-50">
+              {loading ? 'Saving...' : 'Save Draft'}
+            </button>
+            <button onClick={() => handleSubmit(true)} disabled={loading} className="flex-1 py-2.5 text-sm font-semibold bg-accent-primary text-white rounded-xl disabled:opacity-50 hover:opacity-90">
+              {loading ? 'Posting...' : 'Share'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+

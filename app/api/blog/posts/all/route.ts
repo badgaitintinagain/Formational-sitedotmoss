@@ -13,6 +13,7 @@ async function getAllPostsHandler() {
     const postsWithParsedTags = allPosts.map(post => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
+      images: post.images ? JSON.parse(post.images) : [],
     }));
 
     return NextResponse.json({ 
