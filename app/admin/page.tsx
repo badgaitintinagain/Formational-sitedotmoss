@@ -84,7 +84,11 @@ export default function AdminPage() {
         body: JSON.stringify({ published: !current }),
       });
       if (res.ok) fetchPosts();
-    } catch (err) { console.error(err); }
+      else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to update post status');
+      }
+    } catch (err) { console.error(err); alert('Network error. Please try again.'); }
   };
 
   const deletePost = async (id: string) => {
@@ -146,8 +150,8 @@ export default function AdminPage() {
               onClick={() => setFilterStatus(item.value)}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${
                 filterStatus === item.value
-                  ? 'bg-accent-primary/10 text-accent-primary font-semibold'
-                  : 'text-foreground/60 hover:bg-foreground/5 hover:text-foreground'
+                  ? 'bg-accent-primary/15 text-accent-primary font-semibold'
+                  : 'text-foreground/70 hover:bg-foreground/10 hover:text-foreground'
               }`}
             >
               <span>{item.label}</span>
@@ -160,14 +164,14 @@ export default function AdminPage() {
           <div className="pt-3 mt-3 border-t border-foreground/10 space-y-1">
             <button
               onClick={() => router.push('/admin/comments')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/60 hover:bg-foreground/5 hover:text-foreground transition-all"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/70 hover:bg-foreground/10 hover:text-foreground transition-all"
             >
               <MessageSquare size={16} />
               <span>Comments</span>
             </button>
             <button
               onClick={() => router.push('/')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/60 hover:bg-foreground/5 hover:text-foreground transition-all"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground/70 hover:bg-foreground/10 hover:text-foreground transition-all"
             >
               <ArrowLeft size={16} />
               <span>Back to Site</span>
@@ -194,7 +198,7 @@ export default function AdminPage() {
                 placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-accent-primary/40 text-foreground transition-colors placeholder:text-foreground/40"
+                className="w-full pl-9 pr-3 py-2 bg-foreground/10 border border-foreground/15 rounded-xl text-sm focus:outline-none focus:border-accent-primary/50 text-foreground transition-colors placeholder:text-foreground/40"
               />
             </div>
 
@@ -205,7 +209,7 @@ export default function AdminPage() {
                   key={f}
                   onClick={() => setFilterStatus(f)}
                   className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                    filterStatus === f ? 'bg-accent-primary/15 text-accent-primary' : 'bg-foreground/8 text-foreground/60'
+                    filterStatus === f ? 'bg-accent-primary/15 text-accent-primary' : 'bg-foreground/10 text-foreground/70'
                   }`}
                 >
                   {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -215,11 +219,11 @@ export default function AdminPage() {
 
             <div className="flex items-center gap-2 ml-auto">
               {/* View toggle */}
-              <div className="hidden sm:flex bg-foreground/8 rounded-lg p-0.5">
-                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow text-foreground' : 'text-foreground/40'}`}>
+              <div className="hidden sm:flex bg-foreground/10 rounded-lg p-0.5">
+                <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow text-foreground' : 'text-foreground/50'}`}>
                   <Grid size={15} />
                 </button>
-                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-background shadow text-foreground' : 'text-foreground/40'}`}>
+                <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-background shadow text-foreground' : 'text-foreground/50'}`}>
                   <List size={15} />
                 </button>
               </div>
@@ -239,16 +243,18 @@ export default function AdminPage() {
         <div className="p-4 md:p-6 max-w-5xl mx-auto">
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            {[
-              { label: 'Total Posts', value: stats.total, color: 'text-foreground' },
-              { label: 'Published', value: stats.published, color: 'text-green-600 dark:text-green-400' },
-              { label: 'Drafts', value: stats.draft, color: 'text-yellow-500 dark:text-yellow-400' },
-            ].map(stat => (
-              <div key={stat.label} className="bg-foreground/6 border border-foreground/12 rounded-2xl p-4 text-center">
-                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-foreground/50 mt-0.5">{stat.label}</p>
-              </div>
-            ))}
+            <div className="bg-foreground/10 border border-foreground/15 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+              <p className="text-xs text-foreground/50 mt-0.5">Total Posts</p>
+            </div>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-green-500">{stats.published}</p>
+              <p className="text-xs text-foreground/50 mt-0.5">Published</p>
+            </div>
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold text-yellow-500">{stats.draft}</p>
+              <p className="text-xs text-foreground/50 mt-0.5">Drafts</p>
+            </div>
           </div>
 
           {/* Post grid/list */}
@@ -331,7 +337,7 @@ export default function AdminPage() {
                 const thumb = getThumbnail(post);
                 const hasMultiple = (post.images?.length ?? 0) > 1;
                 return (
-                  <div key={post.id} className="flex items-center gap-4 bg-foreground/6 hover:bg-foreground/8 border border-foreground/12 rounded-2xl p-3 transition-all">
+                  <div key={post.id} className="flex items-center gap-4 bg-foreground/10 hover:bg-foreground/15 border border-foreground/15 rounded-2xl p-3 transition-all">
                     {/* Thumbnail */}
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-foreground/5">
                       {thumb ? (
@@ -353,7 +359,7 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-semibold text-foreground text-sm truncate">{post.title || 'Untitled'}</p>
                         <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          post.published ? 'bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400'
+                          post.published ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'
                         }`}>
                           {post.published ? 'Live' : 'Draft'}
                         </span>
