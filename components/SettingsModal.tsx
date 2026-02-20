@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState, memo, useMemo } from 'react';
-import { X, Sun, Moon, Palette, Check, Ghost, Image as ImageIcon, Wind, Zap } from 'lucide-react';
+import { X, Sun, Moon, Palette, Check, Ghost, Image as ImageIcon, Wind, Zap, Pipette } from 'lucide-react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { useTheme, PaletteId } from './ThemeProvider';
@@ -13,7 +13,8 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: SettingsModalProps) => {
   const { 
     theme, toggleTheme, paletteId, setPaletteId, isGrayscale, setGrayscale,
-    bgValue, setBgValue, glassBlur, setGlassBlur, setBgType
+    bgValue, setBgValue, glassBlur, setGlassBlur, setBgType,
+    customPrimary, setCustomPrimary, customSecondary, setCustomSecondary
   } = useTheme();
   const modalRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -199,8 +200,82 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                   )}
                 </button>
               ))}
+
+              {/* Custom color picker */}
+              <button
+                onClick={() => setPaletteId('custom')}
+                className={`group relative aspect-square rounded-full overflow-hidden flex items-center justify-center hover:scale-110 transition-transform active:scale-95 shadow-md border-2 ${paletteId === 'custom' ? 'border-accent-primary scale-110' : 'border-transparent opacity-80'}`}
+                title="Custom"
+              >
+                <div className="absolute inset-0 flex rotate-45">
+                  <div className="flex-1 h-full" style={{ backgroundColor: customPrimary }} />
+                  <div className="flex-1 h-full" style={{ backgroundColor: customSecondary }} />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/15 z-10">
+                  {paletteId === 'custom' ? (
+                    <Check size={16} className="text-white drop-shadow-md" />
+                  ) : (
+                    <Pipette size={14} className="text-white drop-shadow-md" />
+                  )}
+                </div>
+              </button>
             </div>
-            <p className="text-[9px] opacity-40 text-foreground italic text-center">Randomized primary & secondary tones</p>
+
+            {/* Custom color pickers - shown when custom is selected */}
+            {paletteId === 'custom' && (
+              <div className="flex gap-4 mt-3 p-3 bg-foreground/5 rounded-xl">
+                <div className="flex-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Primary</label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-foreground/10 flex-shrink-0">
+                      <input
+                        type="color"
+                        value={customPrimary}
+                        onChange={(e) => setCustomPrimary(e.target.value)}
+                        className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                      />
+                      <div className="w-full h-full pointer-events-none" style={{ backgroundColor: customPrimary }} />
+                    </div>
+                    <input
+                      type="text"
+                      value={customPrimary}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomPrimary(v);
+                      }}
+                      maxLength={7}
+                      className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Secondary</label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-foreground/10 flex-shrink-0">
+                      <input
+                        type="color"
+                        value={customSecondary}
+                        onChange={(e) => setCustomSecondary(e.target.value)}
+                        className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                      />
+                      <div className="w-full h-full pointer-events-none" style={{ backgroundColor: customSecondary }} />
+                    </div>
+                    <input
+                      type="text"
+                      value={customSecondary}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomSecondary(v);
+                      }}
+                      maxLength={7}
+                      className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <p className="text-[9px] opacity-40 text-foreground italic text-center">Choose a preset pair or pick your own colors</p>
           </section>
 
           {/* Grayscale Toggle */}

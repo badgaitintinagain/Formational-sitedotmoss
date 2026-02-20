@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
-export type PaletteId = 'serene' | 'clay' | 'moss' | 'desert' | 'ocean' | 'spring' | 'sunset' | 'vintage';
+export type PaletteId = 'serene' | 'clay' | 'moss' | 'desert' | 'ocean' | 'spring' | 'sunset' | 'vintage' | 'custom';
 
 interface ThemeContextType {
   theme: Theme;
@@ -17,6 +17,10 @@ interface ThemeContextType {
   setBgValue: (value: string) => void;
   glassBlur: number;
   setGlassBlur: (value: number) => void;
+  customPrimary: string;
+  setCustomPrimary: (value: string) => void;
+  customSecondary: string;
+  setCustomSecondary: (value: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -28,6 +32,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [bgType, setBgTypeState] = useState<'color' | 'image'>('color');
   const [bgValue, setBgValueState] = useState<string>('');
   const [glassBlur, setGlassBlurState] = useState<number>(0);
+  const [customPrimary, setCustomPrimaryState] = useState<string>('#7C9885');
+  const [customSecondary, setCustomSecondaryState] = useState<string>('#C4A882');
 
   // Sync with LocalStorage once on mount
   useEffect(() => {
@@ -51,6 +57,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         const savedBlur = localStorage.getItem('glassBlur');
         if (savedBlur) setGlassBlurState(Number(savedBlur));
+
+        const savedCustomPrimary = localStorage.getItem('customPrimary');
+        if (savedCustomPrimary) setCustomPrimaryState(savedCustomPrimary);
+        const savedCustomSecondary = localStorage.getItem('customSecondary');
+        if (savedCustomSecondary) setCustomSecondaryState(savedCustomSecondary);
       } catch (e) {
         console.warn("Could not load settings from localStorage", e);
       }
@@ -69,7 +80,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     document.documentElement.setAttribute('data-palette', paletteId);
     localStorage.setItem('palette', paletteId);
+    // When switching away from custom, remove inline overrides
+    if (paletteId !== 'custom') {
+      document.documentElement.style.removeProperty('--accent-primary');
+      document.documentElement.style.removeProperty('--accent-secondary');
+    }
   }, [paletteId]);
+
+  // Apply custom colors directly as inline styles on <html>
+  useEffect(() => {
+    if (paletteId === 'custom') {
+      document.documentElement.style.setProperty('--accent-primary', customPrimary);
+      document.documentElement.style.setProperty('--accent-secondary', customSecondary);
+    }
+    localStorage.setItem('customPrimary', customPrimary);
+    localStorage.setItem('customSecondary', customSecondary);
+  }, [paletteId, customPrimary, customSecondary]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('force-grayscale', isGrayscale);
@@ -95,8 +121,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     bgValue,
     setBgValue: (value: string) => setBgValueState(value),
     glassBlur,
-    setGlassBlur: (value: number) => setGlassBlurState(value)
-  }), [theme, paletteId, isGrayscale, bgType, bgValue, glassBlur]);
+    setGlassBlur: (value: number) => setGlassBlurState(value),
+    customPrimary,
+    setCustomPrimary: (value: string) => setCustomPrimaryState(value),
+    customSecondary,
+    setCustomSecondary: (value: string) => setCustomSecondaryState(value),
+  }), [theme, paletteId, isGrayscale, bgType, bgValue, glassBlur, customPrimary, customSecondary]);
 
   return (
     <ThemeContext.Provider value={value}>
