@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:setup": "node scripts/setup-db.js",
+    "db:migrate-images": "node scripts/add-images-column.js",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
