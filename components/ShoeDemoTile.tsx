@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Tile from './Tile';
-import { X, Footprints, Upload, Loader2, ImageIcon, BarChart3, Eye, Layers, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Footprints, Upload, Loader2, ImageIcon, Layers, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import gsap from 'gsap';
 
 // --- Types ---
@@ -56,62 +56,31 @@ const BRAND_COLORS: Record<string, string> = {
   other: '#888888'
 };
 
-// --- Probability Bar Chart ---
-const ProbChart: React.FC<{ probs: ShoeResult['probs'] }> = ({ probs }) => {
+// --- Compact Probability Bars ---
+const ProbBars: React.FC<{ probs: ShoeResult['probs']; compact?: boolean }> = ({ probs, compact }) => {
   const winnerIdx = probs.weighted_avg.indexOf(Math.max(...probs.weighted_avg));
 
   return (
-    <div className="space-y-3">
-      {/* Brand rows */}
+    <div className={compact ? 'space-y-1' : 'space-y-1.5'}>
       {BRANDS.map((brand, i) => {
         const avg = probs.weighted_avg[i] ?? 0;
         const isWinner = i === winnerIdx;
         const brandColor = BRAND_COLORS[brand] || BRAND_COLORS.other;
-
         return (
-          <div key={brand} className={`rounded-lg p-2.5 transition-all ${isWinner ? 'bg-foreground/[0.06] ring-1 ring-foreground/10' : ''}`}>
-            {/* Label row */}
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isWinner ? 'text-foreground' : 'text-foreground/50'}`}>
-                  {brand}
-                </span>
-              </div>
-              <span className={`text-xs font-bold tabular-nums ${isWinner ? '' : 'opacity-50'}`} style={{ color: isWinner ? brandColor : undefined }}>
-                {(avg * 100).toFixed(1)}%
-              </span>
-            </div>
-
-            {/* Main bar (weighted avg) */}
-            <div className="w-full h-2.5 bg-foreground/[0.06] rounded-full overflow-hidden">
+          <div key={brand} className="flex items-center gap-1.5">
+            <span className={`w-10 text-[8px] font-bold uppercase tracking-wider text-right ${isWinner ? 'text-foreground' : 'text-foreground/40'}`}>
+              {brand}
+            </span>
+            <div className="flex-1 h-1.5 bg-foreground/[0.06] rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{
-                  width: `${avg * 100}%`,
-                  backgroundColor: brandColor,
-                  opacity: isWinner ? 1 : 0.4,
-                }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${avg * 100}%`, backgroundColor: brandColor, opacity: isWinner ? 1 : 0.35 }}
               />
             </div>
-
-            {/* Model breakdown (small dots) */}
-            <div className="flex items-center gap-3 mt-1.5">
-              {[
-                { label: 'S', value: probs.swin[i] ?? 0, weight: probs.weights[0] },
-                { label: 'M', value: probs.marqo[i] ?? 0, weight: probs.weights[1] },
-                { label: 'G', value: probs.google[i] ?? 0, weight: probs.weights[2] },
-              ].map(({ label, value, weight }) => (
-                <div key={label} className="flex items-center gap-1">
-                  <span className="text-[7px] font-bold opacity-30 text-foreground">{label}</span>
-                  <div className="w-8 h-1 bg-foreground/[0.06] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-foreground/25 transition-all duration-500" style={{ width: `${value * 100}%` }} />
-                  </div>
-                  <span className="text-[7px] tabular-nums opacity-25 text-foreground">{(value * 100).toFixed(0)}</span>
-                  <span className="text-[6px] opacity-15 text-foreground">w{(weight ?? 0.33).toFixed(1)}</span>
-                </div>
-              ))}
-            </div>
+            <span className={`w-8 text-[8px] tabular-nums text-right ${isWinner ? 'font-bold' : 'opacity-40'}`}
+              style={{ color: isWinner ? brandColor : undefined }}>
+              {(avg * 100).toFixed(0)}%
+            </span>
           </div>
         );
       })}
@@ -119,74 +88,62 @@ const ProbChart: React.FC<{ probs: ShoeResult['probs'] }> = ({ probs }) => {
   );
 };
 
-// --- Quality Metrics ---
-const QualityMetrics: React.FC<{ shoe: ShoeResult }> = ({ shoe }) => (
-  <div className="grid grid-cols-3 gap-2">
-    {[
-      { label: 'Pose', value: shoe.pose_score, icon: Eye },
-      { label: 'Blur', value: shoe.blur_score, icon: Layers },
-      { label: 'Depth', value: shoe.depth_score, icon: BarChart3 },
-    ].map(({ label, value, icon: Icon }) => (
-      <div key={label} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-foreground/5 border border-foreground/5">
-        <Icon size={12} className="opacity-40 text-foreground" />
-        <div className="text-[10px] font-bold text-foreground">{(value * 100).toFixed(0)}%</div>
-        <div className="text-[8px] uppercase tracking-widest opacity-40 text-foreground">{label}</div>
-      </div>
-    ))}
-  </div>
-);
-
-// --- Shoe Card ---
-const ShoeCard: React.FC<{ shoe: ShoeResult; personRank: number }> = ({ shoe, personRank }) => {
+// --- Compact Shoe Side Card (Left or Right foot) ---
+const ShoeSideCard: React.FC<{ shoe: ShoeResult; label: string }> = ({ shoe, label }) => {
   const brandColor = BRAND_COLORS[shoe.brand] || BRAND_COLORS.other;
-  
+  const [showPose, setShowPose] = useState(false);
+
   return (
-    <div className="border border-foreground/10 rounded-xl overflow-hidden bg-foreground/[0.02]">
-      {/* Card Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-foreground/5" style={{ backgroundColor: `${brandColor}15` }}>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: brandColor }} />
-          <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-            P{personRank} {shoe.side}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase" style={{ color: brandColor }}>{shoe.brand}</span>
-          <span className="text-[10px] opacity-50 text-foreground">{(shoe.confidence * 100).toFixed(1)}%</span>
-          {shoe.relabel_info && (
-            <span className="text-[9px] text-amber-400 italic">{shoe.relabel_info}</span>
-          )}
+    <div className="flex-1 min-w-0 border border-foreground/10 rounded-lg overflow-hidden bg-foreground/[0.02]">
+      {/* Side header */}
+      <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-foreground/5" style={{ backgroundColor: `${brandColor}10` }}>
+        <span className="text-[9px] font-bold uppercase tracking-widest text-foreground/60">{label}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: brandColor }} />
+          <span className="text-[10px] font-bold uppercase" style={{ color: brandColor }}>{shoe.brand}</span>
+          <span className="text-[9px] opacity-50 tabular-nums text-foreground">{(shoe.confidence * 100).toFixed(0)}%</span>
+          {shoe.relabel_info && <span className="text-[8px] text-amber-400">↻</span>}
         </div>
       </div>
 
-      {/* Card Body */}
-      <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Shoe Images */}
-        <div className="space-y-2">
-          {shoe.crop_base64 && (
-            <div className="relative rounded-lg overflow-hidden border border-foreground/10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={shoe.crop_base64} alt="Shoe crop" className="w-full h-auto object-contain bg-black/20" />
-              <div className="absolute top-1 left-1 text-[8px] bg-black/60 text-white px-1.5 py-0.5 rounded uppercase tracking-widest">Crop</div>
-            </div>
-          )}
-          {shoe.pose_base64 && (
-            <div className="relative rounded-lg overflow-hidden border border-foreground/10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={shoe.pose_base64} alt="Pose keypoints" className="w-full h-auto object-contain bg-black/20" />
-              <div className="absolute top-1 left-1 text-[8px] bg-black/60 text-white px-1.5 py-0.5 rounded uppercase tracking-widest">Pose</div>
-            </div>
-          )}
-        </div>
+      {/* Image + bars row */}
+      <div className="flex gap-2 p-2">
+        {/* Crop image  */}
+        {shoe.crop_base64 && (
+          <button
+            onClick={() => shoe.pose_base64 && setShowPose(!showPose)}
+            className="w-20 h-20 shrink-0 rounded-md overflow-hidden border border-foreground/10 bg-black/20 relative"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={showPose && shoe.pose_base64 ? shoe.pose_base64 : shoe.crop_base64}
+              alt={`${label} shoe`}
+              className="w-full h-full object-contain"
+            />
+            {shoe.pose_base64 && (
+              <div className="absolute bottom-0.5 right-0.5 text-[6px] bg-black/60 text-white px-1 rounded">
+                {showPose ? 'POSE' : 'CROP'}
+              </div>
+            )}
+          </button>
+        )}
 
-        {/* Probability Chart */}
-        <div className="md:col-span-1">
-          <ProbChart probs={shoe.probs} />
-        </div>
-
-        {/* Quality Metrics */}
-        <div>
-          <QualityMetrics shoe={shoe} />
+        {/* Prob bars + quality */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+          <ProbBars probs={shoe.probs} compact />
+          {/* Quality inline */}
+          <div className="flex items-center gap-2 mt-1.5 pt-1 border-t border-foreground/5">
+            {[
+              { label: 'PSE', value: shoe.pose_score },
+              { label: 'BLR', value: shoe.blur_score },
+              { label: 'DPT', value: shoe.depth_score },
+            ].map(m => (
+              <div key={m.label} className="flex items-center gap-0.5">
+                <span className="text-[7px] opacity-30 text-foreground">{m.label}</span>
+                <span className="text-[8px] font-bold tabular-nums text-foreground/60">{(m.value * 100).toFixed(0)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -229,6 +186,8 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
   }, [isOpen]);
 
   const [pipelineProgress, setPipelineProgress] = useState(0);
+  const [pipelineLog, setPipelineLog] = useState<string[]>([]);
+  const [liveStats, setLiveStats] = useState<Record<string, string>>({});
 
   const resetState = useCallback(() => {
     setPreviewUrl(null);
@@ -238,6 +197,8 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
     setLoading(false);
     setPipelineProgress(0);
     setSelectedPerson(null);
+    setPipelineLog([]);
+    setLiveStats({});
   }, []);
 
   const processFile = useCallback(async (file: File) => {
@@ -254,6 +215,8 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
     setResult(null);
     setLoading(true);
     setPipelineProgress(0);
+    setPipelineLog([]);
+    setLiveStats({});
 
     // Show preview
     const reader = new FileReader();
@@ -277,7 +240,22 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
             const p = event.progress_data[0];
             setPipelineProgress(Math.round(p.progress * 100));
             if (p.desc) {
-              setStatusText(p.desc);
+              // Parse STAT: messages for live stats
+              if (p.desc.startsWith('STAT:')) {
+                const [statPart, ...msgParts] = p.desc.substring(5).split('|');
+                const displayMsg = msgParts.join('|');
+                // Parse stat key=value
+                const [key, val] = statPart.split('=');
+                if (key && val) {
+                  setLiveStats(prev => ({ ...prev, [key]: val }));
+                }
+                if (displayMsg) {
+                  setPipelineLog(prev => [...prev, displayMsg]);
+                  setStatusText(displayMsg);
+                }
+              } else {
+                setStatusText(p.desc);
+              }
             }
           }
         } else if (event.type === "data" && event.data) {
@@ -413,7 +391,7 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={previewUrl} alt="Preview" className="max-h-64 rounded-lg object-contain" />
                       {loading && (
-                        <div className="w-full max-w-md space-y-2">
+                        <div className="w-full max-w-md space-y-3">
                           {/* Progress bar */}
                           <div className="w-full h-1.5 bg-foreground/10 rounded-full overflow-hidden">
                             <div
@@ -421,7 +399,41 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
                               style={{ width: `${pipelineProgress}%` }}
                             />
                           </div>
-                          {/* Stage label */}
+
+                          {/* Live stats badges */}
+                          {Object.keys(liveStats).length > 0 && (
+                            <div className="flex items-center justify-center gap-2 flex-wrap">
+                              {liveStats.persons && (
+                                <span className="text-[10px] bg-accent-primary/15 text-accent-primary px-2 py-0.5 rounded-full font-medium tabular-nums">
+                                  {liveStats.persons} person{liveStats.persons !== '1' ? 's' : ''}
+                                </span>
+                              )}
+                              {liveStats.shoes && (
+                                <span className="text-[10px] bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-medium tabular-nums">
+                                  {liveStats.shoes} shoe{liveStats.shoes !== '1' ? 's' : ''}
+                                </span>
+                              )}
+                              {liveStats.depth === 'done' && (
+                                <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+                                  depth ✓
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Pipeline log terminal */}
+                          {pipelineLog.length > 0 && (
+                            <div className="bg-foreground/[0.03] border border-foreground/5 rounded-lg p-2 max-h-24 overflow-y-auto">
+                              {pipelineLog.map((msg, i) => (
+                                <div key={i} className="flex items-start gap-1.5 text-[10px] text-foreground/50 leading-relaxed">
+                                  <span className="text-emerald-400 mt-px shrink-0">✓</span>
+                                  <span>{msg}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Current stage */}
                           <div className="flex items-center justify-center gap-2 text-accent-primary">
                             <Loader2 size={14} className="animate-spin" />
                             <span className="text-xs tracking-wide">{statusText || 'Processing...'}</span>
@@ -453,130 +465,140 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
 
               {/* Results */}
               {result && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-500">
 
-                  {/* Overview images — compact row */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Overview strip: annotated + depth side by side, compact */}
+                  <div className="flex gap-2 h-36">
                     {result.annotated_image && (
-                      <div className="rounded-lg overflow-hidden border border-foreground/10 relative">
-                        <div className="absolute top-1.5 left-1.5 z-10 text-[7px] bg-black/70 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
-                          <ImageIcon size={8} /> Annotated
+                      <div className="flex-1 rounded-lg overflow-hidden border border-foreground/10 relative bg-black/20">
+                        <div className="absolute top-1 left-1 z-10 text-[7px] bg-black/70 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
+                          <ImageIcon size={7} /> Detect
                         </div>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={result.annotated_image} alt="Annotated" className="w-full h-auto object-contain bg-black/30" />
+                        <img src={result.annotated_image} alt="Annotated" className="w-full h-full object-contain" />
                       </div>
                     )}
                     {result.depth_map && (
-                      <div className="rounded-lg overflow-hidden border border-foreground/10 relative">
-                        <div className="absolute top-1.5 left-1.5 z-10 text-[7px] bg-black/70 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
-                          <Layers size={8} /> Depth
+                      <div className="flex-1 rounded-lg overflow-hidden border border-foreground/10 relative bg-black/20">
+                        <div className="absolute top-1 left-1 z-10 text-[7px] bg-black/70 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
+                          <Layers size={7} /> Depth
                         </div>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={result.depth_map} alt="Depth map" className="w-full h-auto object-contain bg-black/30" />
+                        <img src={result.depth_map} alt="Depth map" className="w-full h-full object-contain" />
                       </div>
                     )}
                   </div>
 
+                  {/* Summary bar */}
+                  <div className="text-[10px] uppercase tracking-widest opacity-40 text-foreground px-1">
+                    {result.persons?.length || 0} person{(result.persons?.length || 0) !== 1 ? 's' : ''} · {totalShoes} shoe{totalShoes !== 1 ? 's' : ''}
+                    {selectedPerson === null ? ' — tap to inspect' : ''}
+                  </div>
+
                   {/* Person navigation */}
                   {selectedPerson === null ? (
-                    // --- Person list view ---
-                    <div className="space-y-3">
-                      <div className="text-[10px] uppercase tracking-widest opacity-40 text-foreground px-1">
-                        {result.persons?.length || 0} person{(result.persons?.length || 0) !== 1 ? 's' : ''} • {totalShoes} shoe{totalShoes !== 1 ? 's' : ''} detected — select a person
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {result.persons?.map((person) => {
-                          const topBrand = person.shoes?.[0]?.brand || 'unknown';
-                          const topConf = person.shoes?.[0]?.confidence || 0;
-                          const brandColor = BRAND_COLORS[topBrand] || BRAND_COLORS.other;
-                          return (
-                            <button
-                              key={person.rank}
-                              onClick={() => setSelectedPerson(person.rank)}
-                              className="group relative rounded-xl border border-foreground/10 overflow-hidden bg-foreground/[0.02] hover:border-foreground/25 hover:bg-foreground/[0.05] transition-all text-left"
-                            >
-                              {/* Person thumbnail */}
-                              {person.person_crop_base64 && (
-                                <div className="aspect-[3/4] overflow-hidden bg-black/20">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={person.person_crop_base64}
-                                    alt={`Person ${person.rank}`}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                </div>
-                              )}
-                              {/* Info overlay */}
-                              <div className="p-2.5 space-y-1">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/70">Person {person.rank}</span>
-                                  <ChevronRight size={12} className="opacity-30 group-hover:opacity-70 transition-opacity text-foreground" />
-                                </div>
-                                <div className="flex items-center gap-1.5">
+                    // --- Person grid ---
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {result.persons?.map((person) => {
+                        const leftShoe = person.shoes?.find(s => s.side === 'Left');
+                        const rightShoe = person.shoes?.find(s => s.side === 'Right');
+                        const topShoe = person.shoes?.[0];
+                        const topBrand = topShoe?.brand || 'unknown';
+                        const brandColor = BRAND_COLORS[topBrand] || BRAND_COLORS.other;
+                        return (
+                          <button
+                            key={person.rank}
+                            onClick={() => setSelectedPerson(person.rank)}
+                            className="group rounded-lg border border-foreground/10 overflow-hidden bg-foreground/[0.02] hover:border-foreground/20 transition-all text-left"
+                          >
+                            {/* Person thumbnail */}
+                            {person.person_crop_base64 && (
+                              <div className="aspect-[4/5] overflow-hidden bg-black/20">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={person.person_crop_base64} alt={`Person ${person.rank}`}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              </div>
+                            )}
+                            <div className="p-1.5 space-y-0.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/60">P{person.rank}</span>
+                                <div className="flex items-center gap-1">
                                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: brandColor }} />
-                                  <span className="text-[9px] font-bold uppercase" style={{ color: brandColor }}>{topBrand}</span>
-                                  <span className="text-[9px] opacity-40 text-foreground">{(topConf * 100).toFixed(0)}%</span>
-                                </div>
-                                <div className="text-[8px] opacity-30 text-foreground">
-                                  {person.shoes?.length || 0} shoe{(person.shoes?.length || 0) !== 1 ? 's' : ''}
+                                  <span className="text-[8px] font-bold uppercase" style={{ color: brandColor }}>{topBrand}</span>
                                 </div>
                               </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                              {/* L/R indicator */}
+                              <div className="flex items-center gap-1 text-[7px] text-foreground/40">
+                                <span className={leftShoe ? 'text-foreground/70 font-bold' : 'opacity-30'}>L</span>
+                                <span>|</span>
+                                <span className={rightShoe ? 'text-foreground/70 font-bold' : 'opacity-30'}>R</span>
+                                <ChevronRight size={9} className="ml-auto opacity-0 group-hover:opacity-50 transition-opacity text-foreground" />
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   ) : (
-                    // --- Person detail view ---
+                    // --- Person detail: side-by-side left/right ---
                     (() => {
                       const person = result.persons?.find(p => p.rank === selectedPerson);
                       if (!person) return null;
                       const personIdx = result.persons?.findIndex(p => p.rank === selectedPerson) ?? 0;
                       const prevPerson = result.persons?.[personIdx - 1];
                       const nextPerson = result.persons?.[personIdx + 1];
+                      const leftShoe = person.shoes?.find(s => s.side === 'Left');
+                      const rightShoe = person.shoes?.find(s => s.side === 'Right');
+
                       return (
-                        <div className="space-y-4">
-                          {/* Back + nav bar */}
+                        <div className="space-y-3">
+                          {/* Nav bar */}
                           <div className="flex items-center justify-between">
-                            <button
-                              onClick={() => setSelectedPerson(null)}
-                              className="flex items-center gap-1.5 text-xs text-foreground/60 hover:text-foreground transition-colors"
-                            >
+                            <button onClick={() => setSelectedPerson(null)}
+                              className="flex items-center gap-1 text-xs text-foreground/50 hover:text-foreground transition-colors">
                               <ChevronLeft size={14} />
-                              <span className="uppercase tracking-wider text-[10px]">All Persons</span>
+                              <span className="text-[10px] uppercase tracking-wider">Back</span>
                             </button>
                             <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50">
-                                Person {person.rank}
-                              </span>
                               {prevPerson && (
-                                <button
-                                  onClick={() => setSelectedPerson(prevPerson.rank)}
-                                  className="p-1 hover:bg-foreground/10 rounded transition-colors text-foreground/40 hover:text-foreground"
-                                >
+                                <button onClick={() => setSelectedPerson(prevPerson.rank)}
+                                  className="p-1 hover:bg-foreground/10 rounded text-foreground/40 hover:text-foreground transition-colors">
                                   <ChevronLeft size={14} />
                                 </button>
                               )}
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 px-1">
+                                Person {person.rank}
+                              </span>
                               {nextPerson && (
-                                <button
-                                  onClick={() => setSelectedPerson(nextPerson.rank)}
-                                  className="p-1 hover:bg-foreground/10 rounded transition-colors text-foreground/40 hover:text-foreground"
-                                >
+                                <button onClick={() => setSelectedPerson(nextPerson.rank)}
+                                  className="p-1 hover:bg-foreground/10 rounded text-foreground/40 hover:text-foreground transition-colors">
                                   <ChevronRight size={14} />
                                 </button>
                               )}
                             </div>
                           </div>
 
-                          {/* Shoe cards for this person */}
-                          <div className="space-y-3">
-                            {person.shoes?.map((shoe, shoeIdx) => (
-                              <ShoeCard key={`${person.rank}-${shoeIdx}`} shoe={shoe} personRank={person.rank} />
-                            ))}
-                            {(!person.shoes || person.shoes.length === 0) && (
-                              <div className="text-center py-8 text-foreground/30 text-sm">No shoes detected for this person</div>
+                          {/* Left / Right shoe split */}
+                          <div className="flex gap-3">
+                            {leftShoe ? (
+                              <ShoeSideCard shoe={leftShoe} label="👟 Left Foot" />
+                            ) : (
+                              <div className="flex-1 border border-dashed border-foreground/10 rounded-lg flex items-center justify-center py-8">
+                                <span className="text-[10px] text-foreground/25 uppercase tracking-widest">No left shoe</span>
+                              </div>
+                            )}
+                            {rightShoe ? (
+                              <ShoeSideCard shoe={rightShoe} label="👟 Right Foot" />
+                            ) : (
+                              <div className="flex-1 border border-dashed border-foreground/10 rounded-lg flex items-center justify-center py-8">
+                                <span className="text-[10px] text-foreground/25 uppercase tracking-widest">No right shoe</span>
+                              </div>
                             )}
                           </div>
+
+                          {(!person.shoes || person.shoes.length === 0) && (
+                            <div className="text-center py-6 text-foreground/30 text-sm">No shoes detected</div>
+                          )}
                         </div>
                       );
                     })()
