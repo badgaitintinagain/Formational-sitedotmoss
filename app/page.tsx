@@ -7,6 +7,7 @@ import CalendarTile from "@/components/CalendarTile";
 import ClockTile from "@/components/ClockTile";
 import AIChatTile from "@/components/MicronversationTile";
 import ShoeDemoTile from "@/components/ShoeDemoTile";
+import NextWbcTile from "@/components/NextWbcTile";
 import BlogTile from "@/components/BlogTile";
 import SettingsModal from "@/components/SettingsModal";
 import ProfileButton from "@/components/ProfileButton";
@@ -65,7 +66,8 @@ const Home = () => {
         title: "AI Lab",
         tiles: [
           { id: 'aicat', size: '2x2', component: AIChatTile },
-          { id: 'shoedemo', size: '2x2', component: ShoeDemoTile }
+          { id: 'shoedemo', size: '2x2', component: ShoeDemoTile },
+          { id: 'nextwbc', size: '2x1', component: NextWbcTile }
         ]
       },
       {
