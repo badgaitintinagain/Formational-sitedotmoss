@@ -305,7 +305,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
 
         {/* Footer */}
         <div className="p-6 text-center border-t border-foreground/5 opacity-30 mt-auto flex-shrink-0">
-          <p className="text-[8px] uppercase tracking-[0.3em] text-foreground">Site Dot Moss © 2026</p>
+          <p className="text-[8px] uppercase tracking-[0.3em] text-foreground">site(.)moss, Built by Moss. Refined by Claude. (NextJS, React, Turso SQLite and Huggingface)</p>
         </div>
       </div>
       

@@ -141,7 +141,7 @@ const Home = () => {
                 <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1 text-foreground">
                   {group.title}
                 </h2>
-                <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[22.5rem] w-max">
+                <div className="grid grid-rows-5 grid-flow-col gap-1.5 h-[21.5rem] w-max">
                   {group.tiles.map((tile) => {
                     if (tile.component) {
                       const Component = tile.component;
