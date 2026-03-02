@@ -38,6 +38,8 @@ interface InferenceResult {
 
 interface GradioClient {
   predict: (endpoint: string, data: unknown[]) => Promise<{ data: unknown[] }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  submit: (endpoint: string, data: unknown[]) => AsyncIterable<any>;
 }
 
 interface ShoeDemoProps {
@@ -195,12 +197,15 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
     }
   }, [isOpen]);
 
+  const [pipelineProgress, setPipelineProgress] = useState(0);
+
   const resetState = useCallback(() => {
     setPreviewUrl(null);
     setResult(null);
     setError(null);
     setStatusText('');
     setLoading(false);
+    setPipelineProgress(0);
   }, []);
 
   const processFile = useCallback(async (file: File) => {
@@ -216,6 +221,7 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
     setError(null);
     setResult(null);
     setLoading(true);
+    setPipelineProgress(0);
 
     // Show preview
     const reader = new FileReader();
@@ -226,14 +232,34 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
       setStatusText('Connecting to model...');
       const client = await getClient();
 
-      setStatusText('Running inference pipeline...');
-      const response = await client.predict("/predict", [file]);
+      setStatusText('Starting pipeline...');
+      const job = client!.submit("/predict", [file]);
 
-      if (response?.data?.[0]) {
-        const data = response.data[0] as InferenceResult;
-        setResult(data);
-        setStatusText('');
-      } else {
+      let gotResult = false;
+      for await (const event of job) {
+        if (event.type === "status") {
+          if (event.stage === "error") {
+            throw new Error("Pipeline failed");
+          }
+          if (event.progress_data && event.progress_data.length > 0) {
+            const p = event.progress_data[0];
+            setPipelineProgress(Math.round(p.progress * 100));
+            if (p.desc) {
+              setStatusText(p.desc);
+            }
+          }
+        } else if (event.type === "data" && event.data) {
+          if (event.data[0]) {
+            const data = event.data[0] as InferenceResult;
+            setResult(data);
+            setStatusText('');
+            setPipelineProgress(100);
+            gotResult = true;
+          }
+        }
+      }
+
+      if (!gotResult) {
         throw new Error('No result returned from model');
       }
     } catch (err: unknown) {
@@ -355,9 +381,20 @@ const ShoeDemoTile: React.FC<ShoeDemoProps> = ({ size = '2x2', accent = 'seconda
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={previewUrl} alt="Preview" className="max-h-64 rounded-lg object-contain" />
                       {loading && (
-                        <div className="flex items-center gap-2 text-accent-primary">
-                          <Loader2 size={16} className="animate-spin" />
-                          <span className="text-xs uppercase tracking-widest">{statusText || 'Processing...'}</span>
+                        <div className="w-full max-w-md space-y-2">
+                          {/* Progress bar */}
+                          <div className="w-full h-1.5 bg-foreground/10 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-accent-primary rounded-full transition-all duration-500 ease-out"
+                              style={{ width: `${pipelineProgress}%` }}
+                            />
+                          </div>
+                          {/* Stage label */}
+                          <div className="flex items-center justify-center gap-2 text-accent-primary">
+                            <Loader2 size={14} className="animate-spin" />
+                            <span className="text-xs tracking-wide">{statusText || 'Processing...'}</span>
+                            <span className="text-[10px] opacity-50 tabular-nums">{pipelineProgress}%</span>
+                          </div>
                         </div>
                       )}
                     </div>
