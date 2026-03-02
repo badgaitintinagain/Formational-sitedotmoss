@@ -1,0 +1,11 @@
+# Hawk WBC Detection — Dependencies
+# Hardware: GPU recommended (T4 or better). CPU works but slower.
+
+torch>=2.0
+torchvision>=0.15
+opencv-python-headless>=4.8
+numpy>=1.24
+Pillow>=10.0
+
+# Detection (YOLO-based)
+ultralytics>=8.0

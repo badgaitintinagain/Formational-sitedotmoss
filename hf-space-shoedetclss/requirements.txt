@@ -1,0 +1,19 @@
+# Shoe Brand Classification Demo — Dependencies
+# Hardware: GPU recommended (T4 or better). CPU works but slow.
+
+torch>=2.0
+torchvision>=0.15
+opencv-python-headless>=4.8
+numpy>=1.24
+Pillow>=10.0
+
+# Detection & Pose (all YOLO-based, CPU compatible)
+ultralytics>=8.0
+
+# Classification
+timm>=0.9
+open_clip_torch>=2.20
+transformers>=4.35
+
+# Depth estimation (MiDaS via transformers — already listed above)
+scipy
