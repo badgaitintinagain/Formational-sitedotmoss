@@ -293,9 +293,9 @@ const NextWbcTile: React.FC<NextWbcProps> = ({ size = '2x1', accent = 'primary',
               <div className="flex items-center gap-3">
                 <Microscope className="text-accent-primary" />
                 <div>
-                  <h2 className="text-xl font-light tracking-tight text-foreground">Hawk WBC Detection</h2>
+                  <h2 className="text-xl font-light tracking-tight text-foreground">NextWBC</h2>
                   <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">
-                    6-class white blood cell detection in avian blood smears
+                    6-class white blood cell detection in avian blood smears // from capstone project by badgaitintin on Hugging Face Spaces
                   </p>
                 </div>
               </div>
@@ -491,7 +491,7 @@ const NextWbcTile: React.FC<NextWbcProps> = ({ size = '2x1', accent = 'primary',
             <div className="px-5 py-3 border-t border-foreground/5 bg-foreground/[0.03]">
               <div className="flex items-center justify-between">
                 <p className="text-[9px] uppercase tracking-widest opacity-30 text-foreground">
-                  YOLOv8 → 6-Class WBC Detection (Heterophil · Eosinophil · Basophil · Lymphocyte · Monocyte · Thrombocyte)
+                  YOLO12 → 6-Class WBC Detection (Heterophil · Eosinophil · Basophil · Lymphocyte · Monocyte · Thrombocyte)
                 </p>
                 <p className="text-[9px] uppercase tracking-widest opacity-30 text-foreground">
                   Running on HF Space
