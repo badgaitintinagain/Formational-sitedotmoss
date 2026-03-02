@@ -319,7 +319,7 @@ const NextWbcTile: React.FC<NextWbcProps> = ({ size = '2x1', accent = 'primary',
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin scrollbar-thumb-foreground/10 scrollbar-track-transparent">
+            <div className="flex-1 overflow-hidden p-5 flex flex-col gap-4">
 
               {/* Upload Area */}
               {!result && (
@@ -387,78 +387,48 @@ const NextWbcTile: React.FC<NextWbcProps> = ({ size = '2x1', accent = 'primary',
 
               {/* Results */}
               {result && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                <div className="flex-1 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500 min-h-0">
 
-                  {/* Annotated image */}
-                  <div className="flex gap-3">
+                  {/* Top row: Annotated image + Stats side by side */}
+                  <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0">
+                    {/* Annotated image */}
                     {result.annotated_image && (
-                      <div className="flex-1 rounded-lg overflow-hidden border border-foreground/10 relative bg-black/20">
+                      <div className="flex-1 rounded-lg overflow-hidden border border-foreground/10 relative bg-black/20 min-h-0">
                         <div className="absolute top-1.5 left-1.5 z-10 text-[7px] bg-black/70 text-white px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
                           <ImageIcon size={7} /> Detection
                         </div>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={result.annotated_image} alt="Annotated" className="w-full h-auto object-contain" />
+                        <img src={result.annotated_image} alt="Annotated" className="w-full h-full object-contain" />
                       </div>
                     )}
+
+                    {/* Stats panel */}
+                    <div className="w-full md:w-72 shrink-0 flex flex-col gap-3">
+                      {/* Total count badge */}
+                      <div className="flex flex-col items-center justify-center px-4 py-3 border border-foreground/10 rounded-xl bg-foreground/[0.02]">
+                        <span className="text-3xl font-light tabular-nums text-foreground">{result.total_cells}</span>
+                        <span className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mt-1">
+                          Cells Detected
+                        </span>
+                      </div>
+
+                      {/* Class distribution bars */}
+                      <div className="flex-1 border border-foreground/10 rounded-xl bg-foreground/[0.02] p-4">
+                        <div className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mb-3">
+                          Cell Distribution
+                        </div>
+                        <CountBar counts={result.class_counts} total={result.total_cells} />
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Summary + counts */}
-                  <div className="flex flex-col md:flex-row gap-4">
-                    {/* Total count badge */}
-                    <div className="flex flex-col items-center justify-center px-6 py-4 border border-foreground/10 rounded-xl bg-foreground/[0.02]">
-                      <span className="text-3xl font-light tabular-nums text-foreground">{result.total_cells}</span>
-                      <span className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mt-1">
-                        Cells Detected
-                      </span>
-                    </div>
-
-                    {/* Class distribution bars */}
-                    <div className="flex-1 border border-foreground/10 rounded-xl bg-foreground/[0.02] p-4">
-                      <div className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mb-3">
-                        Cell Distribution
-                      </div>
-                      <CountBar counts={result.class_counts} total={result.total_cells} />
-                    </div>
-                  </div>
-
-                  {/* Differential percentage table */}
-                  {result.total_cells > 0 && (
-                    <div className="border border-foreground/10 rounded-xl bg-foreground/[0.02] p-4">
-                      <div className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mb-3">
-                        Differential (%)
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {CLASSES.map((cls) => {
-                          const count = result.class_counts[cls] || 0;
-                          const pct = result.total_cells > 0 ? ((count / result.total_cells) * 100) : 0;
-                          const color = CLASS_COLORS[cls];
-                          return (
-                            <div
-                              key={cls}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-foreground/5"
-                              style={{ backgroundColor: `${color}08` }}
-                            >
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>
-                                {CLASS_LABELS[cls]}
-                              </span>
-                              <span className="text-[11px] font-bold tabular-nums text-foreground/70">
-                                {pct.toFixed(1)}%
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Individual cell crops */}
                   {result.cells && result.cells.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="text-[9px] uppercase tracking-widest opacity-40 text-foreground">
+                    <div className="shrink-0">
+                      <div className="text-[9px] uppercase tracking-widest opacity-40 text-foreground mb-2">
                         Detected Cells ({result.cells.length})
                       </div>
-                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5">
                         {visibleCells.map((cell) => (
                           <CellCard key={cell.id} cell={cell} />
                         ))}
@@ -466,7 +436,7 @@ const NextWbcTile: React.FC<NextWbcProps> = ({ size = '2x1', accent = 'primary',
                       {hasMoreCells && (
                         <button
                           onClick={() => setShowAllCells(!showAllCells)}
-                          className="flex items-center gap-1.5 mx-auto text-[10px] uppercase tracking-wider text-foreground/40 hover:text-foreground/70 transition-colors py-2"
+                          className="flex items-center gap-1.5 mx-auto text-[10px] uppercase tracking-wider text-foreground/40 hover:text-foreground/70 transition-colors py-1.5"
                         >
                           {showAllCells ? (
                             <>
