@@ -6,12 +6,13 @@ import AdTile from "@/components/AdTile";
 import CalendarTile from "@/components/CalendarTile";
 import ClockTile from "@/components/ClockTile";
 import AIChatTile from "@/components/MicronversationTile";
+import ShoeDemoTile from "@/components/ShoeDemoTile";
 import BlogTile from "@/components/BlogTile";
 import SettingsModal from "@/components/SettingsModal";
 import ProfileButton from "@/components/ProfileButton";
 import gsap from "gsap";
 import { 
-  Settings, Package, Users, PenTool, LucideIcon
+  Settings, Package, Users, PenTool, StickyNote, LucideIcon
 } from "lucide-react";
 
 // --- Types ---
@@ -62,7 +63,10 @@ const Home = () => {
       },
       {
         title: "AI Lab",
-        tiles: [{ id: 'aicat', size: '2x2', component: AIChatTile }]
+        tiles: [
+          { id: 'aicat', size: '2x2', component: AIChatTile },
+          { id: 'shoedemo', size: '2x2', component: ShoeDemoTile }
+        ]
       },
       {
         title: "Work & Focus",
@@ -70,6 +74,7 @@ const Home = () => {
           { id: 'blog', size: '2x2', component: BlogTile, label: 'Blog' },
           { id: 'tasks', size: '2x2', label: 'Tasks', icon: PenTool, accent: 'secondary', opacity: 40 },
           { id: 'files', size: '1x1', label: 'Files', icon: Package, accent: 'primary', opacity: 25 },
+          { id: 'notes', size: '1x1', label: 'Notes', icon: StickyNote, accent: 'secondary', opacity: 35 },
           { id: 'project', size: '2x3', label: 'Project Alpha', accent: 'secondary', opacity: 50 },
           { id: 'team', size: '2x2', label: 'Team', icon: Users, accent: 'primary', opacity: 35 }
         ]
