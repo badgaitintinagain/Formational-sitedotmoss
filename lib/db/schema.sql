@@ -71,3 +71,17 @@ CREATE INDEX IF NOT EXISTS idx_comments_parent ON comments(parent_id);
 CREATE INDEX IF NOT EXISTS idx_comments_status ON comments(status);
 CREATE INDEX IF NOT EXISTS idx_post_likes_post ON post_likes(post_id);
 CREATE INDEX IF NOT EXISTS idx_post_likes_user ON post_likes(user_id, post_id);
+
+-- Resources Table
+CREATE TABLE IF NOT EXISTS resources (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT NOT NULL,
+  public_id TEXT NOT NULL,
+  category TEXT DEFAULT 'general',
+  uploaded_by TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch())
+);
+
+CREATE INDEX IF NOT EXISTS idx_resources_category ON resources(category, created_at DESC);

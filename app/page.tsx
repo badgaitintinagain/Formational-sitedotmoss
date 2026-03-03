@@ -9,11 +9,12 @@ import AIChatTile from "@/components/MicronversationTile";
 import ShoeDemoTile from "@/components/ShoeDemoTile";
 import NextWbcTile from "@/components/NextWbcTile";
 import BlogTile from "@/components/BlogTile";
+import ResourceTile from "@/components/ResourceTile";
 import SettingsModal from "@/components/SettingsModal";
 import ProfileButton from "@/components/ProfileButton";
 import gsap from "gsap";
 import { 
-  Settings, Package, Users, PenTool, StickyNote, LucideIcon
+  Settings, Users, PenTool, StickyNote, LucideIcon
 } from "lucide-react";
 
 // --- Types ---
@@ -75,7 +76,7 @@ const Home = () => {
         tiles: [
           { id: 'blog', size: '2x2', component: BlogTile, label: 'Blog' },
           { id: 'tasks', size: '2x2', label: 'Tasks', icon: PenTool, accent: 'secondary', opacity: 40 },
-          { id: 'files', size: '1x1', label: 'Files', icon: Package, accent: 'primary', opacity: 25 },
+          { id: 'resources', size: '1x1', component: ResourceTile, accent: 'primary', opacity: 25 },
           { id: 'notes', size: '1x1', label: 'Notes', icon: StickyNote, accent: 'secondary', opacity: 35 },
           { id: 'project', size: '2x3', label: 'Project Alpha', accent: 'secondary', opacity: 50 },
           { id: 'team', size: '2x2', label: 'Team', icon: Users, accent: 'primary', opacity: 35 }

@@ -68,6 +68,20 @@ export const users = sqliteTable("users", {
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
+// Resources Table (admin-uploaded files for users)
+export const resources = sqliteTable("resources", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  publicId: text("public_id").notNull(),
+  category: text("category").default("general"),
+  uploadedBy: text("uploaded_by").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+}, (table) => ([
+  index("idx_resources_category").on(table.category, table.createdAt),
+]));
+
 // Type exports
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
@@ -77,3 +91,5 @@ export type PostLike = typeof postLikes.$inferSelect;
 export type NewPostLike = typeof postLikes.$inferInsert;
 export type Reaction = typeof reactions.$inferSelect;
 export type User = typeof users.$inferSelect;
+export type Resource = typeof resources.$inferSelect;
+export type NewResource = typeof resources.$inferInsert;
