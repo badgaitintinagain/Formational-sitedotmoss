@@ -170,17 +170,20 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8" onClick={closeModal}>
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 md:p-8" onClick={closeModal}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
           <div
             ref={modalRef}
-            className="relative w-full max-w-4xl h-[80vh] bg-background border border-foreground/10 rounded-2xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-xl"
+            className="relative w-full sm:max-w-4xl h-[95dvh] sm:h-[80vh] bg-background border-t sm:border border-foreground/10 rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Drag handle (mobile) */}
+            <div className="sm:hidden w-10 h-1 bg-foreground/20 rounded-full mx-auto mt-2 mb-1 flex-shrink-0" />
+
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-foreground/10 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-foreground/10 flex-shrink-0">
               <div>
-                <h2 className="text-lg font-bold text-foreground">Resources</h2>
+                <h2 className="text-base sm:text-lg font-bold text-foreground">Resources</h2>
                 <p className="text-[10px] uppercase tracking-widest opacity-40 text-foreground">Save & use in AI Lab</p>
               </div>
               <div className="flex items-center gap-2">
@@ -207,20 +210,20 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
 
             {/* Admin Upload Form */}
             {isAdmin && showUploadForm && (
-              <form onSubmit={handleUpload} className="px-6 py-4 border-b border-foreground/10 flex-shrink-0">
-                <div className="flex gap-4">
+              <form onSubmit={handleUpload} className="px-4 sm:px-6 py-3 sm:py-4 border-b border-foreground/10 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   {/* Image Drop Area */}
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-shrink-0 w-28 h-28 rounded-xl border-2 border-dashed border-foreground/20 hover:border-foreground/40 transition-colors overflow-hidden flex items-center justify-center bg-foreground/5"
+                    className="flex-shrink-0 w-full h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-dashed border-foreground/20 hover:border-foreground/40 transition-colors overflow-hidden flex items-center justify-center bg-foreground/5"
                   >
                     {uploadPreviewUrl ? (
                       <Image src={uploadPreviewUrl} alt="Preview" width={112} height={112} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="flex flex-col items-center gap-1 text-foreground/30">
+                      <div className="flex items-center sm:flex-col gap-2 sm:gap-1 text-foreground/30">
                         <Upload size={20} />
-                        <span className="text-[8px] uppercase tracking-widest font-bold">Image</span>
+                        <span className="text-[9px] sm:text-[8px] uppercase tracking-widest font-bold">Choose Image</span>
                       </div>
                     )}
                   </button>
@@ -252,7 +255,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
                     <div className="flex gap-2 items-center">
                       <input
                         type="text"
-                        placeholder="Category (e.g. cell, microscopy)"
+                        placeholder="Category"
                         value={uploadCategory}
                         onChange={(e) => setUploadCategory(e.target.value)}
                         className="flex-1 px-3 py-2 text-sm rounded-lg bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/30 outline-none focus:border-foreground/30"
@@ -275,7 +278,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
             )}
 
             {/* Search + Category Chips */}
-            <div className="px-6 py-3 border-b border-foreground/10 flex-shrink-0 flex flex-col gap-2">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-b border-foreground/10 flex-shrink-0 flex flex-col gap-2">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30" />
                 <input
@@ -306,33 +309,33 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <Loader2 size={24} className="animate-spin opacity-30 text-foreground" />
                 </div>
               ) : preview ? (
                 /* Preview Mode */
-                <div className="flex flex-col items-center gap-5 h-full">
+                <div className="flex flex-col items-center gap-4 sm:gap-5">
                   <button
                     onClick={() => setPreview(null)}
                     className="self-start text-[10px] uppercase tracking-widest font-bold text-foreground/40 hover:text-foreground transition-colors"
                   >
                     ← Back
                   </button>
-                  <div className="relative w-full max-w-md aspect-square rounded-xl overflow-hidden border border-foreground/10 flex-shrink-0">
+                  <div className="relative w-full max-w-xs sm:max-w-md aspect-square rounded-xl overflow-hidden border border-foreground/10 flex-shrink-0">
                     <Image
                       src={preview.imageUrl}
                       alt={preview.title}
                       fill
                       className="object-contain bg-foreground/5"
-                      sizes="(max-width: 640px) 100vw, 448px"
+                      sizes="(max-width: 640px) 90vw, 448px"
                     />
                   </div>
                   <div className="text-center">
-                    <h3 className="font-bold text-foreground text-lg">{preview.title}</h3>
+                    <h3 className="font-bold text-foreground text-base sm:text-lg">{preview.title}</h3>
                     {preview.description && (
-                      <p className="text-sm text-foreground/50 mt-1">{preview.description}</p>
+                      <p className="text-xs sm:text-sm text-foreground/50 mt-1">{preview.description}</p>
                     )}
                     {preview.category && (
                       <span className="inline-block mt-2 px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold rounded-full border border-foreground/10 text-foreground/40">
@@ -340,17 +343,17 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
                       </span>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pb-4">
                     <button
                       onClick={() => handleSave(preview)}
-                      className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-foreground text-background hover:opacity-80 transition-opacity"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-foreground text-background hover:opacity-80 transition-opacity"
                     >
-                      <Download size={14} /> Save Image
+                      <Download size={14} /> Save
                     </button>
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(preview.id)}
-                        className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors"
                       >
                         <Trash2 size={14} /> Delete
                       </button>
@@ -366,7 +369,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
                 </div>
               ) : (
                 /* Grid View — fixed square thumbnails */
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                   {filteredResources.map((resource) => (
                     <button
                       key={resource.id}
@@ -378,10 +381,10 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
                         alt={resource.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 33vw, 20vw"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <span className="absolute bottom-1.5 left-2 right-2 text-[9px] font-bold text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity truncate drop-shadow-sm">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" />
+                      <span className="absolute bottom-1.5 left-2 right-2 text-[9px] font-bold text-white uppercase tracking-wider sm:opacity-0 sm:group-hover:opacity-100 transition-opacity truncate drop-shadow-sm">
                         {resource.title}
                       </span>
                     </button>
