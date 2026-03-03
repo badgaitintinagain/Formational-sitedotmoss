@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Tile from './Tile';
-import { FolderOpen, X, Upload, Trash2, Download, Loader2 } from 'lucide-react';
+import { FolderOpen, X, Upload, Trash2, Download, Loader2, Search, Plus } from 'lucide-react';
 
 interface Resource {
   id: string;
@@ -20,31 +20,29 @@ interface ResourceTileProps {
   opacity?: number;
 }
 
-const CATEGORIES = ['general', 'cell', 'microscopy', 'dataset', 'model'];
-
 const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'primary', opacity = 25 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [preview, setPreview] = useState<Resource | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Upload form state
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadDesc, setUploadDesc] = useState('');
-  const [uploadCategory, setUploadCategory] = useState('general');
+  const [uploadCategory, setUploadCategory] = useState('');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
 
   const fetchResources = useCallback(async () => {
     setLoading(true);
     try {
-      const url = selectedCategory
-        ? `/api/resources?category=${encodeURIComponent(selectedCategory)}`
-        : '/api/resources';
-      const res = await fetch(url);
+      const res = await fetch('/api/resources');
       const data = await res.json();
       setResources(data.resources || []);
     } catch {
@@ -52,7 +50,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -60,6 +58,14 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
       checkAdmin();
     }
   }, [isOpen, fetchResources]);
+
+  // Generate upload preview
+  useEffect(() => {
+    if (!uploadFile) { setUploadPreviewUrl(null); return; }
+    const url = URL.createObjectURL(uploadFile);
+    setUploadPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [uploadFile]);
 
   const checkAdmin = async () => {
     try {
@@ -71,6 +77,20 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
     }
   };
 
+  // Filter resources by search query (title, description, category)
+  const filteredResources = resources.filter(r => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      r.title.toLowerCase().includes(q) ||
+      (r.description?.toLowerCase().includes(q)) ||
+      (r.category?.toLowerCase().includes(q))
+    );
+  });
+
+  // Get unique categories from existing resources
+  const categories = Array.from(new Set(resources.map(r => r.category).filter(Boolean) as string[]));
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadFile || !uploadTitle.trim()) return;
@@ -81,7 +101,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
       formData.append('file', uploadFile);
       formData.append('title', uploadTitle.trim());
       if (uploadDesc.trim()) formData.append('description', uploadDesc.trim());
-      formData.append('category', uploadCategory);
+      if (uploadCategory.trim()) formData.append('category', uploadCategory.trim());
 
       const res = await fetch('/api/resources', { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Upload failed');
@@ -89,7 +109,7 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
       // Reset form & refresh
       setUploadTitle('');
       setUploadDesc('');
-      setUploadCategory('general');
+      setUploadCategory('');
       setUploadFile(null);
       setShowUploadForm(false);
       fetchResources();
@@ -126,9 +146,15 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch {
-      // Fallback: open in new tab
       window.open(resource.imageUrl, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+    setPreview(null);
+    setShowUploadForm(false);
+    setSearchQuery('');
   };
 
   return (
@@ -144,30 +170,35 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => { setIsOpen(false); setPreview(null); }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8" onClick={closeModal}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
           <div
-            className="relative z-10 w-full max-w-2xl max-h-[85vh] bg-[#F2EBE3] dark:bg-[#1A1410] rounded-2xl border border-white/20 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col"
+            ref={modalRef}
+            className="relative w-full max-w-4xl h-[80vh] bg-background border border-foreground/10 rounded-2xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10 flex-shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-foreground/10 flex-shrink-0">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Resources</h2>
-                <p className="text-[10px] uppercase tracking-widest opacity-50 text-foreground">Save & use in AI Lab</p>
+                <p className="text-[10px] uppercase tracking-widest opacity-40 text-foreground">Save & use in AI Lab</p>
               </div>
               <div className="flex items-center gap-2">
                 {isAdmin && (
                   <button
                     onClick={() => setShowUploadForm(!showUploadForm)}
-                    className="p-2 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-foreground"
+                    className={`p-2 rounded-xl border transition-colors ${
+                      showUploadForm
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-foreground/5 border-foreground/10 hover:bg-foreground/10 text-foreground'
+                    }`}
                   >
-                    <Upload size={16} />
+                    <Plus size={16} />
                   </button>
                 )}
                 <button
-                  onClick={() => { setIsOpen(false); setPreview(null); }}
-                  className="p-2 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-foreground"
+                  onClick={closeModal}
+                  className="p-2 rounded-xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-colors text-foreground"
                 >
                   <X size={16} />
                 </button>
@@ -176,150 +207,181 @@ const ResourceTile: React.FC<ResourceTileProps> = ({ size = '1x1', accent = 'pri
 
             {/* Admin Upload Form */}
             {isAdmin && showUploadForm && (
-              <form onSubmit={handleUpload} className="p-4 border-b border-black/10 dark:border-white/10 flex flex-col gap-3 flex-shrink-0">
-                <input
-                  type="text"
-                  placeholder="Title *"
-                  value={uploadTitle}
-                  onChange={(e) => setUploadTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-foreground placeholder:opacity-40 outline-none focus:ring-1 focus:ring-black/20 dark:focus:ring-white/20"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Description (optional)"
-                  value={uploadDesc}
-                  onChange={(e) => setUploadDesc(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-foreground placeholder:opacity-40 outline-none focus:ring-1 focus:ring-black/20 dark:focus:ring-white/20"
-                />
-                <div className="flex gap-2">
-                  <select
-                    value={uploadCategory}
-                    onChange={(e) => setUploadCategory(e.target.value)}
-                    className="px-3 py-2 text-sm rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-foreground outline-none"
+              <form onSubmit={handleUpload} className="px-6 py-4 border-b border-foreground/10 flex-shrink-0">
+                <div className="flex gap-4">
+                  {/* Image Drop Area */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-shrink-0 w-28 h-28 rounded-xl border-2 border-dashed border-foreground/20 hover:border-foreground/40 transition-colors overflow-hidden flex items-center justify-center bg-foreground/5"
                   >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                    {uploadPreviewUrl ? (
+                      <Image src={uploadPreviewUrl} alt="Preview" width={112} height={112} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-foreground/30">
+                        <Upload size={20} />
+                        <span className="text-[8px] uppercase tracking-widest font-bold">Image</span>
+                      </div>
+                    )}
+                  </button>
                   <input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                    className="flex-1 text-sm text-foreground file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-black/10 dark:file:bg-white/10 file:text-foreground hover:file:bg-black/20 dark:hover:file:bg-white/20"
-                    required
+                    className="hidden"
                   />
+
+                  {/* Fields */}
+                  <div className="flex-1 flex flex-col gap-2">
+                    <input
+                      type="text"
+                      placeholder="Title"
+                      value={uploadTitle}
+                      onChange={(e) => setUploadTitle(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/30 outline-none focus:border-foreground/30"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Description (optional)"
+                      value={uploadDesc}
+                      onChange={(e) => setUploadDesc(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/30 outline-none focus:border-foreground/30"
+                    />
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        placeholder="Category (e.g. cell, microscopy)"
+                        value={uploadCategory}
+                        onChange={(e) => setUploadCategory(e.target.value)}
+                        className="flex-1 px-3 py-2 text-sm rounded-lg bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/30 outline-none focus:border-foreground/30"
+                        list="category-suggestions"
+                      />
+                      <datalist id="category-suggestions">
+                        {categories.map(cat => <option key={cat} value={cat} />)}
+                      </datalist>
+                      <button
+                        type="submit"
+                        disabled={uploading || !uploadFile || !uploadTitle.trim()}
+                        className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-foreground text-background hover:opacity-80 transition-opacity disabled:opacity-30 whitespace-nowrap"
+                      >
+                        {uploading ? <Loader2 size={14} className="animate-spin" /> : 'Upload'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  type="submit"
-                  disabled={uploading || !uploadFile || !uploadTitle.trim()}
-                  className="self-end px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-foreground text-background hover:opacity-80 transition-opacity disabled:opacity-30"
-                >
-                  {uploading ? <Loader2 size={14} className="animate-spin" /> : 'Upload'}
-                </button>
               </form>
             )}
 
-            {/* Category Filter */}
-            <div className="flex gap-1.5 p-3 overflow-x-auto flex-shrink-0 no-scrollbar">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full border transition-colors whitespace-nowrap ${
-                  !selectedCategory
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-transparent text-foreground border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5'
-                }`}
-              >
-                All
-              </button>
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full border transition-colors whitespace-nowrap ${
-                    selectedCategory === cat
-                      ? 'bg-foreground text-background border-foreground'
-                      : 'bg-transparent text-foreground border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            {/* Search + Category Chips */}
+            <div className="px-6 py-3 border-b border-foreground/10 flex-shrink-0 flex flex-col gap-2">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30" />
+                <input
+                  type="text"
+                  placeholder="Search resources..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/30 outline-none focus:border-foreground/30"
+                />
+              </div>
+              {categories.length > 0 && (
+                <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSearchQuery(prev => prev === cat ? '' : cat)}
+                      className={`px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold rounded-full border transition-colors whitespace-nowrap ${
+                        searchQuery === cat
+                          ? 'bg-foreground text-background border-foreground'
+                          : 'bg-transparent text-foreground/50 border-foreground/10 hover:border-foreground/30'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-6">
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 size={24} className="animate-spin opacity-40 text-foreground" />
-                </div>
-              ) : resources.length === 0 ? (
-                <div className="text-center py-12">
-                  <FolderOpen size={32} className="mx-auto mb-2 opacity-20 text-foreground" />
-                  <p className="text-xs opacity-40 text-foreground">No resources yet</p>
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 size={24} className="animate-spin opacity-30 text-foreground" />
                 </div>
               ) : preview ? (
                 /* Preview Mode */
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-5 h-full">
                   <button
                     onClick={() => setPreview(null)}
-                    className="self-start text-[10px] uppercase tracking-widest font-bold opacity-50 hover:opacity-100 transition-opacity text-foreground"
+                    className="self-start text-[10px] uppercase tracking-widest font-bold text-foreground/40 hover:text-foreground transition-colors"
                   >
                     ← Back
                   </button>
-                  <div className="relative w-full aspect-square max-w-sm rounded-xl overflow-hidden border border-black/10 dark:border-white/10">
+                  <div className="relative w-full max-w-md aspect-square rounded-xl overflow-hidden border border-foreground/10 flex-shrink-0">
                     <Image
                       src={preview.imageUrl}
                       alt={preview.title}
                       fill
-                      className="object-contain bg-black/5 dark:bg-white/5"
-                      sizes="(max-width: 640px) 100vw, 384px"
+                      className="object-contain bg-foreground/5"
+                      sizes="(max-width: 640px) 100vw, 448px"
                     />
                   </div>
                   <div className="text-center">
-                    <h3 className="font-bold text-foreground">{preview.title}</h3>
+                    <h3 className="font-bold text-foreground text-lg">{preview.title}</h3>
                     {preview.description && (
-                      <p className="text-xs opacity-60 text-foreground mt-1">{preview.description}</p>
+                      <p className="text-sm text-foreground/50 mt-1">{preview.description}</p>
                     )}
-                    <p className="text-[10px] uppercase tracking-widest opacity-30 mt-2 text-foreground">
-                      {preview.category} · by {preview.uploadedBy}
-                    </p>
+                    {preview.category && (
+                      <span className="inline-block mt-2 px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold rounded-full border border-foreground/10 text-foreground/40">
+                        {preview.category}
+                      </span>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleSave(preview)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-foreground text-background hover:opacity-80 transition-opacity"
+                      className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-foreground text-background hover:opacity-80 transition-opacity"
                     >
-                      <Download size={14} /> Save
+                      <Download size={14} /> Save Image
                     </button>
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(preview.id)}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors"
                       >
                         <Trash2 size={14} /> Delete
                       </button>
                     )}
                   </div>
                 </div>
+              ) : filteredResources.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <FolderOpen size={40} className="mb-3 text-foreground/15" />
+                  <p className="text-sm text-foreground/30">
+                    {searchQuery ? 'No matching resources' : 'No resources yet'}
+                  </p>
+                </div>
               ) : (
-                /* Grid View */
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {resources.map((resource) => (
+                /* Grid View — fixed square thumbnails */
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {filteredResources.map((resource) => (
                     <button
                       key={resource.id}
                       onClick={() => setPreview(resource)}
-                      className="group relative aspect-square rounded-xl overflow-hidden border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 transition-all hover:shadow-lg"
+                      className="group relative aspect-square rounded-xl overflow-hidden border border-foreground/10 hover:border-foreground/30 transition-all hover:shadow-lg bg-foreground/5"
                     >
                       <Image
                         src={resource.imageUrl}
                         alt={resource.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 33vw, 25vw"
+                        sizes="(max-width: 640px) 33vw, 20vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <span className="absolute bottom-1 left-1 right-1 text-[8px] font-bold text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity truncate">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="absolute bottom-1.5 left-2 right-2 text-[9px] font-bold text-white uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity truncate drop-shadow-sm">
                         {resource.title}
                       </span>
                     </button>
