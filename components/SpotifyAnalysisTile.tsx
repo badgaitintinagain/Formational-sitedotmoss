@@ -231,7 +231,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         const normalizedY = ((track.tsne_y + 8) / 16) * 600;
                         
                         return (
-                          <g key={idx} className="hover-track" title={`${track.name} (${track.release_year})`}>
+                          <g key={idx} className="hover-track">
+                            <title>{`${track.name} (${track.release_year})`}</title>
                             {/* Glow */}
                             <circle cx={normalizedX} cy={normalizedY} r="4" fill={meta.color} opacity="0.3" />
                             {/* Dot */}
