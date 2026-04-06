@@ -130,7 +130,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-foreground/10">
+            <div className="flex gap-2 mb-6 border-b border-foreground/10 px-6">
               {(['personas', 'galaxy', 'comparison'] as const).map(tab => (
                 <button
                   key={tab}
@@ -147,6 +147,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                 </button>
               ))}
             </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6 text-foreground/80">
               {/* PERSONAS TAB */}
               {activeTab === 'personas' && (
                 <section className="space-y-4">
@@ -309,6 +312,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                   <strong>Data:</strong> 118 Madonna tracks • Spotify Dataset (1921-2020) • 5 Audio Features
                 </p>
               </div>
+            </div>
             </div>
           </div>
         </div>
