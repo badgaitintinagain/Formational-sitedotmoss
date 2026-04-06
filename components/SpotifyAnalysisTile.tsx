@@ -96,6 +96,18 @@ const AUDIO_FEATURE_KEYS: Array<keyof TrackData> = [
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+const projectTsnePoint = (
+  value: number,
+  min: number,
+  max: number,
+  size: number,
+  padding = 36
+) => {
+  if (max === min) return size / 2;
+  const normalized = (value - min) / (max - min);
+  return padding + normalized * (size - padding * 2);
+};
+
 const cosineSimilarity = (left: TrackData, right: TrackData) => {
   let dot = 0;
   let leftNorm = 0;
@@ -145,6 +157,17 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   const madonnaTracks = useMemo(() => tracks.filter(track => String(track.artists).includes('Madonna')), [tracks]);
   const selectedTrack = tracks[selectedTrackIndex] ?? tracks[0];
   const selectedClusterMeta = CLUSTER_NAMES[selectedCluster];
+  const tsneBounds = useMemo(() => {
+    const xValues = tracks.map(track => track.tsne_x);
+    const yValues = tracks.map(track => track.tsne_y);
+
+    return {
+      minX: Math.min(...xValues),
+      maxX: Math.max(...xValues),
+      minY: Math.min(...yValues),
+      maxY: Math.max(...yValues)
+    };
+  }, [tracks]);
   const clusterTrackCounts = useMemo(() => {
     const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0 };
     tracks.forEach(track => {
@@ -391,9 +414,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
               <div className="min-h-0 min-w-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 sm:py-4">
               {activeTab === 'personas' && (
-                <section className="h-full">
-                  <div className="grid h-full gap-3 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
+                <section className="h-full overflow-y-auto pr-1">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
+                    <div className="min-w-0 rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Persona Finder</p>
@@ -475,7 +498,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="min-w-0 space-y-3">
                       <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
                         <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Current persona</p>
                         <div className="mt-3 flex items-center gap-3">
@@ -510,9 +533,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               <button
                                 key={`${track.name}-${track.release_year}`}
                                 onClick={() => setSelectedTrackIndex(tracks.findIndex(item => item.name === track.name && item.release_year === track.release_year))}
-                                className={`flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-foreground/35 bg-foreground/12' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/8'}`}
+                                className={`flex min-w-0 w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-foreground/35 bg-foreground/12' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/8'}`}
                               >
-                                <span className="min-w-0 flex-1 truncate text-xs text-foreground sm:text-sm">{track.name}</span>
+                                <span className="min-w-0 flex-1 truncate pr-2 text-xs text-foreground sm:text-sm" title={track.name}>{track.name}</span>
                                 <span className="ml-3 shrink-0 text-xs text-foreground/50">{track.release_year}</span>
                               </button>
                             ))}
@@ -532,8 +555,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'galaxy' && (
-                <section className="grid h-full gap-3 lg:grid-cols-[1.2fr_0.8fr]">
-                  <div className="rounded-2xl border border-foreground/10 bg-background/80 p-4">
+                <section className="grid h-full gap-3 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
+                  <div className="min-w-0 rounded-2xl border border-foreground/10 bg-background/80 p-4">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">2D manifold</p>
@@ -544,8 +567,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="relative h-[min(40vh,320px)] overflow-hidden rounded-2xl border border-foreground/10 bg-[radial-gradient(circle_at_center,rgba(120,120,120,0.14),transparent_55%),linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0.02)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(220,220,220,0.06),transparent_55%),linear-gradient(180deg,rgba(0,0,0,0.30)_0%,rgba(0,0,0,0.12)_100%)]">
-                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 800 600" preserveAspectRatio="none">
+                    <div className="relative h-[min(35vh,300px)] min-h-[235px] overflow-hidden rounded-2xl border border-foreground/10 bg-[radial-gradient(circle_at_center,rgba(120,120,120,0.14),transparent_55%),linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0.02)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(220,220,220,0.06),transparent_55%),linear-gradient(180deg,rgba(0,0,0,0.30)_0%,rgba(0,0,0,0.12)_100%)]">
+                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet">
                         <defs>
                           <pattern id="grid-lines" width="40" height="40" patternUnits="userSpaceOnUse">
                             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7" />
@@ -555,17 +578,17 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                           </radialGradient>
                         </defs>
-                        <rect width="800" height="600" fill="url(#grid-lines)" />
-                        <circle cx="400" cy="300" r="130" fill="url(#glow)" opacity="0.3" />
+                        <rect width="1000" height="620" fill="url(#grid-lines)" />
+                        <circle cx="500" cy="310" r="150" fill="url(#glow)" opacity="0.3" />
 
                         {selectedTrack && wormholeLinks.map(link => {
-                          const selectedX = ((selectedTrack.tsne_x + 10) / 20) * 800;
-                          const selectedY = ((selectedTrack.tsne_y + 8) / 16) * 600;
+                          const selectedX = projectTsnePoint(selectedTrack.tsne_x, tsneBounds.minX, tsneBounds.maxX, 1000);
+                          const selectedY = projectTsnePoint(selectedTrack.tsne_y, tsneBounds.minY, tsneBounds.maxY, 620);
                           const targetTrack = tracks[link.index];
                           if (!targetTrack) return null;
 
-                          const targetX = ((targetTrack.tsne_x + 10) / 20) * 800;
-                          const targetY = ((targetTrack.tsne_y + 8) / 16) * 600;
+                          const targetX = projectTsnePoint(targetTrack.tsne_x, tsneBounds.minX, tsneBounds.maxX, 1000);
+                          const targetY = projectTsnePoint(targetTrack.tsne_y, tsneBounds.minY, tsneBounds.maxY, 620);
                           const opacity = clamp((link.similarity - 0.85) / 0.15, 0.2, 0.95);
 
                           return (
@@ -585,8 +608,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
                         {tracks.map((track, index) => {
                           const meta = CLUSTER_NAMES[track.cluster];
-                          const x = ((track.tsne_x + 10) / 20) * 800;
-                          const y = ((track.tsne_y + 8) / 16) * 600;
+                          const x = projectTsnePoint(track.tsne_x, tsneBounds.minX, tsneBounds.maxX, 1000);
+                          const y = projectTsnePoint(track.tsne_y, tsneBounds.minY, tsneBounds.maxY, 620);
                           const isActive = selectedTrack?.name === track.name && selectedTrack?.release_year === track.release_year;
                           const isDimmed = selectedCluster !== track.cluster;
 
@@ -632,12 +655,12 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="min-w-0 space-y-3">
                     <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-4">
                       <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Selected track</p>
                       <div className="mt-3 flex items-start justify-between gap-4">
                         <div>
-                          <h4 className="text-lg font-semibold text-foreground">{selectedTrack?.name}</h4>
+                          <h4 className="max-w-[240px] truncate text-lg font-semibold text-foreground sm:max-w-[300px]" title={selectedTrack?.name}>{selectedTrack?.name}</h4>
                           <p className="mt-1 text-sm text-foreground/60">{selectedTrack?.release_year}</p>
                         </div>
                         <span className="rounded-full border border-foreground/10 bg-foreground/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/55">
@@ -675,7 +698,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               <button
                                 key={`${track.name}-${track.release_year}`}
                                 onClick={() => setSelectedTrackIndex(link.index)}
-                                className="flex w-full items-center justify-between rounded-lg border border-foreground/10 bg-foreground/5 px-2 py-1.5 text-left text-xs text-foreground/70 transition-colors hover:bg-foreground/10"
+                                className="flex min-w-0 w-full items-center justify-between rounded-lg border border-foreground/10 bg-foreground/5 px-2 py-1.5 text-left text-xs text-foreground/70 transition-colors hover:bg-foreground/10"
                               >
                                 <span className="truncate">{track.name}</span>
                                 <span className="ml-2 shrink-0 text-foreground/50">{Math.round(link.similarity * 100)}%</span>
