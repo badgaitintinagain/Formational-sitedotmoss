@@ -82,7 +82,10 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   const clusters = clusterSummaryData as ClusterData[];
-  const tracks = musicGalaxyData as TrackData[];
+  const tracks = useMemo(
+    () => (musicGalaxyData as TrackData[]).filter(track => track.release_year <= 2020),
+    []
+  );
   const divas = divaDnaData as DivaData[];
 
   useEffect(() => {
@@ -402,20 +405,21 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         </span>
                       </div>
 
-                      <div className="absolute bottom-4 left-4 rounded-2xl border border-foreground/10 bg-background/75 p-3 text-xs backdrop-blur">
-                        <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-foreground/50">Cluster palette</p>
-                        <div className="space-y-1.5">
-                          {Object.entries(CLUSTER_NAMES).map(([key, meta]) => (
-                            <button
-                              key={key}
-                              onClick={() => handleClusterSelect(Number(key))}
-                              className="flex items-center gap-2 text-left text-foreground/70 transition-colors hover:text-foreground"
-                            >
-                              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: meta.color }} />
-                              <span>{meta.name}</span>
-                            </button>
-                          ))}
-                        </div>
+                    </div>
+
+                    <div className="mt-3 rounded-2xl border border-foreground/10 bg-background/60 p-3 text-xs">
+                      <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-foreground/50">Cluster palette</p>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(CLUSTER_NAMES).map(([key, meta]) => (
+                          <button
+                            key={key}
+                            onClick={() => handleClusterSelect(Number(key))}
+                            className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/5 px-2.5 py-1 text-left text-foreground/75 transition-colors hover:bg-foreground/10 hover:text-foreground"
+                          >
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: meta.color }} />
+                            <span>{meta.name}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
