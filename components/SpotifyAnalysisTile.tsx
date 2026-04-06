@@ -217,7 +217,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
             </div>
 
             <div className="min-h-0 flex flex-1 overflow-hidden">
-              <aside className="w-[200px] shrink-0 border-r border-foreground/10 bg-foreground/5 p-2.5">
+              <aside className="w-[200px] min-w-[200px] max-w-[200px] flex-none border-r border-foreground/10 bg-foreground/5 p-2.5">
                 <div className="space-y-2">
                   <p className="px-2 text-[10px] uppercase tracking-[0.25em] text-foreground/45">Navigation</p>
                   {(['personas', 'galaxy', 'comparison'] as const).map(tab => {
@@ -241,16 +241,16 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                 </div>
               </aside>
 
-              <div className="min-h-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 sm:py-4">
+              <div className="min-h-0 min-w-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 sm:py-4">
               {activeTab === 'personas' && (
                 <section className="h-full">
                   <div className="grid h-full gap-3 lg:grid-cols-[1.2fr_0.8fr]">
-                    <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-4">
+                    <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Persona Finder</p>
-                          <h3 className="mt-2 text-lg font-semibold text-foreground">AI groups tracks by sonic behavior</h3>
-                          <p className="mt-2 max-w-2xl text-xs leading-5 text-foreground/65 sm:text-sm">
+                          <h3 className="mt-1.5 text-base font-semibold text-foreground sm:text-lg">AI groups tracks by sonic behavior</h3>
+                          <p className="mt-1.5 max-w-2xl text-xs leading-5 text-foreground/65">
                             These clusters are not sorted by year. They are sorted by feel: energy, warmth, brightness, and tension. Click a cluster to inspect its profile.
                           </p>
                         </div>
@@ -259,7 +259,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         </div>
                       </div>
 
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
                         {clusters.map(cluster => {
                           const meta = CLUSTER_NAMES[cluster.cluster];
                           const isSelected = selectedCluster === cluster.cluster;
@@ -271,13 +271,13 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               onClick={() => {
                                 handleClusterSelect(cluster.cluster);
                               }}
-                              className={`group rounded-xl border p-3 text-left transition-all duration-200 ${isSelected ? 'border-foreground/30 bg-foreground/10 shadow-[0_0_0_1px_rgba(0,0,0,0.06)]' : 'border-foreground/10 bg-background/50 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-foreground/6'}`}
+                              className={`group rounded-xl border p-2.5 text-left transition-all duration-200 ${isSelected ? 'border-foreground/30 bg-foreground/10 shadow-[0_0_0_1px_rgba(0,0,0,0.06)]' : 'border-foreground/10 bg-background/50 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-foreground/6'}`}
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: meta.color }} />
-                                    <span className="text-sm font-semibold text-foreground">{meta.name}</span>
+                                    <span className="text-xs font-semibold text-foreground sm:text-sm">{meta.name}</span>
                                   </div>
                                   <p className="mt-1.5 text-[11px] leading-4 text-foreground/60">{meta.description}</p>
                                 </div>
@@ -313,7 +313,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
 
                     <div className="space-y-3">
-                      <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-4">
+                      <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
                         <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Current persona</p>
                         <div className="mt-3 flex items-center gap-3">
                           <span className="h-4 w-4 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
@@ -321,16 +321,16 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         </div>
                         <p className="mt-2 text-sm leading-6 text-foreground/65">{selectedClusterMeta.description}</p>
 
-                        <div className="mt-3 rounded-xl border border-foreground/10 bg-background/70 p-3">
+                        <div className="mt-2.5 rounded-xl border border-foreground/10 bg-background/70 p-2.5">
                           <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Top tracks in this cluster</p>
-                          <div className="mt-3 space-y-2">
+                          <div className="mt-2.5 space-y-1.5">
                             {selectedClusterTracks.slice(0, 2).map(track => (
                               <button
                                 key={`${track.name}-${track.release_year}`}
                                 onClick={() => setSelectedTrackIndex(tracks.findIndex(item => item.name === track.name && item.release_year === track.release_year))}
-                                className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-foreground/35 bg-foreground/12' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/8'}`}
+                                className={`flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-foreground/35 bg-foreground/12' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/8'}`}
                               >
-                                <span className="min-w-0 truncate text-sm text-foreground">{track.name}</span>
+                                <span className="min-w-0 flex-1 truncate text-xs text-foreground sm:text-sm">{track.name}</span>
                                 <span className="ml-3 shrink-0 text-xs text-foreground/50">{track.release_year}</span>
                               </button>
                             ))}
@@ -338,7 +338,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-foreground/10 bg-gradient-to-br from-foreground/8 to-foreground/3 p-4">
+                      <div className="rounded-2xl border border-foreground/10 bg-gradient-to-br from-foreground/8 to-foreground/3 p-3.5">
                         <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Why it matters</p>
                         <p className="mt-2 text-sm leading-6 text-foreground/70">
                           This is the part where the model stops being a chart and starts becoming a lens: it reveals the music’s internal structure without being told what structure to expect.
