@@ -20,7 +20,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
     <>
       <Tile
         size={size}
-        accent={accent}
+        accentType={accent}
         opacity={opacity}
         onClick={() => setIsOpen(true)}
         className="cursor-pointer group"
