@@ -313,7 +313,6 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                 </p>
               </div>
             </div>
-            </div>
           </div>
         </div>
       )}
