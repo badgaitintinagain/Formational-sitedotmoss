@@ -39,6 +39,22 @@ interface DivaData {
   speechiness: number;
 }
 
+interface SimilarTrack {
+  index: number;
+  similarity: number;
+}
+
+interface EraProfile {
+  label: string;
+  years: string;
+  count: number;
+  danceability: number;
+  energy: number;
+  valence: number;
+  acousticness: number;
+  speechiness: number;
+}
+
 interface SpotifyAnalysisTileProps {
   size?: '1x1' | '2x1' | '2x2' | '2x3' | '3x2';
   accent?: 'primary' | 'secondary';
@@ -70,6 +86,33 @@ const TAB_META = {
   }
 } as const;
 
+const AUDIO_FEATURE_KEYS: Array<keyof TrackData> = [
+  'danceability',
+  'energy',
+  'valence',
+  'acousticness',
+  'speechiness'
+];
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const cosineSimilarity = (left: TrackData, right: TrackData) => {
+  let dot = 0;
+  let leftNorm = 0;
+  let rightNorm = 0;
+
+  AUDIO_FEATURE_KEYS.forEach(key => {
+    const leftValue = Number(left[key]);
+    const rightValue = Number(right[key]);
+    dot += leftValue * rightValue;
+    leftNorm += leftValue * leftValue;
+    rightNorm += rightValue * rightValue;
+  });
+
+  if (leftNorm === 0 || rightNorm === 0) return 0;
+  return dot / (Math.sqrt(leftNorm) * Math.sqrt(rightNorm));
+};
+
 const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   size = '2x1',
   accent = 'primary',
@@ -79,6 +122,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   const [activeTab, setActiveTab] = useState<'personas' | 'galaxy' | 'comparison'>('personas');
   const [selectedCluster, setSelectedCluster] = useState(0);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
+  const [selectedEraIndex, setSelectedEraIndex] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const clusters = clusterSummaryData as ClusterData[];
@@ -108,10 +152,114 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
     });
     return counts;
   }, [tracks]);
+
+  const popularityProxyByTrackIndex = useMemo(() => {
+    const centrality = tracks.map((track, index) => {
+      let sum = 0;
+      let count = 0;
+      tracks.forEach((candidate, candidateIndex) => {
+        if (candidateIndex === index) return;
+        sum += cosineSimilarity(track, candidate);
+        count += 1;
+      });
+      return count > 0 ? sum / count : 0;
+    });
+
+    const min = Math.min(...centrality);
+    const max = Math.max(...centrality);
+    if (max === min) return centrality.map(() => 0.5);
+
+    return centrality.map(value => clamp((value - min) / (max - min), 0, 1));
+  }, [tracks]);
+
+  const weightedClusterImpact = useMemo(() => {
+    const map: Record<number, { weightedSum: number; share: number; meanWeight: number }> = {
+      0: { weightedSum: 0, share: 0, meanWeight: 0 },
+      1: { weightedSum: 0, share: 0, meanWeight: 0 },
+      2: { weightedSum: 0, share: 0, meanWeight: 0 },
+      3: { weightedSum: 0, share: 0, meanWeight: 0 }
+    };
+    const countMap: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0 };
+
+    tracks.forEach((track, index) => {
+      const weight = popularityProxyByTrackIndex[index] * 0.85 + 0.15;
+      map[track.cluster] = {
+        ...map[track.cluster],
+        weightedSum: map[track.cluster].weightedSum + weight,
+        meanWeight: map[track.cluster].meanWeight + weight
+      };
+      countMap[track.cluster] = (countMap[track.cluster] ?? 0) + 1;
+    });
+
+    const total = Object.values(map).reduce((sum, entry) => sum + entry.weightedSum, 0) || 1;
+
+    Object.keys(map).forEach(clusterKey => {
+      const cluster = Number(clusterKey);
+      map[cluster].share = map[cluster].weightedSum / total;
+      map[cluster].meanWeight = countMap[cluster] > 0 ? map[cluster].meanWeight / countMap[cluster] : 0;
+    });
+
+    return map;
+  }, [tracks, popularityProxyByTrackIndex]);
+
   const selectedClusterTracks = useMemo(
     () => tracks.filter(track => track.cluster === selectedCluster).sort((left, right) => right.release_year - left.release_year),
     [tracks, selectedCluster]
   );
+
+  const wormholeLinks = useMemo<SimilarTrack[]>(() => {
+    if (!selectedTrack) return [];
+
+    return tracks
+      .map((track, index) => ({ index, similarity: cosineSimilarity(selectedTrack, track) }))
+      .filter(item => item.index !== selectedTrackIndex)
+      .sort((left, right) => right.similarity - left.similarity)
+      .slice(0, 5);
+  }, [selectedTrack, selectedTrackIndex, tracks]);
+
+  const eraProfiles = useMemo<EraProfile[]>(() => {
+    const buckets = [
+      { label: '80s', min: 1980, max: 1989 },
+      { label: '90s', min: 1990, max: 1999 },
+      { label: '00s', min: 2000, max: 2009 },
+      { label: '10s+', min: 2010, max: 2030 }
+    ];
+
+    return buckets
+      .map(bucket => {
+        const bucketTracks = madonnaTracks.filter(track => track.release_year >= bucket.min && track.release_year <= bucket.max);
+        if (!bucketTracks.length) return null;
+
+        const aggregate = bucketTracks.reduce(
+          (accumulator, track) => {
+            accumulator.danceability += track.danceability;
+            accumulator.energy += track.energy;
+            accumulator.valence += track.valence;
+            accumulator.acousticness += track.acousticness;
+            accumulator.speechiness += track.speechiness;
+            return accumulator;
+          },
+          { danceability: 0, energy: 0, valence: 0, acousticness: 0, speechiness: 0 }
+        );
+
+        const count = bucketTracks.length;
+        return {
+          label: bucket.label,
+          years: `${bucket.min}-${bucket.max}`,
+          count,
+          danceability: aggregate.danceability / count,
+          energy: aggregate.energy / count,
+          valence: aggregate.valence / count,
+          acousticness: aggregate.acousticness / count,
+          speechiness: aggregate.speechiness / count
+        };
+      })
+      .filter((profile): profile is EraProfile => Boolean(profile));
+  }, [madonnaTracks]);
+
+  const safeSelectedEraIndex = clamp(selectedEraIndex, 0, Math.max(eraProfiles.length - 1, 0));
+  const selectedEra = eraProfiles[safeSelectedEraIndex] ?? eraProfiles[0];
+
   const diva = useMemo(() => divas.find(item => item.artists === 'Madonna') ?? divas[0], [divas]);
   const closestDivaNeighbors = useMemo(
     () => divas
@@ -264,6 +412,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                           const meta = CLUSTER_NAMES[cluster.cluster];
                           const isSelected = selectedCluster === cluster.cluster;
                           const trackCount = clusterTrackCounts[cluster.cluster] ?? 0;
+                          const impactShare = weightedClusterImpact[cluster.cluster]?.share ?? 0;
+                          const meanWeight = weightedClusterImpact[cluster.cluster]?.meanWeight ?? 0;
 
                           return (
                             <button
@@ -282,8 +432,21 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                   <p className="mt-1.5 text-[11px] leading-4 text-foreground/60">{meta.description}</p>
                                 </div>
                                 <span className="rounded-full border border-foreground/10 bg-foreground/5 px-2 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/60">
-                                  {trackCount}
+                                  {Math.round(impactShare * 100)}%
                                 </span>
+                              </div>
+
+                              <div className="mt-2.5 text-[10px] uppercase tracking-[0.2em] text-foreground/45">
+                                Weighted impact • {trackCount} tracks
+                              </div>
+                              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${clamp(meanWeight * 100, 8, 100)}%`,
+                                    background: `linear-gradient(90deg, ${meta.color}, rgba(255,255,255,0.35))`
+                                  }}
+                                />
                               </div>
 
                               <div className="mt-3 space-y-1.5 text-xs">
@@ -322,6 +485,25 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         <p className="mt-2 text-sm leading-6 text-foreground/65">{selectedClusterMeta.description}</p>
 
                         <div className="mt-2.5 rounded-xl border border-foreground/10 bg-background/70 p-2.5">
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Feature weighting 2.0</p>
+                          <p className="mt-1.5 text-xs text-foreground/60">
+                            Vibe-central tracks receive higher influence, surfacing personas that feel most mainstream inside this sonic network.
+                          </p>
+                          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${(weightedClusterImpact[selectedCluster]?.share ?? 0) * 100}%`,
+                                background: `linear-gradient(90deg, ${selectedClusterMeta.color}, rgba(255,255,255,0.35))`
+                              }}
+                            />
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-foreground/65">
+                            Share of weighted popularity: {Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}%
+                          </p>
+                        </div>
+
+                        <div className="mt-2.5 rounded-xl border border-foreground/10 bg-background/70 p-2.5">
                           <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Top tracks in this cluster</p>
                           <div className="mt-2.5 space-y-1.5">
                             {selectedClusterTracks.slice(0, 2).map(track => (
@@ -355,7 +537,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">2D manifold</p>
-                        <h3 className="mt-1 text-xl font-semibold text-foreground">Music Galaxy Map</h3>
+                        <h3 className="mt-1 text-xl font-semibold text-foreground">Music Galaxy 2.0: Wormhole Edition</h3>
                       </div>
                       <div className="rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/55">
                         Click a dot to inspect
@@ -375,6 +557,31 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         </defs>
                         <rect width="800" height="600" fill="url(#grid-lines)" />
                         <circle cx="400" cy="300" r="130" fill="url(#glow)" opacity="0.3" />
+
+                        {selectedTrack && wormholeLinks.map(link => {
+                          const selectedX = ((selectedTrack.tsne_x + 10) / 20) * 800;
+                          const selectedY = ((selectedTrack.tsne_y + 8) / 16) * 600;
+                          const targetTrack = tracks[link.index];
+                          if (!targetTrack) return null;
+
+                          const targetX = ((targetTrack.tsne_x + 10) / 20) * 800;
+                          const targetY = ((targetTrack.tsne_y + 8) / 16) * 600;
+                          const opacity = clamp((link.similarity - 0.85) / 0.15, 0.2, 0.95);
+
+                          return (
+                            <line
+                              key={`wormhole-${selectedTrackIndex}-${link.index}`}
+                              x1={selectedX}
+                              y1={selectedY}
+                              x2={targetX}
+                              y2={targetY}
+                              stroke="rgba(125,211,252,0.9)"
+                              strokeWidth={1 + opacity * 2.5}
+                              strokeOpacity={opacity}
+                              strokeDasharray="3 4"
+                            />
+                          );
+                        })}
 
                         {tracks.map((track, index) => {
                           const meta = CLUSTER_NAMES[track.cluster];
@@ -402,7 +609,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       <div className="absolute left-4 top-4 rounded-2xl border border-foreground/10 bg-background/70 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-foreground/55 backdrop-blur">
                         <span className="inline-flex items-center gap-2">
                           <span className="h-2 w-2 rounded-full bg-foreground/70" />
-                          t-SNE projection
+                          t-SNE projection + cosine wormholes
                         </span>
                       </div>
 
@@ -456,6 +663,27 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                           </div>
                         ))}
                       </div>
+
+                      <div className="mt-3 rounded-xl border border-foreground/10 bg-background/60 p-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Closest vibe wormholes</p>
+                        <div className="mt-2 space-y-1.5">
+                          {wormholeLinks.map(link => {
+                            const track = tracks[link.index];
+                            if (!track) return null;
+
+                            return (
+                              <button
+                                key={`${track.name}-${track.release_year}`}
+                                onClick={() => setSelectedTrackIndex(link.index)}
+                                className="flex w-full items-center justify-between rounded-lg border border-foreground/10 bg-foreground/5 px-2 py-1.5 text-left text-xs text-foreground/70 transition-colors hover:bg-foreground/10"
+                              >
+                                <span className="truncate">{track.name}</span>
+                                <span className="ml-2 shrink-0 text-foreground/50">{Math.round(link.similarity * 100)}%</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="rounded-2xl border border-foreground/10 bg-gradient-to-br from-foreground/8 to-foreground/3 p-4">
@@ -471,24 +699,51 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               {activeTab === 'comparison' && (
                 <section className="grid h-full gap-3 lg:grid-cols-[0.95fr_1.05fr]">
                   <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-4">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Reference profile</p>
-                    <h3 className="mt-2 text-xl font-semibold text-foreground">Madonna versus the pop field</h3>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Evolution map</p>
+                    <h3 className="mt-2 text-xl font-semibold text-foreground">Diva DNA 2.0: Timeline mutation</h3>
                     <p className="mt-2 text-sm leading-6 text-foreground/65">
-                      This panel compares Madonna with other artists using the same five audio features. The bars animate on render and keep the focus on relative shape, not just raw numbers.
+                      Slide across decades to see how Madonna&apos;s sonic DNA mutates over time, then compare each era with her all-time baseline.
                     </p>
+
+                    <div className="mt-4 rounded-xl border border-foreground/10 bg-background/60 p-3">
+                      <div className="flex items-center justify-between gap-2 text-xs text-foreground/65">
+                        <span>{selectedEra?.label ?? 'N/A'} ({selectedEra?.years ?? '-'})</span>
+                        <span>{selectedEra?.count ?? 0} tracks</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={Math.max(eraProfiles.length - 1, 0)}
+                        value={safeSelectedEraIndex}
+                        onChange={event => setSelectedEraIndex(Number(event.target.value))}
+                        className="mt-2 w-full accent-cyan-400"
+                        disabled={eraProfiles.length <= 1}
+                      />
+                      <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
+                        {eraProfiles.map((era, index) => (
+                          <button
+                            key={era.label}
+                            onClick={() => setSelectedEraIndex(index)}
+                            className={`rounded-full border px-2 py-0.5 transition-colors ${index === safeSelectedEraIndex ? 'border-foreground/35 bg-foreground/12 text-foreground' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/10'}`}
+                          >
+                            {era.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
                     <div className="mt-4 space-y-2.5">
                       {[
-                        { label: 'Danceability', value: diva?.danceability ?? 0 },
-                        { label: 'Energy', value: diva?.energy ?? 0 },
-                        { label: 'Valence', value: diva?.valence ?? 0 },
-                        { label: 'Acousticness', value: diva?.acousticness ?? 0 },
-                        { label: 'Speechiness', value: diva?.speechiness ?? 0 }
+                        { label: 'Danceability', value: selectedEra?.danceability ?? 0, baseline: diva?.danceability ?? 0 },
+                        { label: 'Energy', value: selectedEra?.energy ?? 0, baseline: diva?.energy ?? 0 },
+                        { label: 'Valence', value: selectedEra?.valence ?? 0, baseline: diva?.valence ?? 0 },
+                        { label: 'Acousticness', value: selectedEra?.acousticness ?? 0, baseline: diva?.acousticness ?? 0 },
+                        { label: 'Speechiness', value: selectedEra?.speechiness ?? 0, baseline: diva?.speechiness ?? 0 }
                       ].map(metric => (
                         <div key={metric.label}>
                           <div className="mb-1 flex items-center justify-between text-xs text-foreground/60">
                             <span>{metric.label}</span>
-                            <span className="text-foreground">{metric.value.toFixed(3)}</span>
+                            <span className="text-foreground">{metric.value.toFixed(3)} ({metric.value >= metric.baseline ? '+' : ''}{(metric.value - metric.baseline).toFixed(3)})</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
                             <div className="h-full rounded-full bg-gradient-to-r from-amber-300 via-cyan-300 to-fuchsia-400 transition-all duration-700" style={{ width: `${metric.value * 100}%` }} />
@@ -501,7 +756,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                   <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Diva DNA</p>
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Diva DNA baseline</p>
                         <h3 className="mt-2 text-xl font-semibold text-foreground">Closest pop neighbors</h3>
                       </div>
                       <div className="rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/55">
