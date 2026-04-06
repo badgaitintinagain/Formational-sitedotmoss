@@ -17,3 +17,4 @@ export { default as WeatherTile } from '@/components/WeatherTile';
 export { default as CalendarTile } from '@/components/CalendarTile';
 export { default as BlogModal } from '@/components/BlogModal';
 export { default as ResourceTile } from '@/components/ResourceTile';
+export { default as SpotifyAnalysisTile } from '@/components/SpotifyAnalysisTile';

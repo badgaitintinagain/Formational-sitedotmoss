@@ -5,9 +5,9 @@ import WeatherTile from "@/components/WeatherTile";
 import AdTile from "@/components/AdTile";
 import CalendarTile from "@/components/CalendarTile";
 import ClockTile from "@/components/ClockTile";
-import AIChatTile from "@/components/MicronversationTile";
 import ShoeDemoTile from "@/components/ShoeDemoTile";
 import NextWbcTile from "@/components/NextWbcTile";
+import SpotifyAnalysisTile from "@/components/SpotifyAnalysisTile";
 import BlogTile from "@/components/BlogTile";
 import ResourceTile from "@/components/ResourceTile";
 import SettingsModal from "@/components/SettingsModal";
@@ -66,7 +66,7 @@ const Home = () => {
       {
         title: "AI Lab",
         tiles: [
-          { id: 'aicat', size: '2x2', component: AIChatTile },
+          { id: 'spotify', size: '2x1', component: SpotifyAnalysisTile },
           { id: 'shoedemo', size: '2x2', component: ShoeDemoTile },
           { id: 'nextwbc', size: '2x1', component: NextWbcTile }
         ]
