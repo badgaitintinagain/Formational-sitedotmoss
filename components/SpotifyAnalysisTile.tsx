@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Tile from './Tile';
 import gsap from 'gsap';
-import { Activity, BarChart3, ChevronRight, Disc3, MapPinned, Music2, Radar, Sparkles, TrendingUp, X } from 'lucide-react';
+import { ChevronRight, Disc3, MapPinned, Radar, Sparkles, X } from 'lucide-react';
 import clusterSummaryData from '../assets/data/cluster_summary.json';
 import divaDnaData from '../assets/data/diva_dna.json';
 import musicGalaxyData from '../assets/data/music_galaxy.json';
@@ -331,46 +331,13 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
         onClick={() => setIsOpen(true)}
         className="group cursor-pointer overflow-hidden"
       >
-        <div className="relative flex h-full w-full flex-col justify-between p-3 text-left sm:p-4">
+        <div className="relative h-full w-full">
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
             style={{ backgroundImage: `url(${mdnaTourImage.src})` }}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_22%,rgba(8,10,22,0.18)_0%,rgba(8,10,22,0.88)_62%,rgba(8,10,22,0.95)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,22,0.10)_0%,rgba(8,10,22,0.36)_100%)]" />
           <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-2 text-white/90">
-              <Music2 className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.28em]">AI Analysis</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-white/70">
-              <span className="rounded-full border border-white/20 bg-black/20 px-2 py-1">118 tracks</span>
-            </div>
-          </div>
-
-          <div className="relative space-y-1.5">
-            <div>
-              <p className="text-base font-semibold text-white sm:text-lg">Spotify Analysis</p>
-              <p className="text-[11px] text-white/75 sm:text-xs">Open the cluster map and persona explorer</p>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 text-[10px] text-white/80">
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/25 px-2 py-1">
-                <Activity className="h-3 w-3" /> K-Means
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/25 px-2 py-1">
-                <TrendingUp className="h-3 w-3" /> t-SNE
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/25 px-2 py-1">
-                <BarChart3 className="h-3 w-3" /> Radar
-              </span>
-            </div>
-          </div>
-
-          <div className="relative flex items-center justify-between text-[10px] text-white/75">
-            <span>Madonna deep-dive</span>
-            <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </div>
         </div>
       </Tile>
 
@@ -469,6 +436,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       <div className="mt-3 grid gap-2 sm:grid-cols-2">
                         {clusters.map(cluster => {
                           const meta = CLUSTER_NAMES[cluster.cluster];
+                          const isDiscoPersona = cluster.cluster === 0;
                           const isSelected = selectedCluster === cluster.cluster;
                           const trackCount = clusterTrackCounts[cluster.cluster] ?? 0;
                           const impactShare = weightedClusterImpact[cluster.cluster]?.share ?? 0;
@@ -488,7 +456,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                     className="pointer-events-none absolute right-0 top-0 h-full w-[52%] bg-cover bg-right-top opacity-90"
                                     style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
                                   />
-                                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_14%,rgba(0,0,0,0)_0%,rgba(8,10,22,0.08)_24%,rgba(8,10,22,0.38)_46%,rgba(8,10,22,0.72)_76%,rgba(8,10,22,0.90)_100%)]" />
+                                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,10,22,0.96)_0%,rgba(8,10,22,0.88)_46%,rgba(8,10,22,0.62)_72%,rgba(8,10,22,0.20)_100%)]" />
                                 </>
                               )}
 
@@ -496,19 +464,19 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: meta.color }} />
-                                    <span className="text-xs font-semibold text-foreground sm:text-sm">{meta.name}</span>
+                                    <span className={`text-xs font-semibold sm:text-sm ${isDiscoPersona ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]' : 'text-foreground'}`}>{meta.name}</span>
                                   </div>
-                                  <p className="mt-1.5 text-[11px] leading-4 text-foreground/60">{meta.description}</p>
+                                  <p className={`mt-1.5 text-[11px] leading-4 ${isDiscoPersona ? 'text-white/88' : 'text-foreground/60'}`}>{meta.description}</p>
                                 </div>
-                                <span className="rounded-full border border-foreground/10 bg-foreground/5 px-2 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/60">
+                                <span className={`rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.25em] ${isDiscoPersona ? 'border-white/25 bg-black/30 text-white/95' : 'border-foreground/10 bg-foreground/5 text-foreground/60'}`}>
                                   {Math.round(impactShare * 100)}%
                                 </span>
                               </div>
 
-                              <div className="mt-2.5 text-[10px] uppercase tracking-[0.2em] text-foreground/45">
+                              <div className={`mt-2.5 text-[10px] uppercase tracking-[0.2em] ${isDiscoPersona ? 'text-white/78' : 'text-foreground/45'}`}>
                                 Weighted impact • {trackCount} tracks
                               </div>
-                              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                              <div className={`mt-1.5 h-1.5 overflow-hidden rounded-full ${isDiscoPersona ? 'bg-white/22' : 'bg-foreground/10'}`}>
                                 <div
                                   className="h-full rounded-full transition-all duration-500"
                                   style={{
@@ -525,11 +493,11 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                   { label: 'Valence', value: cluster.valence }
                                 ].map(metric => (
                                   <div key={metric.label}>
-                                    <div className="mb-1 flex items-center justify-between text-foreground/60">
+                                    <div className={`mb-1 flex items-center justify-between ${isDiscoPersona ? 'text-white/84' : 'text-foreground/60'}`}>
                                       <span>{metric.label}</span>
-                                      <span className="font-medium text-foreground">{Math.round(metric.value * 100)}%</span>
+                                      <span className={`font-medium ${isDiscoPersona ? 'text-white' : 'text-foreground'}`}>{Math.round(metric.value * 100)}%</span>
                                     </div>
-                                    <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                                    <div className={`h-1.5 overflow-hidden rounded-full ${isDiscoPersona ? 'bg-white/22' : 'bg-foreground/10'}`}>
                                       <div
                                         className="h-full rounded-full transition-all duration-500"
                                         style={{ width: `${metric.value * 100}%`, background: `linear-gradient(90deg, ${meta.color}, rgba(255,255,255,0.3))` }}
