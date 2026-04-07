@@ -36,6 +36,11 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
     { id: 'nature', type: 'image' as const, value: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1600&q=80', name: 'Nature' },
     { id: 'abstract', type: 'image' as const, value: 'https://images.unsplash.com/photo-1557683311-eac922347aa1?auto=format&fit=crop&w=1600&q=80', name: 'Abstract' },
     { id: 'city', type: 'image' as const, value: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80', name: 'City' },
+    { id: 'aurora', type: 'image' as const, value: 'https://images.unsplash.com/photo-1579033462043-0f11a7862f8d?auto=format&fit=crop&w=1600&q=80', name: 'Aurora' },
+    { id: 'ocean-drive', type: 'image' as const, value: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80', name: 'Ocean Drive' },
+    { id: 'mountain-fog', type: 'image' as const, value: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80', name: 'Mountain Fog' },
+    { id: 'neon-night', type: 'image' as const, value: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1600&q=80', name: 'Neon Night' },
+    { id: 'desert-dunes', type: 'image' as const, value: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1600&q=80', name: 'Desert Dunes' },
   ], []);
 
   useEffect(() => {
@@ -53,17 +58,17 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-colors duration-500 ${isDragging ? 'bg-black/20' : 'bg-black/60'}`}>
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-colors duration-500 ${isDragging ? 'bg-black/10' : 'bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.03)_35%,rgba(0,0,0,0.18)_100%)]'}`}>
       {/* Backdrop */}
       <div 
-        className={`absolute inset-0 backdrop-blur-md transition-all duration-500 ${isDragging ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute inset-0 backdrop-blur-lg transition-all duration-500 ${isDragging ? 'opacity-0' : 'opacity-100'}`}
         onClick={onClose}
       />
       
       {/* App Window */}
       <div 
         ref={modalRef}
-        className="relative w-full max-w-lg h-[81vh] bg-background dark:bg-background border border-foreground/10 rounded-2xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-xl transition-all duration-500"
+        className="relative w-full max-w-lg h-[81vh] rounded-[4px] border border-foreground/20 bg-background/24 text-foreground overflow-hidden flex flex-col shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500"
         style={{ 
           opacity: isDragging ? 0.15 : 1,
           transform: isDragging ? 'scale(0.98)' : 'scale(1)',
@@ -71,7 +76,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-foreground/5 bg-foreground/5 flex-shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-foreground/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_100%)] backdrop-blur-xl backdrop-saturate-150 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)] flex-shrink-0">
           <div className="flex items-center gap-3">
             <Zap className="text-accent-primary animate-pulse" />
             <div>
@@ -80,31 +85,31 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-foreground/10 rounded-full transition-colors text-foreground"
+            className="p-2 rounded-[4px] border border-foreground/20 bg-background/20 text-foreground/75 transition-all duration-200 hover:bg-background/35 hover:text-foreground backdrop-blur-md backdrop-saturate-150"
           >
             <X size={24} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-10 overflow-y-auto no-scrollbar">
+        <div className="p-6 space-y-6 overflow-y-auto no-scrollbar">
           {/* Theme Mode */}
-          <section className="space-y-4">
+          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center gap-2 mb-2">
               <Sun size={16} className="text-foreground opacity-40" />
               <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Interface</h3>
             </div>
-            <div className="flex bg-foreground/5 p-1 rounded-xl">
+            <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
               <button 
                 onClick={() => theme === 'dark' && toggleTheme()}
-                className={`flex-1 flex items-center justify-center gap-3 py-3 rounded-lg transition-all ${theme === 'light' ? 'bg-white dark:bg-zinc-800 shadow-md text-foreground font-bold' : 'text-foreground/40'}`}
+                className={`flex-1 flex items-center justify-center gap-3 py-2.5 rounded-[3px] transition-all ${theme === 'light' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
               >
                 <Sun size={18} className={theme === 'light' ? 'text-amber-500' : ''} />
                 <span className="text-sm">Day</span>
               </button>
               <button 
                 onClick={() => theme === 'light' && toggleTheme()}
-                className={`flex-1 flex items-center justify-center gap-3 py-3 rounded-lg transition-all ${theme === 'dark' ? 'bg-white dark:bg-zinc-800 shadow-md text-foreground font-bold' : 'text-foreground/40'}`}
+                className={`flex-1 flex items-center justify-center gap-3 py-2.5 rounded-[3px] transition-all ${theme === 'dark' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
               >
                 <Moon size={18} className={theme === 'dark' ? 'text-indigo-400' : ''} />
                 <span className="text-sm">Night</span>
@@ -113,12 +118,12 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           </section>
 
           {/* Canvas */}
-          <section className="space-y-4">
+          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center gap-2 mb-2">
               <ImageIcon size={16} className="text-foreground opacity-40" />
               <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Canvas</h3>
             </div>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-2.5">
               {bgPresets.map((bg) => (
                 <button
                   key={bg.id}
@@ -126,8 +131,8 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                     setBgType(bg.type as 'color' | 'image');
                     setBgValue(bg.value);
                   }}
-                  className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                    bgValue === bg.value ? 'border-accent-primary scale-95' : 'border-transparent opacity-70 hover:opacity-100'
+                  className={`relative aspect-square rounded-[4px] overflow-hidden border transition-all ${
+                    bgValue === bg.value ? 'border-accent-primary scale-[0.97] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'border-foreground/15 opacity-80 hover:opacity-100'
                   }`}
                 >
                   {bg.type === 'color' ? (
@@ -146,7 +151,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           </section>
 
           {/* Liquid Glass Blur */}
-          <section className="space-y-4">
+          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Wind size={16} className="text-foreground opacity-40" />
@@ -176,7 +181,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           </section>
 
           {/* Accent Color Palette */}
-          <section className="space-y-4">
+          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center gap-2 mb-2">
               <Palette size={16} className="text-foreground opacity-40" />
               <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Pastel Pairs</h3>
@@ -186,7 +191,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                 <button
                   key={p.id}
                   onClick={() => setPaletteId(p.id)}
-                  className={`group relative aspect-square rounded-full overflow-hidden flex items-center justify-center hover:scale-110 transition-transform active:scale-95 shadow-md border-2 ${paletteId === p.id ? 'border-accent-primary scale-110' : 'border-transparent opacity-80'}`}
+                  className={`group relative aspect-square rounded-[4px] overflow-hidden flex items-center justify-center hover:scale-105 transition-transform active:scale-95 shadow-md border ${paletteId === p.id ? 'border-accent-primary scale-105' : 'border-foreground/15 opacity-85'}`}
                   title={p.name}
                 >
                   <div className="absolute inset-0 flex rotate-45">
@@ -204,7 +209,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
               {/* Custom color picker */}
               <button
                 onClick={() => setPaletteId('custom')}
-                className={`group relative aspect-square rounded-full overflow-hidden flex items-center justify-center hover:scale-110 transition-transform active:scale-95 shadow-md border-2 ${paletteId === 'custom' ? 'border-accent-primary scale-110' : 'border-transparent opacity-80'}`}
+                className={`group relative aspect-square rounded-[4px] overflow-hidden flex items-center justify-center hover:scale-105 transition-transform active:scale-95 shadow-md border ${paletteId === 'custom' ? 'border-accent-primary scale-105' : 'border-foreground/15 opacity-85'}`}
                 title="Custom"
               >
                 <div className="absolute inset-0 flex rotate-45">
@@ -223,11 +228,11 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
 
             {/* Custom color pickers - shown when custom is selected */}
             {paletteId === 'custom' && (
-              <div className="flex gap-4 mt-3 p-3 bg-foreground/5 rounded-xl">
+              <div className="flex gap-4 mt-3 p-3 bg-background/20 border border-foreground/15 rounded-[4px] backdrop-blur-md">
                 <div className="flex-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Primary</label>
                   <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-foreground/10 flex-shrink-0">
+                    <div className="relative w-8 h-8 rounded-[4px] overflow-hidden border border-foreground/15 flex-shrink-0">
                       <input
                         type="color"
                         value={customPrimary}
@@ -244,14 +249,14 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                         if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomPrimary(v);
                       }}
                       maxLength={7}
-                      className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
+                      className="w-full bg-background/25 border border-foreground/15 rounded-[4px] px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
                     />
                   </div>
                 </div>
                 <div className="flex-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Secondary</label>
                   <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-foreground/10 flex-shrink-0">
+                    <div className="relative w-8 h-8 rounded-[4px] overflow-hidden border border-foreground/15 flex-shrink-0">
                       <input
                         type="color"
                         value={customSecondary}
@@ -268,7 +273,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                         if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomSecondary(v);
                       }}
                       maxLength={7}
-                      className="w-full bg-foreground/5 border border-foreground/10 rounded-lg px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
+                      className="w-full bg-background/25 border border-foreground/15 rounded-[4px] px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
                     />
                   </div>
                 </div>
@@ -279,7 +284,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
           </section>
 
           {/* Grayscale Toggle */}
-          <section className="space-y-4">
+          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center gap-2 mb-2">
               <Ghost size={16} className="text-foreground opacity-40" />
               <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Accessibility</h3>
@@ -288,8 +293,8 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
               onClick={() => setGrayscale(!isGrayscale)}
               className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
                 isGrayscale 
-                  ? 'bg-accent-primary/20 border-accent-primary/50 text-accent-primary font-bold' 
-                  : 'bg-foreground/5 border-transparent text-foreground opacity-80'
+                  ? 'bg-accent-primary/18 border-accent-primary/45 text-accent-primary font-bold' 
+                  : 'bg-background/22 border-foreground/15 text-foreground opacity-85'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -304,14 +309,14 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
         </div>
 
         {/* Footer */}
-        <div className="p-6 text-center border-t border-foreground/5 opacity-30 mt-auto flex-shrink-0">
+        <div className="p-5 text-center border-t border-foreground/15 opacity-35 mt-auto flex-shrink-0 bg-background/14 backdrop-blur-md">
           <p className="text-[8px] uppercase tracking-[0.3em] text-foreground">site(.)moss, Built by Moss. Refined by Claude. (NextJS, React, Turso SQLite and Huggingface)</p>
         </div>
       </div>
       
       {/* Slider Helper (External to modal so it doesn't fade) */}
       {isDragging && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-[200px] bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 pointer-events-none animate-in fade-in zoom-in-95">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-[200px] bg-white/10 backdrop-blur-md px-6 py-3 rounded-[4px] border border-white/20 pointer-events-none animate-in fade-in zoom-in-95">
           <div className="flex items-center gap-3 text-white">
             <Wind size={20} className="animate-spin" />
             <span className="text-lg font-light tracking-widest uppercase">Adjusting Blur</span>
