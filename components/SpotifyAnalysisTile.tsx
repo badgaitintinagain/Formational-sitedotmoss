@@ -329,15 +329,16 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
         accentType={accent}
         opacity={opacity}
         onClick={() => setIsOpen(true)}
-        className="group cursor-pointer overflow-hidden"
+        className="group cursor-pointer overflow-hidden border border-sky-200/30"
       >
         <div className="relative h-full w-full">
           <div
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
             style={{ backgroundImage: `url(${mdnaTourImage.src})` }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,22,0.10)_0%,rgba(8,10,22,0.36)_100%)]" />
-          <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(120,180,255,0.06)_0%,rgba(8,16,34,0.32)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-sky-100/15 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="absolute inset-[6px] border border-white/25" />
         </div>
       </Tile>
 
@@ -349,17 +350,17 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
           <div
             ref={modalRef}
             onClick={event => event.stopPropagation()}
-            className="mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-background/95 text-foreground shadow-[0_30px_120px_rgba(0,0,0,0.35)] sm:h-[calc(100dvh-1.5rem)]"
+            className="mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[14px] border border-sky-200/35 bg-[linear-gradient(160deg,rgba(230,244,255,0.78)_0%,rgba(214,236,255,0.62)_35%,rgba(190,228,255,0.52)_100%)] text-slate-900 shadow-[0_25px_80px_rgba(12,32,56,0.35)] backdrop-blur-2xl sm:h-[calc(100dvh-1.5rem)]"
           >
-            <div className="border-b border-foreground/10 bg-gradient-to-r from-background via-background/95 to-background px-3 py-2.5 sm:px-4 sm:py-3">
+            <div className="border-b border-sky-300/35 bg-[linear-gradient(90deg,rgba(255,255,255,0.60)_0%,rgba(232,245,255,0.48)_100%)] px-3 py-2.5 sm:px-4 sm:py-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/5 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-foreground/60">
+                  <div className="inline-flex items-center gap-2 rounded-[8px] border border-sky-300/45 bg-white/45 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-slate-700 backdrop-blur-md">
                     <Sparkles className="h-3 w-3" /> Unsupervised learning showcase
                   </div>
                   <div className="space-y-1">
-                    <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Madonna Sonic Atlas</h2>
-                    <p className="max-w-2xl text-[11px] text-foreground/65 sm:text-xs">
+                    <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">Madonna Sonic Atlas</h2>
+                    <p className="max-w-2xl text-[11px] text-slate-700/85 sm:text-xs">
                       Explore how AI finds structure in the music: clusters become personas, and t-SNE becomes a galaxy map.
                     </p>
                   </div>
@@ -367,7 +368,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                 <div className="flex items-start justify-between gap-2 sm:flex-col sm:items-end">
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="rounded-full border border-foreground/10 bg-foreground/5 p-2 text-foreground/70 transition-all duration-200 hover:-translate-y-0.5 hover:bg-foreground/10 hover:text-foreground"
+                    className="rounded-[8px] border border-sky-300/45 bg-white/55 p-2 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/70 hover:text-slate-900"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -378,9 +379,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       { label: 'clusters', value: clusters.length.toString() },
                       { label: 'madonna', value: madonnaTracks.length.toString() }
                     ].map(item => (
-                      <div key={item.label} className="min-w-[64px] rounded-lg border border-foreground/10 bg-foreground/5 px-2 py-1 text-right sm:min-w-[72px] sm:py-1.5">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-foreground/45">{item.label}</p>
-                        <p className="text-xs font-semibold text-foreground sm:text-sm">{item.value}</p>
+                      <div key={item.label} className="min-w-[64px] rounded-[8px] border border-sky-300/40 bg-white/45 px-2 py-1 text-right backdrop-blur sm:min-w-[72px] sm:py-1.5">
+                        <p className="text-[9px] uppercase tracking-[0.2em] text-slate-600">{item.label}</p>
+                        <p className="text-xs font-semibold text-slate-900 sm:text-sm">{item.value}</p>
                       </div>
                     ))}
                   </div>
@@ -389,9 +390,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
             </div>
 
             <div className="min-h-0 flex flex-1 flex-col overflow-hidden md:flex-row">
-              <aside className="w-full flex-none border-b border-foreground/10 bg-foreground/5 p-2 md:w-[188px] md:min-w-[188px] md:max-w-[188px] md:border-b-0 md:border-r md:p-2.5">
+              <aside className="w-full flex-none border-b border-sky-300/30 bg-white/38 p-2 backdrop-blur-md md:w-[188px] md:min-w-[188px] md:max-w-[188px] md:border-b-0 md:border-r md:p-2.5">
                 <div className="space-y-1.5 md:space-y-2">
-                  <p className="hidden px-2 text-[10px] uppercase tracking-[0.25em] text-foreground/45 md:block">Navigation</p>
+                  <p className="hidden px-2 text-[10px] uppercase tracking-[0.25em] text-slate-600 md:block">Navigation</p>
                   <div className="grid grid-cols-3 gap-1.5 md:grid-cols-1 md:gap-2">
                   {(['personas', 'galaxy', 'comparison'] as const).map(tab => {
                     const meta = TAB_META[tab];
@@ -402,9 +403,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`group flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all duration-200 md:px-3 ${active ? 'border-foreground/40 bg-foreground/12 text-foreground' : 'border-foreground/10 bg-background/50 text-foreground/70 hover:border-foreground/20 hover:bg-foreground/8'}`}
+                        className={`group flex w-full items-center gap-2 rounded-[8px] border px-2.5 py-2 text-left transition-all duration-200 md:px-3 ${active ? 'border-sky-400/55 bg-[linear-gradient(120deg,rgba(255,255,255,0.74)_0%,rgba(201,233,255,0.62)_100%)] text-slate-900 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)]' : 'border-sky-200/30 bg-white/35 text-slate-700 hover:border-sky-300/50 hover:bg-white/52'}`}
                       >
-                        <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md md:h-6 md:w-6 ${active ? 'bg-foreground/15 text-foreground' : 'bg-foreground/10 text-foreground/70'}`}>
+                        <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] md:h-6 md:w-6 ${active ? 'bg-sky-100/90 text-slate-900' : 'bg-white/55 text-slate-700'}`}>
                           <Icon className="h-3.5 w-3.5" />
                         </span>
                         <span className="truncate text-[11px] font-medium md:text-xs">{meta.title}</span>
@@ -419,16 +420,16 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               {activeTab === 'personas' && (
                 <section className="h-full overflow-y-auto pr-1">
                   <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-                    <div className="min-w-0 rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
+                    <div className="min-w-0 rounded-[12px] border border-sky-300/35 bg-white/36 p-3.5 backdrop-blur-md">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Persona Finder</p>
-                          <h3 className="mt-1.5 text-base font-semibold text-foreground sm:text-lg">AI groups tracks by sonic behavior</h3>
-                          <p className="mt-1.5 max-w-2xl text-xs leading-5 text-foreground/65">
+                          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-600">Persona Finder</p>
+                          <h3 className="mt-1.5 text-base font-semibold text-slate-900 sm:text-lg">AI groups tracks by sonic behavior</h3>
+                          <p className="mt-1.5 max-w-2xl text-xs leading-5 text-slate-700/90">
                             These clusters are not sorted by year. They are sorted by feel: energy, warmth, brightness, and tension. Click a cluster to inspect its profile.
                           </p>
                         </div>
-                        <div className="hidden rounded-full border border-foreground/10 bg-foreground/5 p-3 text-foreground/80 md:block">
+                        <div className="hidden rounded-[10px] border border-sky-300/40 bg-white/50 p-3 text-slate-700 md:block">
                           <Disc3 className="h-6 w-6" />
                         </div>
                       </div>
@@ -448,7 +449,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               onClick={() => {
                                 handleClusterSelect(cluster.cluster);
                               }}
-                              className={`group relative overflow-hidden rounded-xl border p-2.5 text-left transition-all duration-200 ${isSelected ? 'border-foreground/30 bg-foreground/10 shadow-[0_0_0_1px_rgba(0,0,0,0.06)]' : 'border-foreground/10 bg-background/50 hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-foreground/6'}`}
+                              className={`group relative overflow-hidden rounded-[10px] border p-2.5 text-left transition-all duration-200 ${isSelected ? 'border-sky-400/60 bg-white/52 shadow-[0_0_0_1px_rgba(255,255,255,0.25)]' : 'border-sky-200/35 bg-white/30 hover:-translate-y-0.5 hover:border-sky-300/55 hover:bg-white/46'}`}
                             >
                               {cluster.cluster === 0 && (
                                 <>
@@ -466,17 +467,17 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: meta.color }} />
                                     <span className={`text-xs font-semibold sm:text-sm ${isDiscoPersona ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]' : 'text-foreground'}`}>{meta.name}</span>
                                   </div>
-                                  <p className={`mt-1.5 text-[11px] leading-4 ${isDiscoPersona ? 'text-white/88' : 'text-foreground/60'}`}>{meta.description}</p>
+                                  <p className={`mt-1.5 text-[11px] leading-4 ${isDiscoPersona ? 'text-white/90' : 'text-slate-700/90'}`}>{meta.description}</p>
                                 </div>
-                                <span className={`rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.25em] ${isDiscoPersona ? 'border-white/25 bg-black/30 text-white/95' : 'border-foreground/10 bg-foreground/5 text-foreground/60'}`}>
+                                <span className={`rounded-[8px] border px-2 py-1 text-[10px] uppercase tracking-[0.25em] ${isDiscoPersona ? 'border-white/30 bg-black/35 text-white' : 'border-sky-300/45 bg-white/50 text-slate-700'}`}>
                                   {Math.round(impactShare * 100)}%
                                 </span>
                               </div>
 
-                              <div className={`mt-2.5 text-[10px] uppercase tracking-[0.2em] ${isDiscoPersona ? 'text-white/78' : 'text-foreground/45'}`}>
+                              <div className={`mt-2.5 text-[10px] uppercase tracking-[0.2em] ${isDiscoPersona ? 'text-white/78' : 'text-slate-600'}`}>
                                 Weighted impact • {trackCount} tracks
                               </div>
-                              <div className={`mt-1.5 h-1.5 overflow-hidden rounded-full ${isDiscoPersona ? 'bg-white/22' : 'bg-foreground/10'}`}>
+                              <div className={`mt-1.5 h-1.5 overflow-hidden rounded-[5px] ${isDiscoPersona ? 'bg-white/22' : 'bg-slate-400/25'}`}>
                                 <div
                                   className="h-full rounded-full transition-all duration-500"
                                   style={{
@@ -493,11 +494,11 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                   { label: 'Valence', value: cluster.valence }
                                 ].map(metric => (
                                   <div key={metric.label}>
-                                    <div className={`mb-1 flex items-center justify-between ${isDiscoPersona ? 'text-white/84' : 'text-foreground/60'}`}>
+                                    <div className={`mb-1 flex items-center justify-between ${isDiscoPersona ? 'text-white/84' : 'text-slate-700/90'}`}>
                                       <span>{metric.label}</span>
-                                      <span className={`font-medium ${isDiscoPersona ? 'text-white' : 'text-foreground'}`}>{Math.round(metric.value * 100)}%</span>
+                                      <span className={`font-medium ${isDiscoPersona ? 'text-white' : 'text-slate-900'}`}>{Math.round(metric.value * 100)}%</span>
                                     </div>
-                                    <div className={`h-1.5 overflow-hidden rounded-full ${isDiscoPersona ? 'bg-white/22' : 'bg-foreground/10'}`}>
+                                    <div className={`h-1.5 overflow-hidden rounded-[5px] ${isDiscoPersona ? 'bg-white/22' : 'bg-slate-400/25'}`}>
                                       <div
                                         className="h-full rounded-full transition-all duration-500"
                                         style={{ width: `${metric.value * 100}%`, background: `linear-gradient(90deg, ${meta.color}, rgba(255,255,255,0.3))` }}
@@ -513,20 +514,20 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
 
                     <div className="min-w-0 space-y-3">
-                      <div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-3.5">
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Current persona</p>
+                      <div className="rounded-[12px] border border-sky-300/35 bg-white/36 p-3.5 backdrop-blur-md">
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-slate-600">Current persona</p>
                         <div className="mt-3 flex items-center gap-3">
                           <span className="h-4 w-4 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
-                          <h4 className="text-lg font-semibold text-foreground">{selectedClusterMeta.name}</h4>
+                          <h4 className="text-lg font-semibold text-slate-900">{selectedClusterMeta.name}</h4>
                         </div>
-                        <p className="mt-2 text-sm leading-6 text-foreground/65">{selectedClusterMeta.description}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-700/90">{selectedClusterMeta.description}</p>
 
-                        <div className="mt-2.5 rounded-xl border border-foreground/10 bg-background/70 p-2.5">
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Feature weighting 2.0</p>
-                          <p className="mt-1.5 text-xs text-foreground/60">
+                        <div className="mt-2.5 rounded-[10px] border border-sky-300/35 bg-white/52 p-2.5">
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-slate-600">Feature weighting 2.0</p>
+                          <p className="mt-1.5 text-xs text-slate-700/85">
                             Vibe-central tracks receive higher influence, surfacing personas that feel most mainstream inside this sonic network.
                           </p>
-                          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                          <div className="mt-2.5 h-1.5 overflow-hidden rounded-[5px] bg-slate-400/25">
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{
@@ -535,31 +536,31 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               }}
                             />
                           </div>
-                          <p className="mt-1.5 text-[11px] text-foreground/65">
+                          <p className="mt-1.5 text-[11px] text-slate-700/80">
                             Share of weighted popularity: {Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}%
                           </p>
                         </div>
 
-                        <div className="mt-2.5 rounded-xl border border-foreground/10 bg-background/70 p-2.5">
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/45">Top tracks in this cluster</p>
+                        <div className="mt-2.5 rounded-[10px] border border-sky-300/35 bg-white/52 p-2.5">
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-slate-600">Top tracks in this cluster</p>
                           <div className="mt-2.5 space-y-1.5">
                             {selectedClusterTracks.slice(0, 2).map(track => (
                               <button
                                 key={`${track.name}-${track.release_year}`}
                                 onClick={() => setSelectedTrackIndex(tracks.findIndex(item => item.name === track.name && item.release_year === track.release_year))}
-                                className={`flex min-w-0 w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-foreground/35 bg-foreground/12' : 'border-foreground/10 bg-foreground/5 hover:bg-foreground/8'}`}
+                                className={`flex min-w-0 w-full items-center justify-between gap-2 rounded-[8px] border px-2.5 py-1.5 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-sky-400/55 bg-white/72' : 'border-sky-200/35 bg-white/45 hover:bg-white/62'}`}
                               >
-                                <span className="min-w-0 flex-1 truncate pr-2 text-xs text-foreground sm:text-sm" title={track.name}>{track.name}</span>
-                                <span className="ml-3 shrink-0 text-xs text-foreground/50">{track.release_year}</span>
+                                <span className="min-w-0 flex-1 truncate pr-2 text-xs text-slate-900 sm:text-sm" title={track.name}>{track.name}</span>
+                                <span className="ml-3 shrink-0 text-xs text-slate-600">{track.release_year}</span>
                               </button>
                             ))}
                           </div>
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-foreground/10 bg-gradient-to-br from-foreground/8 to-foreground/3 p-3.5">
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Why it matters</p>
-                        <p className="mt-2 text-sm leading-6 text-foreground/70">
+                      <div className="rounded-[12px] border border-sky-300/35 bg-[linear-gradient(135deg,rgba(255,255,255,0.55)_0%,rgba(203,236,255,0.45)_100%)] p-3.5 backdrop-blur-md">
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-slate-600">Why it matters</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-700/90">
                           This is the part where the model stops being a chart and starts becoming a lens: it reveals the music’s internal structure without being told what structure to expect.
                         </p>
                       </div>
