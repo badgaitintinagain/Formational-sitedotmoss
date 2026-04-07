@@ -1,9 +1,9 @@
 "use client";
 import React, { useRef, useEffect, useState, memo, useMemo } from 'react';
-import { X, Sun, Moon, Palette, Check, Ghost, Image as ImageIcon, Wind, Zap, Pipette } from 'lucide-react';
+import { X, Sun, Moon, Check, Ghost, Image as ImageIcon, Wind, Zap } from 'lucide-react';
 import Image from 'next/image';
 import gsap from 'gsap';
-import { useTheme, PaletteId } from './ThemeProvider';
+import { useTheme } from './ThemeProvider';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,23 +12,11 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: SettingsModalProps) => {
   const { 
-    theme, toggleTheme, paletteId, setPaletteId, isGrayscale, setGrayscale,
-    bgValue, setBgValue, glassBlur, setGlassBlur, setBgType,
-    customPrimary, setCustomPrimary, customSecondary, setCustomSecondary
+    theme, toggleTheme, isGrayscale, setGrayscale,
+    bgType, bgValue, setBgValue, glassBlur, setGlassBlur, setBgType
   } = useTheme();
   const modalRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-
-  const palettes: { id: PaletteId; name: string; primary: string; secondary: string }[] = useMemo(() => [
-    { id: 'serene', name: 'Serene', primary: '#949B7B', secondary: '#B6A691' },
-    { id: 'clay', name: 'Clay', primary: '#CB997E', secondary: '#DDBEA9' },
-    { id: 'moss', name: 'Moss', primary: '#6B705C', secondary: '#A5A58D' },
-    { id: 'desert', name: 'Desert', primary: '#E6CCB2', secondary: '#EDE0D4' },
-    { id: 'ocean', name: 'Ocean', primary: '#A8DADC', secondary: '#F1FAEE' },
-    { id: 'spring', name: 'Spring', primary: '#FFB4A2', secondary: '#FFCDB2' },
-    { id: 'sunset', name: 'Sunset', primary: '#B5838D', secondary: '#E5989B' },
-    { id: 'vintage', name: 'Vintage', primary: '#A68A64', secondary: '#DEAB48' },
-  ], []);
 
   const bgPresets = useMemo(() => [
     { id: 'beige', type: 'color' as const, value: '#F2EBE3', name: 'Default Light' },
@@ -36,12 +24,17 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
     { id: 'nature', type: 'image' as const, value: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1600&q=80', name: 'Nature' },
     { id: 'abstract', type: 'image' as const, value: 'https://images.unsplash.com/photo-1557683311-eac922347aa1?auto=format&fit=crop&w=1600&q=80', name: 'Abstract' },
     { id: 'city', type: 'image' as const, value: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80', name: 'City' },
-    { id: 'aurora', type: 'image' as const, value: 'https://images.unsplash.com/photo-1579033462043-0f11a7862f8d?auto=format&fit=crop&w=1600&q=80', name: 'Aurora' },
+    { id: 'aurora', type: 'image' as const, value: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1600&q=80', name: 'Aurora' },
     { id: 'ocean-drive', type: 'image' as const, value: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80', name: 'Ocean Drive' },
     { id: 'mountain-fog', type: 'image' as const, value: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80', name: 'Mountain Fog' },
     { id: 'neon-night', type: 'image' as const, value: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1600&q=80', name: 'Neon Night' },
     { id: 'desert-dunes', type: 'image' as const, value: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1600&q=80', name: 'Desert Dunes' },
   ], []);
+
+  const visibleBgPresets = useMemo(
+    () => bgPresets.filter(bg => bg.type === bgType),
+    [bgPresets, bgType]
+  );
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -123,8 +116,22 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
               <ImageIcon size={16} className="text-foreground opacity-40" />
               <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Canvas</h3>
             </div>
+            <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
+              <button
+                onClick={() => setBgType('color')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'color' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
+              >
+                Color
+              </button>
+              <button
+                onClick={() => setBgType('image')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'image' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
+              >
+                Image
+              </button>
+            </div>
             <div className="grid grid-cols-5 gap-2.5">
-              {bgPresets.map((bg) => (
+              {visibleBgPresets.map((bg) => (
                 <button
                   key={bg.id}
                   onClick={() => {
@@ -132,7 +139,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                     setBgValue(bg.value);
                   }}
                   className={`relative aspect-square rounded-[4px] overflow-hidden border transition-all ${
-                    bgValue === bg.value ? 'border-accent-primary scale-[0.97] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'border-foreground/15 opacity-80 hover:opacity-100'
+                    bgValue === bg.value && bgType === bg.type ? 'border-accent-primary scale-[0.97] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'border-foreground/15 opacity-80 hover:opacity-100'
                   }`}
                 >
                   {bg.type === 'color' ? (
@@ -178,109 +185,6 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
                 </div>
               )}
             </div>
-          </section>
-
-          {/* Accent Color Palette */}
-          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            <div className="flex items-center gap-2 mb-2">
-              <Palette size={16} className="text-foreground opacity-40" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Pastel Pairs</h3>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              {palettes.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setPaletteId(p.id)}
-                  className={`group relative aspect-square rounded-[4px] overflow-hidden flex items-center justify-center hover:scale-105 transition-transform active:scale-95 shadow-md border ${paletteId === p.id ? 'border-accent-primary scale-105' : 'border-foreground/15 opacity-85'}`}
-                  title={p.name}
-                >
-                  <div className="absolute inset-0 flex rotate-45">
-                    <div className="flex-1 h-full" style={{ backgroundColor: p.primary }} />
-                    <div className="flex-1 h-full" style={{ backgroundColor: p.secondary }} />
-                  </div>
-                  {paletteId === p.id && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-10">
-                      <Check size={16} className="text-white drop-shadow-md" />
-                    </div>
-                  )}
-                </button>
-              ))}
-
-              {/* Custom color picker */}
-              <button
-                onClick={() => setPaletteId('custom')}
-                className={`group relative aspect-square rounded-[4px] overflow-hidden flex items-center justify-center hover:scale-105 transition-transform active:scale-95 shadow-md border ${paletteId === 'custom' ? 'border-accent-primary scale-105' : 'border-foreground/15 opacity-85'}`}
-                title="Custom"
-              >
-                <div className="absolute inset-0 flex rotate-45">
-                  <div className="flex-1 h-full" style={{ backgroundColor: customPrimary }} />
-                  <div className="flex-1 h-full" style={{ backgroundColor: customSecondary }} />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/15 z-10">
-                  {paletteId === 'custom' ? (
-                    <Check size={16} className="text-white drop-shadow-md" />
-                  ) : (
-                    <Pipette size={14} className="text-white drop-shadow-md" />
-                  )}
-                </div>
-              </button>
-            </div>
-
-            {/* Custom color pickers - shown when custom is selected */}
-            {paletteId === 'custom' && (
-              <div className="flex gap-4 mt-3 p-3 bg-background/20 border border-foreground/15 rounded-[4px] backdrop-blur-md">
-                <div className="flex-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Primary</label>
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 rounded-[4px] overflow-hidden border border-foreground/15 flex-shrink-0">
-                      <input
-                        type="color"
-                        value={customPrimary}
-                        onChange={(e) => setCustomPrimary(e.target.value)}
-                        className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
-                      />
-                      <div className="w-full h-full pointer-events-none" style={{ backgroundColor: customPrimary }} />
-                    </div>
-                    <input
-                      type="text"
-                      value={customPrimary}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomPrimary(v);
-                      }}
-                      maxLength={7}
-                      className="w-full bg-background/25 border border-foreground/15 rounded-[4px] px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest opacity-50 text-foreground mb-1.5 block">Secondary</label>
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 rounded-[4px] overflow-hidden border border-foreground/15 flex-shrink-0">
-                      <input
-                        type="color"
-                        value={customSecondary}
-                        onChange={(e) => setCustomSecondary(e.target.value)}
-                        className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
-                      />
-                      <div className="w-full h-full pointer-events-none" style={{ backgroundColor: customSecondary }} />
-                    </div>
-                    <input
-                      type="text"
-                      value={customSecondary}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setCustomSecondary(v);
-                      }}
-                      maxLength={7}
-                      className="w-full bg-background/25 border border-foreground/15 rounded-[4px] px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:border-accent-primary/50"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <p className="text-[9px] opacity-40 text-foreground italic text-center">Choose a preset pair or pick your own colors</p>
           </section>
 
           {/* Grayscale Toggle */}
