@@ -453,10 +453,10 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               {cluster.cluster === 0 && (
                                 <>
                                   <div
-                                    className="pointer-events-none absolute right-0 top-0 h-full w-[52%] bg-cover bg-right-top opacity-90"
+                                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-95"
                                     style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
                                   />
-                                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,10,22,0.96)_0%,rgba(8,10,22,0.88)_46%,rgba(8,10,22,0.62)_72%,rgba(8,10,22,0.20)_100%)]" />
+                                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,10,22,0.97)_0%,rgba(8,10,22,0.84)_42%,rgba(8,10,22,0.58)_68%,rgba(8,10,22,0.42)_100%)]" />
                                 </>
                               )}
 
