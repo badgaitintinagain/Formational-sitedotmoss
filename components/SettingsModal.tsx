@@ -69,7 +69,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
       {/* App Window */}
       <div 
         ref={modalRef}
-        className="relative w-full max-w-lg h-[81vh] rounded-[4px] border border-foreground/20 bg-background/24 text-foreground overflow-hidden flex flex-col shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500"
+        className="relative w-full max-w-xl h-[81vh] rounded-[4px] border border-foreground/20 bg-background/24 text-foreground overflow-hidden flex flex-col shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500"
         style={{ 
           opacity: isDragging ? 0.15 : 1,
           transform: isDragging ? 'scale(0.98)' : 'scale(1)',
@@ -116,7 +116,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
 
           <div className="min-h-0 flex-1 overflow-y-auto p-4 no-scrollbar md:p-5">
             {activeSection === 'interface' && (
-              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+              <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Sun size={16} className="text-foreground opacity-40" />
                   <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Interface</h3>
@@ -141,7 +141,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
             )}
 
             {activeSection === 'canvas' && (
-              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+              <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <ImageIcon size={16} className="text-foreground opacity-40" />
                   <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Canvas</h3>
@@ -189,7 +189,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
             )}
 
             {activeSection === 'glass' && (
-              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+              <section className="space-y-4">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <Wind size={16} className="text-foreground opacity-40" />
@@ -220,7 +220,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
             )}
 
             {activeSection === 'accessibility' && (
-              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+              <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Ghost size={16} className="text-foreground opacity-40" />
                   <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Accessibility</h3>
