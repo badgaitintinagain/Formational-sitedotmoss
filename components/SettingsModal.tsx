@@ -17,6 +17,7 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
   } = useTheme();
   const modalRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeSection, setActiveSection] = useState<'interface' | 'canvas' | 'glass' | 'accessibility'>('interface');
 
   const bgPresets = useMemo(() => [
     { id: 'beige', type: 'color' as const, value: '#F2EBE3', name: 'Default Light' },
@@ -35,6 +36,13 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
     () => bgPresets.filter(bg => bg.type === bgType),
     [bgPresets, bgType]
   );
+
+  const settingsSections = useMemo(() => ([
+    { id: 'interface' as const, label: 'Interface', icon: Sun },
+    { id: 'canvas' as const, label: 'Canvas', icon: ImageIcon },
+    { id: 'glass' as const, label: 'Glass', icon: Wind },
+    { id: 'accessibility' as const, label: 'Accessibility', icon: Ghost }
+  ]), []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -85,131 +93,157 @@ const SettingsModal: React.FC<SettingsModalProps> = memo(({ isOpen, onClose }: S
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto no-scrollbar">
-          {/* Theme Mode */}
-          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            <div className="flex items-center gap-2 mb-2">
-              <Sun size={16} className="text-foreground opacity-40" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Interface</h3>
-            </div>
-            <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
-              <button 
-                onClick={() => theme === 'dark' && toggleTheme()}
-                className={`flex-1 flex items-center justify-center gap-3 py-2.5 rounded-[3px] transition-all ${theme === 'light' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
-              >
-                <Sun size={18} className={theme === 'light' ? 'text-amber-500' : ''} />
-                <span className="text-sm">Day</span>
-              </button>
-              <button 
-                onClick={() => theme === 'light' && toggleTheme()}
-                className={`flex-1 flex items-center justify-center gap-3 py-2.5 rounded-[3px] transition-all ${theme === 'dark' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
-              >
-                <Moon size={18} className={theme === 'dark' ? 'text-indigo-400' : ''} />
-                <span className="text-sm">Night</span>
-              </button>
-            </div>
-          </section>
+        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+          <aside className="border-b border-foreground/15 bg-background/16 p-2 backdrop-blur-xl backdrop-saturate-150 md:w-[170px] md:border-b-0 md:border-r md:p-3">
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1">
+              {settingsSections.map(section => {
+                const Icon = section.icon;
+                const active = activeSection === section.id;
 
-          {/* Canvas */}
-          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            <div className="flex items-center gap-2 mb-2">
-              <ImageIcon size={16} className="text-foreground opacity-40" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Canvas</h3>
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`flex items-center gap-2 rounded-[4px] border px-2.5 py-2 text-left text-xs transition-all ${active ? 'border-foreground/30 bg-background/28 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]' : 'border-foreground/15 bg-background/14 text-foreground/70 hover:border-foreground/30 hover:bg-background/24'}`}
+                  >
+                    <Icon size={14} />
+                    <span className="truncate">{section.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
-              <button
-                onClick={() => setBgType('color')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'color' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
-              >
-                Color
-              </button>
-              <button
-                onClick={() => setBgType('image')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'image' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
-              >
-                Image
-              </button>
-            </div>
-            <div className="grid grid-cols-5 gap-2.5">
-              {visibleBgPresets.map((bg) => (
-                <button
-                  key={bg.id}
-                  onClick={() => {
-                    setBgType(bg.type as 'color' | 'image');
-                    setBgValue(bg.value);
-                  }}
-                  className={`relative aspect-square rounded-[4px] overflow-hidden border transition-all ${
-                    bgValue === bg.value && bgType === bg.type ? 'border-accent-primary scale-[0.97] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'border-foreground/15 opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  {bg.type === 'color' ? (
-                    <div className="w-full h-full" style={{ backgroundColor: bg.value }} />
-                  ) : (
-                    <Image src={bg.value} className="object-cover" alt={bg.name} fill sizes="100px" />
-                  )}
-                  {bgValue === bg.value && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <Check size={16} className="text-white" />
+          </aside>
+
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 no-scrollbar md:p-5">
+            {activeSection === 'interface' && (
+              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sun size={16} className="text-foreground opacity-40" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Interface</h3>
+                </div>
+                <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
+                  <button
+                    onClick={() => theme === 'dark' && toggleTheme()}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[3px] transition-all ${theme === 'light' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
+                  >
+                    <Sun size={16} className={theme === 'light' ? 'text-amber-500' : ''} />
+                    <span className="text-sm">Day</span>
+                  </button>
+                  <button
+                    onClick={() => theme === 'light' && toggleTheme()}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[3px] transition-all ${theme === 'dark' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-foreground/45'}`}
+                  >
+                    <Moon size={16} className={theme === 'dark' ? 'text-indigo-400' : ''} />
+                    <span className="text-sm">Night</span>
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {activeSection === 'canvas' && (
+              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="flex items-center gap-2 mb-1">
+                  <ImageIcon size={16} className="text-foreground opacity-40" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Canvas</h3>
+                </div>
+                <div className="flex bg-background/18 border border-foreground/15 p-1 rounded-[4px] backdrop-blur-md">
+                  <button
+                    onClick={() => setBgType('color')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'color' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
+                  >
+                    Color
+                  </button>
+                  <button
+                    onClick={() => setBgType('image')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[3px] text-xs uppercase tracking-[0.2em] transition-all ${bgType === 'image' ? 'bg-background/55 border border-foreground/20 text-foreground font-bold' : 'text-foreground/45'}`}
+                  >
+                    Image
+                  </button>
+                </div>
+                <div className="grid grid-cols-5 gap-2.5">
+                  {visibleBgPresets.map((bg) => (
+                    <button
+                      key={bg.id}
+                      onClick={() => {
+                        setBgType(bg.type as 'color' | 'image');
+                        setBgValue(bg.value);
+                      }}
+                      className={`relative aspect-square rounded-[4px] overflow-hidden border transition-all ${
+                        bgValue === bg.value && bgType === bg.type ? 'border-accent-primary scale-[0.97] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'border-foreground/15 opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      {bg.type === 'color' ? (
+                        <div className="w-full h-full" style={{ backgroundColor: bg.value }} />
+                      ) : (
+                        <Image src={bg.value} className="object-cover" alt={bg.name} fill sizes="100px" />
+                      )}
+                      {bgValue === bg.value && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <Check size={16} className="text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeSection === 'glass' && (
+              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Wind size={16} className="text-foreground opacity-40" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Glass Intensity</h3>
+                  </div>
+                  <span className="text-[10px] font-mono opacity-40 text-foreground">{glassBlur}px</span>
+                </div>
+                <div className="relative pt-2 pb-6">
+                  <input
+                    type="range"
+                    min="0"
+                    max="40"
+                    value={glassBlur}
+                    onMouseDown={() => setIsDragging(true)}
+                    onMouseUp={() => setIsDragging(false)}
+                    onTouchStart={() => setIsDragging(true)}
+                    onTouchEnd={() => setIsDragging(false)}
+                    onChange={(e) => setGlassBlur(Number(e.target.value))}
+                    className="w-full h-1.5 bg-foreground/10 rounded-lg appearance-none cursor-pointer accent-accent-primary"
+                  />
+                  {isDragging && (
+                    <div className="absolute top-10 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground animate-bounce whitespace-nowrap">
+                      Previewing Dashboard...
                     </div>
                   )}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Liquid Glass Blur */}
-          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Wind size={16} className="text-foreground opacity-40" />
-                <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Glass Intensity</h3>
-              </div>
-              <span className="text-[10px] font-mono opacity-40 text-foreground">{glassBlur}px</span>
-            </div>
-            <div className="relative pt-2 pb-6">
-              <input 
-                type="range" 
-                min="0" 
-                max="40" 
-                value={glassBlur}
-                onMouseDown={() => setIsDragging(true)}
-                onMouseUp={() => setIsDragging(false)}
-                onTouchStart={() => setIsDragging(true)}
-                onTouchEnd={() => setIsDragging(false)}
-                onChange={(e) => setGlassBlur(Number(e.target.value))}
-                className="w-full h-1.5 bg-foreground/10 rounded-lg appearance-none cursor-pointer accent-accent-primary"
-              />
-              {isDragging && (
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground animate-bounce whitespace-nowrap">
-                  Previewing Dashboard...
                 </div>
-              )}
-            </div>
-          </section>
+              </section>
+            )}
 
-          {/* Grayscale Toggle */}
-          <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
-            <div className="flex items-center gap-2 mb-2">
-              <Ghost size={16} className="text-foreground opacity-40" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Accessibility</h3>
-            </div>
-            <button 
-              onClick={() => setGrayscale(!isGrayscale)}
-              className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
-                isGrayscale 
-                  ? 'bg-accent-primary/18 border-accent-primary/45 text-accent-primary font-bold' 
-                  : 'bg-background/22 border-foreground/15 text-foreground opacity-85'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Ghost size={18} />
-                <span className="text-sm">Force to Grayscale</span>
-              </div>
-              <div className={`w-10 h-5 rounded-full relative transition-colors ${isGrayscale ? 'bg-accent-primary' : 'bg-gray-400/30'}`}>
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isGrayscale ? 'left-6' : 'left-1'}`} />
-              </div>
-            </button>
-          </section>
+            {activeSection === 'accessibility' && (
+              <section className="space-y-4 rounded-[4px] border border-foreground/20 bg-background/16 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                <div className="flex items-center gap-2 mb-1">
+                  <Ghost size={16} className="text-foreground opacity-40" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-foreground">Accessibility</h3>
+                </div>
+                <button
+                  onClick={() => setGrayscale(!isGrayscale)}
+                  className={`w-full flex items-center justify-between p-3 rounded-[4px] border transition-all ${
+                    isGrayscale
+                      ? 'bg-accent-primary/18 border-accent-primary/45 text-accent-primary font-bold'
+                      : 'bg-background/22 border-foreground/15 text-foreground opacity-85'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Ghost size={16} />
+                    <span className="text-sm">Force to Grayscale</span>
+                  </div>
+                  <div className={`w-10 h-5 rounded-full relative transition-colors ${isGrayscale ? 'bg-accent-primary' : 'bg-gray-400/30'}`}>
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isGrayscale ? 'left-6' : 'left-1'}`} />
+                  </div>
+                </button>
+              </section>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
