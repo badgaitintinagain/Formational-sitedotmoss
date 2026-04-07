@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { User, LogIn, LogOut, Settings, Shield } from 'lucide-react';
+import { User, LogIn, LogOut, Settings, Shield, Sun, Moon } from 'lucide-react';
 import gsap from 'gsap';
+import { useTheme } from './ThemeProvider';
 
 interface AuthUser {
   id: string;
@@ -13,12 +14,14 @@ interface AuthUser {
 }
 
 const ProfileButton: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Check for existing session on mount
@@ -55,11 +58,28 @@ const ProfileButton: React.FC = () => {
 
   // Animation for dropdown
   useEffect(() => {
-    if (isOpen && dropdownRef.current) {
+    if (isOpen && menuRef.current) {
       gsap.fromTo(
-        dropdownRef.current,
-        { opacity: 0, y: -10, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.2, ease: 'power2.out' }
+        menuRef.current,
+        {
+          opacity: 0,
+          y: -10,
+          scaleX: 0.92,
+          scaleY: 0.75,
+          borderRadius: '10px',
+          filter: 'blur(4px)',
+          transformOrigin: 'top right'
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+          borderRadius: '6px',
+          filter: 'blur(0px)',
+          duration: 0.32,
+          ease: 'power3.out'
+        }
       );
     }
   }, [isOpen]);
@@ -112,24 +132,28 @@ const ProfileButton: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-6 md:top-8 right-16 md:right-20 z-50" ref={dropdownRef}>
+      <div className="fixed top-6 md:top-8 right-6 z-50" ref={dropdownRef}>
         {/* Profile Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 p-2 rounded-full bg-foreground/5 hover:bg-foreground/10 border border-foreground/10 transition-all duration-200 group backdrop-blur-xl shadow-lg hover:shadow-xl"
+          className="flex items-center gap-1.5 p-1.5 rounded-[4px] bg-foreground/5 hover:bg-foreground/10 border border-foreground/15 transition-all duration-200 group backdrop-blur-xl shadow-lg hover:shadow-xl"
+          aria-label="Open profile menu"
         >
-          <div className="w-8 h-8 rounded-full bg-accent-primary/20 border-2 border-accent-primary/30 flex items-center justify-center overflow-hidden group-hover:border-accent-primary/50 transition-all">
+          <div className="w-7 h-7 rounded-[3px] bg-accent-primary/20 border border-accent-primary/35 flex items-center justify-center overflow-hidden group-hover:border-accent-primary/50 transition-all">
             {user?.avatar ? (
-              <Image src={user.avatar} alt={user.name} width={32} height={32} className="w-full h-full object-cover" />
+              <Image src={user.avatar} alt={user.name} width={28} height={28} className="w-full h-full object-cover" />
             ) : (
-              <User size={16} className="text-accent-primary" />
+              <User size={14} className="text-accent-primary" />
             )}
           </div>
         </button>
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-background border border-foreground/10 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl z-[60]">
+          <div
+            ref={menuRef}
+            className="absolute right-0 mt-2 w-56 bg-background/85 border border-foreground/15 rounded-[6px] shadow-2xl overflow-hidden backdrop-blur-xl z-[60]"
+          >
             {user ? (
               <>
                 <div className="p-4 border-b border-foreground/5 bg-foreground/5">
@@ -145,6 +169,16 @@ const ProfileButton: React.FC = () => {
                   )}
                 </div>
                 <div className="py-1">
+                  <button
+                    onClick={() => {
+                      toggleTheme();
+                      setIsOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5 flex items-center gap-2 transition-colors"
+                  >
+                    {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                    <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                  </button>
                   {user.role === 'admin' && (
                     <button
                       onClick={() => {
@@ -168,6 +202,16 @@ const ProfileButton: React.FC = () => {
               </>
             ) : (
               <div className="py-1">
+                <button
+                  onClick={() => {
+                    toggleTheme();
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5 flex items-center gap-2 transition-colors"
+                >
+                  {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                  <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                </button>
                 <button
                   onClick={() => {
                     setShowLogin(true);
