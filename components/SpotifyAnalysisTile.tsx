@@ -384,7 +384,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-background/70 p-2 backdrop-blur-md sm:p-3"
+          className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.03)_35%,rgba(0,0,0,0.18)_100%)] p-2 backdrop-blur-lg sm:p-3"
           onClick={() => setIsOpen(false)}
         >
           <div
