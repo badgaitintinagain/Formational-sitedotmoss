@@ -7,6 +7,9 @@ import clusterSummaryData from '../assets/data/cluster_summary.json';
 import divaDnaData from '../assets/data/diva_dna.json';
 import musicGalaxyData from '../assets/data/music_galaxy.json';
 import mdnaTourImage from '../assets/image/MDNATour-1.jpg';
+import discoDynamoImage from '../assets/image/thediscodynamo-1.jpg';
+import discoDynamoImage2 from '../assets/image/thediscodynamo-2.png';
+import discoDynamoImage3 from '../assets/image/thediscodynamo-3.jpg';
 
 interface ClusterData {
   cluster: number;
@@ -99,6 +102,8 @@ const AUDIO_FEATURE_KEYS: Array<keyof TrackData> = [
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+const DISCO_DYNAMO_IMAGES = [discoDynamoImage, discoDynamoImage2, discoDynamoImage3] as const;
+
 const getTrackKey = (track: TrackIdentity) => `${track.name}::${track.release_year}`;
 
 const projectTsnePoint = (
@@ -181,6 +186,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   const [selectedCluster, setSelectedCluster] = useState(0);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
   const [selectedEraIndex, setSelectedEraIndex] = useState(0);
+  const [discoImageIndex, setDiscoImageIndex] = useState(() => Math.floor(Math.random() * DISCO_DYNAMO_IMAGES.length));
   const modalRef = useRef<HTMLDivElement>(null);
 
   const clusters = clusterSummaryData as ClusterData[];
@@ -207,6 +213,21 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
       { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power3.out' }
     );
   }, [isOpen]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDiscoImageIndex(previous => {
+        if (DISCO_DYNAMO_IMAGES.length <= 1) return previous;
+        let next = previous;
+        while (next === previous) {
+          next = Math.floor(Math.random() * DISCO_DYNAMO_IMAGES.length);
+        }
+        return next;
+      });
+    }, 70_000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const madonnaTracks = useMemo(() => tracks.filter(track => String(track.artists).includes('Madonna')), [tracks]);
   const selectedTrack = tracks[selectedTrackIndex] ?? tracks[0];
@@ -377,9 +398,11 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/55 p-4 backdrop-blur-lg sm:p-6"
+          className="fixed inset-0 z-50 bg-black/60 p-4 backdrop-blur-lg sm:p-6"
           onClick={() => setIsOpen(false)}
         >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(56,189,248,0.25)_0%,rgba(56,189,248,0.06)_26%,transparent_52%),radial-gradient(circle_at_78%_82%,rgba(236,72,153,0.20)_0%,rgba(236,72,153,0.06)_24%,transparent_50%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-70 [background-image:radial-gradient(rgba(255,255,255,0.18)_0.6px,transparent_0.6px)] [background-size:24px_24px]" />
           <div
             ref={modalRef}
             onClick={event => event.stopPropagation()}
@@ -433,7 +456,18 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               {activeTab === 'personas' && (
                 <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1fr)_280px]">
                   <div className="space-y-2">
-                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                    <div className="relative overflow-hidden rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      {selectedCluster === 0 && (
+                        <>
+                          <div
+                            className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-45"
+                            style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
+                          />
+                          <div className="pointer-events-none absolute inset-0 bg-black/45" />
+                        </>
+                      )}
+                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl" style={{ backgroundColor: `${selectedClusterMeta.color}55` }} />
+                      <div className="relative">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <span className="h-3 w-3 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
@@ -462,6 +496,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             </div>
                           </div>
                         ))}
+                      </div>
                       </div>
                     </div>
 
@@ -500,8 +535,11 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             <button
                               key={cluster.cluster}
                               onClick={() => handleClusterSelect(cluster.cluster)}
-                              className={`w-full rounded-[10px] border px-2.5 py-2 text-left ${active ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
+                              className={`relative w-full overflow-hidden rounded-[10px] border px-2.5 py-2 text-left ${active ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
                             >
+                              {active && (
+                                <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: meta.color }} />
+                              )}
                               <div className="flex items-center justify-between gap-2">
                                 <span className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
                                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: meta.color }} />
@@ -591,11 +629,19 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
 
                     <div className="relative h-[min(32vh,260px)] min-h-[200px] overflow-hidden rounded-[12px] border border-white/20 bg-black/20 backdrop-blur-sm">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(56,189,248,0.22)_0%,transparent_40%),radial-gradient(circle_at_68%_70%,rgba(251,191,36,0.14)_0%,transparent_38%)]" />
                       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet">
                         <defs>
                           <pattern id="grid-lines" width="40" height="40" patternUnits="userSpaceOnUse">
                             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7" />
                           </pattern>
+                          <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="5" result="blur" />
+                            <feMerge>
+                              <feMergeNode in="blur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
                         </defs>
                         <rect width="1000" height="620" fill="url(#grid-lines)" />
                         <circle cx="500" cy="310" r="150" fill="rgba(255,255,255,0.08)" />
@@ -641,6 +687,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               style={{ opacity: isDimmed ? 0.25 : 1 }}
                             >
                               <title>{`${track.name} (${track.release_year})`}</title>
+                              <circle cx={x} cy={y} r={isActive ? 16 : 10} fill={meta.color} opacity={isActive ? 0.12 : 0.06} filter="url(#pointGlow)" />
                               <circle cx={x} cy={y} r={isActive ? 12 : 7} fill={meta.color} opacity={isActive ? 0.22 : 0.12} />
                               <circle cx={x} cy={y} r={isActive ? 5.5 : 3.5} fill={meta.color} stroke="rgba(255,255,255,0.7)" strokeWidth={isActive ? 1.6 : 0.7} />
                             </g>
@@ -704,7 +751,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="rounded-[14px] border border-white/20 bg-white/10 p-3 text-xs leading-5 text-foreground/70">
+                    <div className="relative overflow-hidden rounded-[14px] border border-white/20 bg-white/10 p-3 text-xs leading-5 text-foreground/70">
+                      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-cyan-300/20 blur-2xl" />
                       <p>Each era profile is averaged from Madonna tracks only. Delta values compare the selected era against all-time Madonna baseline.</p>
                     </div>
                   </div>
