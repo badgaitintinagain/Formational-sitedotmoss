@@ -454,8 +454,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
                 <div className="min-w-0 flex-1 overflow-hidden">
               {activeTab === 'personas' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1fr)_280px]">
-                  <div className="space-y-2">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(240px,0.65fr)]">
+                  <div className="grid gap-2 xl:grid-cols-2">
                     <div className="relative overflow-hidden rounded-[14px] border border-white/22 bg-white/10 p-3">
                       {selectedCluster === 0 && (
                         <>
@@ -500,7 +500,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3 xl:col-span-1">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">Top tracks in selected cluster</p>
                       <div className="mt-2 space-y-1.5">
                         {selectedClusterTracks.slice(0, 6).map(track => (
@@ -520,7 +520,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 lg:max-w-[320px]">
                     <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
                       <div className="flex items-center gap-2 text-foreground/75">
                         <Disc3 className="h-4 w-4" />
@@ -564,8 +564,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'galaxy' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[260px_minmax(0,1fr)]">
-                  <div className="space-y-3">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.3fr)_280px]">
+                  <div className="order-2 space-y-3 lg:order-2">
                     <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Selected Track</p>
                       <div className="mt-2 flex items-start justify-between gap-3">
@@ -620,7 +620,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="min-w-0 rounded-[14px] border border-white/22 bg-white/10 p-3">
+                  <div className="order-1 min-w-0 rounded-[14px] border border-white/22 bg-white/10 p-3 lg:order-1">
                     <div className="mb-2.5 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">2D manifold</p>
@@ -717,8 +717,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'comparison' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                  <div className="space-y-2">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                  <div className="space-y-2 lg:max-w-[520px]">
                     <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">Evolution</p>
                       <h3 className="mt-1 text-sm font-semibold text-foreground">Timeline Mutation</h3>
@@ -757,7 +757,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="grid gap-2 lg:grid-rows-[auto_1fr]">
                     <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">Era vs Baseline</p>
                       <div className="mt-2 space-y-1.5">
