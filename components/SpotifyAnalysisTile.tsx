@@ -7,9 +7,6 @@ import clusterSummaryData from '../assets/data/cluster_summary.json';
 import divaDnaData from '../assets/data/diva_dna.json';
 import musicGalaxyData from '../assets/data/music_galaxy.json';
 import mdnaTourImage from '../assets/image/MDNATour-1.jpg';
-import discoDynamoImage from '../assets/image/thediscodynamo-1.jpg';
-import discoDynamoImage2 from '../assets/image/thediscodynamo-2.png';
-import discoDynamoImage3 from '../assets/image/thediscodynamo-3.jpg';
 
 interface ClusterData {
   cluster: number;
@@ -102,8 +99,6 @@ const AUDIO_FEATURE_KEYS: Array<keyof TrackData> = [
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-const DISCO_DYNAMO_IMAGES = [discoDynamoImage, discoDynamoImage2, discoDynamoImage3] as const;
-
 const getTrackKey = (track: TrackIdentity) => `${track.name}::${track.release_year}`;
 
 const projectTsnePoint = (
@@ -186,7 +181,6 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
   const [selectedCluster, setSelectedCluster] = useState(0);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
   const [selectedEraIndex, setSelectedEraIndex] = useState(0);
-  const [discoImageIndex, setDiscoImageIndex] = useState(() => Math.floor(Math.random() * DISCO_DYNAMO_IMAGES.length));
   const modalRef = useRef<HTMLDivElement>(null);
 
   const clusters = clusterSummaryData as ClusterData[];
@@ -213,21 +207,6 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
       { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power3.out' }
     );
   }, [isOpen]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDiscoImageIndex(previous => {
-        if (DISCO_DYNAMO_IMAGES.length <= 1) return previous;
-        let next = previous;
-        while (next === previous) {
-          next = Math.floor(Math.random() * DISCO_DYNAMO_IMAGES.length);
-        }
-        return next;
-      });
-    }, 60_000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const madonnaTracks = useMemo(() => tracks.filter(track => String(track.artists).includes('Madonna')), [tracks]);
   const selectedTrack = tracks[selectedTrackIndex] ?? tracks[0];
@@ -452,161 +431,116 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
                 <div className="min-w-0 flex-1 overflow-hidden">
               {activeTab === 'personas' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[280px_minmax(0,1fr)]">
-                  <div className="space-y-3">
-                    <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                      <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/55">Persona Stack</p>
-                      <h3 className="mt-2 text-lg font-semibold text-foreground">Sonic Archetypes</h3>
-                      <p className="mt-1 text-xs leading-5 text-foreground/68">Clusters are ranked by weighted network influence, not chronology.</p>
-                    </div>
-
-                    <div className="space-y-2">
-                        {clusters.map(cluster => {
-                          const meta = CLUSTER_NAMES[cluster.cluster];
-                          const isDiscoPersona = cluster.cluster === 0;
-                          const isSelected = selectedCluster === cluster.cluster;
-                          const trackCount = clusterTrackCounts[cluster.cluster] ?? 0;
-                          const impactShare = weightedClusterImpact[cluster.cluster]?.share ?? 0;
-
-                          return (
-                            <button
-                              key={cluster.cluster}
-                              onClick={() => {
-                                handleClusterSelect(cluster.cluster);
-                              }}
-                              className={`group relative overflow-hidden rounded-[14px] border p-3 text-left transition-all duration-200 ${isSelected ? 'border-white/35 bg-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.2)]' : 'border-white/18 bg-white/10 hover:-translate-y-0.5 hover:border-white/28 hover:bg-white/16'}`}
-                            >
-                              {cluster.cluster === 0 && (
-                                <>
-                                  <div
-                                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-90"
-                                    style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
-                                  />
-                                  <div className="pointer-events-none absolute inset-0 bg-black/55" />
-                                </>
-                              )}
-
-                              <div className="relative flex items-center justify-between gap-3">
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: meta.color }} />
-                                    <span className={`text-sm font-semibold ${isDiscoPersona ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]' : 'text-foreground'}`}>{meta.name}</span>
-                                  </div>
-                                  <p className={`mt-1 text-[11px] leading-4 ${isDiscoPersona ? 'text-white/88' : 'text-foreground/66'}`}>{meta.description}</p>
-                                </div>
-                                <span className={`rounded-full border px-2 py-1 text-[10px] uppercase tracking-[0.2em] ${isDiscoPersona ? 'border-white/30 bg-black/35 text-white' : 'border-white/25 bg-white/20 text-foreground/75'}`}>
-                                  {Math.round(impactShare * 100)}%
-                                </span>
-                              </div>
-
-                              <div className={`relative mt-2 text-[10px] uppercase tracking-[0.16em] ${isDiscoPersona ? 'text-white/75' : 'text-foreground/55'}`}>
-                                {trackCount} tracks in cluster
-                              </div>
-                            </button>
-                          );
-                        })}
-                    </div>
-                  </div>
-
-                  <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
-                    <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/50">Current Persona</p>
-                          <div className="mt-2 flex items-center gap-3">
-                          <span className="h-4 w-4 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
-                          <h4 className="text-lg font-semibold text-foreground">{selectedClusterMeta.name}</h4>
-                          </div>
-                          <p className="mt-2 text-sm leading-6 text-foreground/68">{selectedClusterMeta.description}</p>
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1fr)_280px]">
+                  <div className="space-y-2">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
+                          <h4 className="text-sm font-semibold text-foreground">{selectedClusterMeta.name}</h4>
                         </div>
-                        <div className="rounded-[12px] border border-white/22 bg-white/14 p-2.5 text-foreground/78">
-                          <Disc3 className="h-5 w-5" />
-                        </div>
+                        <span className="rounded-full border border-white/25 bg-white/12 px-2 py-0.5 text-[10px] text-foreground/70">
+                          {Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}% share
+                        </span>
                       </div>
+                      <p className="mt-1.5 text-xs text-foreground/65">{selectedClusterMeta.description}</p>
 
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
                         {[
                           { label: 'Danceability', value: clusters[selectedCluster]?.danceability ?? 0 },
                           { label: 'Energy', value: clusters[selectedCluster]?.energy ?? 0 },
                           { label: 'Valence', value: clusters[selectedCluster]?.valence ?? 0 },
                           { label: 'Acousticness', value: clusters[selectedCluster]?.acousticness ?? 0 }
                         ].map(metric => (
-                          <div key={metric.label} className="rounded-[12px] border border-white/20 bg-white/12 px-3 py-2.5">
-                            <div className="mb-1.5 flex items-center justify-between text-xs text-foreground/72">
+                          <div key={metric.label} className="rounded-[10px] border border-white/20 bg-white/10 px-2.5 py-2">
+                            <div className="mb-1 flex items-center justify-between text-[11px] text-foreground/70">
                               <span>{metric.label}</span>
-                              <span className="font-medium text-foreground">{Math.round(metric.value * 100)}%</span>
+                              <span>{Math.round(metric.value * 100)}%</span>
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-white/18">
-                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${metric.value * 100}%`, backgroundColor: selectedClusterMeta.color }} />
+                            <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                              <div className="h-full rounded-full" style={{ width: `${metric.value * 100}%`, backgroundColor: selectedClusterMeta.color }} />
                             </div>
                           </div>
                         ))}
                       </div>
+                    </div>
 
-                      <div className="mt-3 rounded-[14px] border border-white/20 bg-white/10 p-3">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/55">Weighted popularity share</p>
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${(weightedClusterImpact[selectedCluster]?.share ?? 0) * 100}%`,
-                              backgroundColor: selectedClusterMeta.color
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">Top tracks in selected cluster</p>
+                      <div className="mt-2 space-y-1.5">
+                        {selectedClusterTracks.slice(0, 6).map(track => (
+                          <button
+                            key={`${track.name}-${track.release_year}`}
+                            onClick={() => {
+                              const index = trackIndexByKey.get(getTrackKey(track));
+                              if (typeof index === 'number') setSelectedTrackIndex(index);
                             }}
-                          />
-                        </div>
-                        <p className="mt-1.5 text-xs text-foreground/68">{Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}% of influence in the similarity network</p>
+                            className={`flex w-full items-center justify-between rounded-[10px] border px-2.5 py-1.5 text-left text-xs ${selectedTrack?.name === track.name ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
+                          >
+                            <span className="min-w-0 flex-1 truncate pr-2">{track.name}</span>
+                            <span className="text-foreground/55">{track.release_year}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <div className="flex items-center gap-2 text-foreground/75">
+                        <Disc3 className="h-4 w-4" />
+                        <p className="text-xs font-semibold">Cluster Menu</p>
+                      </div>
+                      <div className="mt-2 space-y-1.5">
+                        {clusters.map(cluster => {
+                          const meta = CLUSTER_NAMES[cluster.cluster];
+                          const active = selectedCluster === cluster.cluster;
+                          const trackCount = clusterTrackCounts[cluster.cluster] ?? 0;
+                          return (
+                            <button
+                              key={cluster.cluster}
+                              onClick={() => handleClusterSelect(cluster.cluster)}
+                              className={`w-full rounded-[10px] border px-2.5 py-2 text-left ${active ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+                                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: meta.color }} />
+                                  {meta.name}
+                                </span>
+                                <span className="text-[10px] text-foreground/60">{trackCount}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                        <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/55">Cluster Spotlight</p>
-                        <div className="mt-2.5 space-y-2">
-                          {selectedClusterTracks.slice(0, 4).map(track => (
-                              <button
-                                key={`${track.name}-${track.release_year}`}
-                                onClick={() => {
-                                  const index = trackIndexByKey.get(getTrackKey(track));
-                                  if (typeof index === 'number') {
-                                    setSelectedTrackIndex(index);
-                                  }
-                                }}
-                                className={`flex min-w-0 w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-2 text-left transition-colors ${selectedTrack?.name === track.name ? 'border-white/32 bg-white/20' : 'border-white/22 bg-white/10 hover:bg-white/16'}`}
-                              >
-                                <span className="min-w-0 flex-1 truncate pr-2 text-sm text-foreground" title={track.name}>{track.name}</span>
-                                <span className="ml-3 shrink-0 text-xs text-foreground/62">{track.release_year}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                      <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                        <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/55">Why This Works</p>
-                        <p className="mt-2 text-sm leading-6 text-foreground/70">
-                          This is the part where the model stops being a chart and starts becoming a lens: it reveals the music’s internal structure without being told what structure to expect.
-                        </p>
-                      </div>
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">Note</p>
+                      <p className="mt-1.5 text-xs leading-5 text-foreground/68">
+                        This view ranks by sonic similarity network, so high-share clusters represent mainstream vibe centers.
+                      </p>
                     </div>
                   </div>
                 </section>
               )}
 
               {activeTab === 'galaxy' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[340px_minmax(0,1fr)]">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[260px_minmax(0,1fr)]">
                   <div className="space-y-3">
-                    <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                      <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/50">Selected Track</p>
-                      <div className="mt-3 flex items-start justify-between gap-4">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Selected Track</p>
+                      <div className="mt-2 flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <h4 className="w-full truncate text-lg font-semibold text-foreground" title={selectedTrack?.name}>{selectedTrack?.name}</h4>
-                          <p className="mt-1 text-sm text-foreground/60">{selectedTrack?.release_year}</p>
+                          <h4 className="w-full truncate text-sm font-semibold text-foreground" title={selectedTrack?.name}>{selectedTrack?.name}</h4>
+                          <p className="mt-0.5 text-xs text-foreground/60">{selectedTrack?.release_year}</p>
                         </div>
-                        <span className="shrink-0 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-foreground/58">
+                        <span className="shrink-0 rounded-full border border-white/25 bg-white/15 px-2 py-0.5 text-[10px] text-foreground/58">
                           {CLUSTER_NAMES[selectedTrack?.cluster ?? 0]?.name}
                         </span>
                       </div>
 
-                      <div className="mt-3 space-y-1.5 text-xs">
+                      <div className="mt-2.5 space-y-1 text-xs">
                         {[
                           { label: 'Danceability', value: selectedTrack?.danceability ?? 0 },
                           { label: 'Energy', value: selectedTrack?.energy ?? 0 },
@@ -626,8 +560,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                      <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/50">Closest Wormholes</p>
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Closest Wormholes</p>
                       <div className="mt-2 space-y-1.5">
                         {wormholeLinks.map(link => {
                           const track = tracks[link.index];
@@ -637,7 +571,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             <button
                               key={`${track.name}-${track.release_year}`}
                               onClick={() => setSelectedTrackIndex(link.index)}
-                              className="flex min-w-0 w-full items-center justify-between rounded-[10px] border border-white/22 bg-white/12 px-2.5 py-2 text-left text-xs text-foreground/72 transition-colors hover:bg-white/18"
+                              className="flex min-w-0 w-full items-center justify-between rounded-[10px] border border-white/22 bg-white/12 px-2 py-1.5 text-left text-xs text-foreground/72 transition-colors hover:bg-white/18"
                             >
                               <span className="min-w-0 flex-1 truncate pr-2" title={track.name}>{track.name}</span>
                               <span className="ml-2 shrink-0 text-foreground/52">{Math.round(link.similarity * 100)}%</span>
@@ -648,18 +582,15 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="min-w-0 rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                    <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 rounded-[14px] border border-white/22 bg-white/10 p-3">
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">2D manifold</p>
-                        <h3 className="mt-1 text-xl font-semibold text-foreground">Music Galaxy: Wormhole Edition</h3>
-                      </div>
-                      <div className="rounded-full border border-white/25 bg-white/14 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/55 backdrop-blur-md">
-                        Click a dot to inspect
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">2D manifold</p>
+                        <h3 className="mt-1 text-base font-semibold text-foreground">Music Galaxy</h3>
                       </div>
                     </div>
 
-                    <div className="relative h-[min(34vh,300px)] min-h-[220px] overflow-hidden rounded-[16px] border border-white/20 bg-black/20 backdrop-blur-sm">
+                    <div className="relative h-[min(32vh,260px)] min-h-[200px] overflow-hidden rounded-[12px] border border-white/20 bg-black/20 backdrop-blur-sm">
                       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet">
                         <defs>
                           <pattern id="grid-lines" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -717,16 +648,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         })}
                       </svg>
 
-                      <div className="absolute left-4 top-4 rounded-[3px] border border-foreground/20 bg-background/55 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-foreground/55 backdrop-blur-xl">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-foreground/70" />
-                          t-SNE projection + cosine wormholes
-                        </span>
-                      </div>
-
                     </div>
 
-                    <div className="mt-3 rounded-[14px] border border-white/22 bg-white/10 p-3 text-xs backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+                    <div className="mt-2 rounded-[12px] border border-white/22 bg-white/10 p-2.5 text-xs">
                       <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-foreground/50">Cluster palette</p>
                       <div className="flex flex-wrap gap-2">
                         {Object.entries(CLUSTER_NAMES).map(([key, meta]) => (
@@ -746,97 +670,89 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'comparison' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[0.9fr_0.9fr_1.2fr]">
-                  <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Evolution map</p>
-                    <h3 className="mt-2 text-xl font-semibold text-foreground">Diva DNA 2.0: Timeline mutation</h3>
-                    <p className="mt-2 text-sm leading-6 text-foreground/65">
-                      Slide across decades to see how Madonna&apos;s sonic DNA mutates over time, then compare each era with her all-time baseline.
-                    </p>
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                  <div className="space-y-2">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">Evolution</p>
+                      <h3 className="mt-1 text-sm font-semibold text-foreground">Timeline Mutation</h3>
 
-                    <div className="mt-4 rounded-[14px] border border-white/22 bg-white/12 p-3 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
-                      <div className="flex items-center justify-between gap-2 text-xs text-foreground/65">
-                        <span>{selectedEra?.label ?? 'N/A'} ({selectedEra?.years ?? '-'})</span>
-                        <span>{selectedEra?.count ?? 0} tracks</span>
+                      <div className="mt-2 rounded-[12px] border border-white/22 bg-white/12 p-2.5">
+                        <div className="flex items-center justify-between gap-2 text-xs text-foreground/65">
+                          <span>{selectedEra?.label ?? 'N/A'} ({selectedEra?.years ?? '-'})</span>
+                          <span>{selectedEra?.count ?? 0} tracks</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(eraProfiles.length - 1, 0)}
+                          value={safeSelectedEraIndex}
+                          onChange={event => setSelectedEraIndex(Number(event.target.value))}
+                          className="mt-2 w-full accent-cyan-400"
+                          disabled={eraProfiles.length <= 1}
+                        />
+                        <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
+                          {eraProfiles.map((era, index) => (
+                            <button
+                              key={era.label}
+                              onClick={() => setSelectedEraIndex(index)}
+                              className={`rounded-full border px-2 py-0.5 transition-colors ${index === safeSelectedEraIndex ? 'border-white/35 bg-white/25 text-foreground' : 'border-white/24 bg-white/12 hover:bg-white/20'}`}
+                            >
+                              {era.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={Math.max(eraProfiles.length - 1, 0)}
-                        value={safeSelectedEraIndex}
-                        onChange={event => setSelectedEraIndex(Number(event.target.value))}
-                        className="mt-2 w-full accent-cyan-400"
-                        disabled={eraProfiles.length <= 1}
-                      />
-                      <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
-                        {eraProfiles.map((era, index) => (
-                          <button
-                            key={era.label}
-                            onClick={() => setSelectedEraIndex(index)}
-                            className={`rounded-full border px-2 py-0.5 transition-colors ${index === safeSelectedEraIndex ? 'border-white/35 bg-white/25 text-foreground' : 'border-white/24 bg-white/12 hover:bg-white/20'}`}
-                          >
-                            {era.label}
-                          </button>
+                    </div>
+
+                    <div className="rounded-[14px] border border-white/20 bg-white/10 p-3 text-xs leading-5 text-foreground/70">
+                      <p>Each era profile is averaged from Madonna tracks only. Delta values compare the selected era against all-time Madonna baseline.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">Era vs Baseline</p>
+                      <div className="mt-2 space-y-1.5">
+                        {[
+                          { label: 'Danceability', value: selectedEra?.danceability ?? 0, baseline: diva?.danceability ?? 0 },
+                          { label: 'Energy', value: selectedEra?.energy ?? 0, baseline: diva?.energy ?? 0 },
+                          { label: 'Valence', value: selectedEra?.valence ?? 0, baseline: diva?.valence ?? 0 },
+                          { label: 'Acousticness', value: selectedEra?.acousticness ?? 0, baseline: diva?.acousticness ?? 0 },
+                          { label: 'Speechiness', value: selectedEra?.speechiness ?? 0, baseline: diva?.speechiness ?? 0 }
+                        ].map(metric => (
+                          <div key={metric.label} className="rounded-[10px] border border-white/20 bg-white/12 px-2.5 py-2">
+                            <div className="mb-1 flex items-center justify-between text-xs text-foreground/60">
+                              <span>{metric.label}</span>
+                              <span className="text-foreground">{metric.value.toFixed(3)} ({metric.value >= metric.baseline ? '+' : ''}{(metric.value - metric.baseline).toFixed(3)})</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                              <div className="h-full rounded-full bg-foreground/70 transition-all duration-700" style={{ width: `${metric.value * 100}%` }} />
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
 
-                    <div className="mt-4 rounded-[14px] border border-white/20 bg-white/10 p-3 text-sm leading-6 text-foreground/70">
-                      <p>Each era profile is averaged from Madonna tracks only. Delta values compare that era against her all-time baseline.</p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Era vs Baseline</p>
-                    <div className="mt-3 space-y-2.5">
-                      {[
-                        { label: 'Danceability', value: selectedEra?.danceability ?? 0, baseline: diva?.danceability ?? 0 },
-                        { label: 'Energy', value: selectedEra?.energy ?? 0, baseline: diva?.energy ?? 0 },
-                        { label: 'Valence', value: selectedEra?.valence ?? 0, baseline: diva?.valence ?? 0 },
-                        { label: 'Acousticness', value: selectedEra?.acousticness ?? 0, baseline: diva?.acousticness ?? 0 },
-                        { label: 'Speechiness', value: selectedEra?.speechiness ?? 0, baseline: diva?.speechiness ?? 0 }
-                      ].map(metric => (
-                        <div key={metric.label} className="rounded-[12px] border border-white/20 bg-white/12 px-3 py-2.5">
-                          <div className="mb-1 flex items-center justify-between text-xs text-foreground/60">
-                            <span>{metric.label}</span>
-                            <span className="text-foreground">{metric.value.toFixed(3)} ({metric.value >= metric.baseline ? '+' : ''}{(metric.value - metric.baseline).toFixed(3)})</span>
-                          </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-                            <div className="h-full rounded-full bg-foreground/70 transition-all duration-700" style={{ width: `${metric.value * 100}%` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Diva DNA baseline</p>
-                        <h3 className="mt-2 text-xl font-semibold text-foreground">Closest pop neighbors</h3>
-                      </div>
-                      <div className="rounded-full border border-white/25 bg-white/14 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-foreground/55 backdrop-blur-md">
-                        interactive list
-                      </div>
-                    </div>
-
-                    <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-                      {closestDivaNeighbors
-                        .map(item => (
-                          <div key={item.artists} className="rounded-[14px] border border-white/22 bg-white/12 p-3 transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/20">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">Diva DNA baseline</p>
+                      <h3 className="mt-1 text-sm font-semibold text-foreground">Closest pop neighbors</h3>
+                      <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                        {closestDivaNeighbors.map(item => (
+                          <div key={item.artists} className="rounded-[10px] border border-white/22 bg-white/12 p-2.5 transition-colors hover:bg-white/18">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate pr-2 text-sm font-semibold text-foreground" title={item.artists}>{item.artists}</p>
+                              <p className="min-w-0 flex-1 truncate pr-2 text-xs font-semibold text-foreground" title={item.artists}>{item.artists}</p>
                               <span className="inline-flex h-6 w-6 items-center justify-center rounded-[8px] bg-white/16 text-foreground/50">
                                 <ChevronRight className="h-3.5 w-3.5" />
                               </span>
                             </div>
-                            <div className="mt-3 space-y-2 text-[10px] uppercase tracking-[0.2em] text-foreground/45">
+                            <div className="mt-2 space-y-1 text-[10px] uppercase tracking-[0.16em] text-foreground/45">
                               <div className="flex items-center justify-between"><span>Dance</span><span>{item.danceability.toFixed(3)}</span></div>
                               <div className="flex items-center justify-between"><span>Energy</span><span>{item.energy.toFixed(3)}</span></div>
                               <div className="flex items-center justify-between"><span>Valence</span><span>{item.valence.toFixed(3)}</span></div>
                             </div>
                           </div>
                         ))}
+                      </div>
                     </div>
                   </div>
                 </section>
