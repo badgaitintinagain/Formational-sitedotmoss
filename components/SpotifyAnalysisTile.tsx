@@ -391,25 +391,21 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
             style={{ backgroundImage: `url(${mdnaTourImage.src})` }}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_30%,transparent_58%),linear-gradient(155deg,rgba(5,8,20,0.35)_0%,rgba(5,8,20,0.70)_100%)]" />
+          <div className="absolute inset-0 bg-black/30" />
           <div className="absolute inset-[6px] rounded-[10px] border border-white/25" />
-          <div className="absolute bottom-2 left-2 right-2 rounded-[8px] border border-white/20 bg-black/30 px-2.5 py-1.5 text-white/90 backdrop-blur-md">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-white/65">Liquid Glass Atlas</p>
-            <p className="mt-0.5 text-xs font-medium">Open Madonna Sonic Atlas</p>
-          </div>
         </div>
       </Tile>
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_10%_8%,rgba(138,185,255,0.24)_0%,rgba(138,185,255,0.06)_26%,rgba(6,8,20,0.72)_100%)] p-2 backdrop-blur-lg sm:p-3"
+          className="fixed inset-0 z-50 bg-black/55 p-4 backdrop-blur-lg sm:p-6"
           onClick={() => setIsOpen(false)}
         >
           <div
             ref={modalRef}
             onClick={event => event.stopPropagation()}
             style={{ backdropFilter: 'url(#liquidGlassWarp) blur(18px) saturate(170%)' }}
-            className="mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-7xl flex-col overflow-hidden rounded-[22px] border border-white/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.26)_0%,rgba(255,255,255,0.09)_48%,rgba(255,255,255,0.02)_100%)] text-foreground shadow-[0_26px_100px_rgba(0,0,0,0.45)] sm:h-[calc(100dvh-1.5rem)]"
+            className="mx-auto flex h-[calc(100dvh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[22px] border border-white/20 bg-background/80 text-foreground shadow-[0_26px_100px_rgba(0,0,0,0.45)] sm:h-[calc(100dvh-3rem)]"
           >
             <div className="border-b border-white/20 px-4 py-3 sm:px-5 sm:py-4">
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
@@ -470,9 +466,9 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 sm:py-4 md:px-5 md:py-5">
+            <div className="min-h-0 flex-1 overflow-hidden px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4">
               {activeTab === 'personas' && (
-                <section className="grid h-full gap-3 overflow-y-auto pr-1 xl:grid-cols-[280px_minmax(0,1fr)]">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[280px_minmax(0,1fr)]">
                   <div className="space-y-3">
                     <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
                       <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/55">Persona Stack</p>
@@ -502,7 +498,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                                     className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-90"
                                     style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
                                   />
-                                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,10,22,0.94)_0%,rgba(8,10,22,0.72)_48%,rgba(8,10,22,0.38)_100%)]" />
+                                  <div className="pointer-events-none absolute inset-0 bg-black/55" />
                                 </>
                               )}
 
@@ -528,7 +524,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
+                  <div className="grid min-w-0 gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
                     <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -557,7 +553,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               <span className="font-medium text-foreground">{Math.round(metric.value * 100)}%</span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-white/18">
-                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${metric.value * 100}%`, background: `linear-gradient(90deg, ${selectedClusterMeta.color}, rgba(255,255,255,0.45))` }} />
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${metric.value * 100}%`, backgroundColor: selectedClusterMeta.color }} />
                             </div>
                           </div>
                         ))}
@@ -570,7 +566,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             className="h-full rounded-full transition-all duration-500"
                             style={{
                               width: `${(weightedClusterImpact[selectedCluster]?.share ?? 0) * 100}%`,
-                              background: `linear-gradient(90deg, ${selectedClusterMeta.color}, rgba(255,255,255,0.35))`
+                              backgroundColor: selectedClusterMeta.color
                             }}
                           />
                         </div>
@@ -612,7 +608,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'galaxy' && (
-                <section className="grid h-full gap-3 overflow-y-auto pr-1 xl:grid-cols-[340px_minmax(0,1fr)]">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[340px_minmax(0,1fr)]">
                   <div className="space-y-3">
                     <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
                       <p className="text-[10px] uppercase tracking-[0.28em] text-foreground/50">Selected Track</p>
@@ -639,7 +635,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                               <span className="text-foreground">{Math.round(metric.value * 100)}%</span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-white/18">
-                              <div className="h-full rounded-full bg-gradient-to-r from-[#7dd3fc] via-[#38bdf8] to-[#ec4899] transition-all duration-500" style={{ width: `${metric.value * 100}%` }} />
+                              <div className="h-full rounded-full bg-foreground/70 transition-all duration-500" style={{ width: `${metric.value * 100}%` }} />
                             </div>
                           </div>
                         ))}
@@ -679,19 +675,15 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       </div>
                     </div>
 
-                    <div className="relative h-[min(48vh,460px)] min-h-[290px] overflow-hidden rounded-[16px] border border-white/20 bg-[radial-gradient(circle_at_center,rgba(120,120,120,0.14),transparent_55%),linear-gradient(180deg,rgba(0,0,0,0.18)_0%,rgba(0,0,0,0.06)_100%)] backdrop-blur-sm">
+                    <div className="relative h-[min(34vh,300px)] min-h-[220px] overflow-hidden rounded-[16px] border border-white/20 bg-black/20 backdrop-blur-sm">
                       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet">
                         <defs>
                           <pattern id="grid-lines" width="40" height="40" patternUnits="userSpaceOnUse">
                             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.7" />
                           </pattern>
-                          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="rgba(255,255,255,0.28)" />
-                            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                          </radialGradient>
                         </defs>
                         <rect width="1000" height="620" fill="url(#grid-lines)" />
-                        <circle cx="500" cy="310" r="150" fill="url(#glow)" opacity="0.3" />
+                        <circle cx="500" cy="310" r="150" fill="rgba(255,255,255,0.08)" />
 
                         {selectedTrack && wormholeLinks.map(link => {
                           const selectedX = projectTsnePoint(selectedTrack.tsne_x, tsneBounds.minX, tsneBounds.maxX, 1000);
@@ -770,7 +762,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
               )}
 
               {activeTab === 'comparison' && (
-                <section className="grid h-full gap-3 overflow-y-auto pr-1 xl:grid-cols-[0.9fr_0.9fr_1.2fr]">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[0.9fr_0.9fr_1.2fr]">
                   <div className="rounded-[18px] border border-white/22 bg-white/10 p-4 backdrop-blur-xl">
                     <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/45">Evolution map</p>
                     <h3 className="mt-2 text-xl font-semibold text-foreground">Diva DNA 2.0: Timeline mutation</h3>
@@ -826,7 +818,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             <span className="text-foreground">{metric.value.toFixed(3)} ({metric.value >= metric.baseline ? '+' : ''}{(metric.value - metric.baseline).toFixed(3)})</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-                            <div className="h-full rounded-full bg-gradient-to-r from-amber-300 via-cyan-300 to-fuchsia-400 transition-all duration-700" style={{ width: `${metric.value * 100}%` }} />
+                            <div className="h-full rounded-full bg-foreground/70 transition-all duration-700" style={{ width: `${metric.value * 100}%` }} />
                           </div>
                         </div>
                       ))}
