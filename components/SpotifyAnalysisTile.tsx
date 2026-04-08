@@ -407,42 +407,29 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
             style={{ backdropFilter: 'url(#liquidGlassWarp) blur(18px) saturate(170%)' }}
             className="mx-auto flex h-[calc(100dvh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[22px] border border-white/20 bg-background/80 text-foreground shadow-[0_26px_100px_rgba(0,0,0,0.45)] sm:h-[calc(100dvh-3rem)]"
           >
-            <div className="border-b border-white/20 px-4 py-3 sm:px-5 sm:py-4">
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-                <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/16 px-3 py-1 text-[10px] uppercase tracking-[0.26em] text-foreground/75 backdrop-blur-lg">
-                    <Sparkles className="h-3 w-3" /> Liquid Glass Music Intelligence
+            <div className="border-b border-white/20 px-4 py-2.5 sm:px-5 sm:py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-foreground/75">
+                    <Sparkles className="h-3 w-3" /> Madonna Sonic Atlas
                   </div>
-                  <div>
-                    <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">Madonna Sonic Atlas</h2>
-                    <p className="mt-1 max-w-3xl text-xs leading-5 text-foreground/70 sm:text-sm">
-                      K-means personas, t-SNE cartography, and timeline DNA in a complete liquid-glass cockpit. Chrome renders full SVG refraction; other browsers fall back to soft glass blur.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 sm:max-w-md">
-                    {[
-                      { label: 'Tracks', value: tracks.length.toString() },
-                      { label: 'Clusters', value: clusters.length.toString() },
-                      { label: 'Madonna', value: madonnaTracks.length.toString() }
-                    ].map(item => (
-                      <div key={item.label} className="rounded-[12px] border border-white/25 bg-white/10 px-3 py-2 backdrop-blur-lg">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-foreground/55">{item.label}</p>
-                        <p className="mt-1 text-base font-semibold text-foreground">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="mt-1 text-xs text-foreground/65">Tracks {tracks.length} • Clusters {clusters.length} • Madonna {madonnaTracks.length}</p>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 lg:flex-col lg:items-end">
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-full border border-white/25 bg-white/12 p-2 text-foreground/75 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:text-foreground backdrop-blur-lg"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-full border border-white/25 bg-white/12 p-2 text-foreground/75 transition-all duration-200 hover:bg-white/20 hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-3 gap-1.5">
+            <div className="min-h-0 flex-1 overflow-hidden px-2 py-2 sm:px-3 sm:py-3">
+              <div className="flex h-full gap-2">
+                <aside className="w-[168px] shrink-0 overflow-y-auto rounded-[14px] border border-white/20 bg-white/8 p-2.5">
+                  <p className="px-1 text-[10px] uppercase tracking-[0.2em] text-foreground/55">Menu</p>
+                  <div className="mt-2 space-y-1.5">
                     {(['personas', 'galaxy', 'comparison'] as const).map(tab => {
                       const meta = TAB_META[tab];
                       const Icon = meta.icon;
@@ -452,21 +439,18 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                         <button
                           key={tab}
                           onClick={() => setActiveTab(tab)}
-                          className={`flex min-w-[92px] items-center justify-center gap-2 rounded-full border px-3 py-2 text-[11px] transition-all duration-200 ${active ? 'border-white/35 bg-white/20 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)]' : 'border-white/20 bg-white/8 text-foreground/70 hover:bg-white/14 hover:text-foreground'}`}
+                          className={`flex w-full items-center gap-2 rounded-[10px] border px-2.5 py-2 text-left text-xs transition-colors ${active ? 'border-white/35 bg-white/20 text-foreground' : 'border-white/20 bg-white/10 text-foreground/70 hover:bg-white/16 hover:text-foreground'}`}
                           title={meta.blurb}
                         >
                           <Icon className="h-3.5 w-3.5" />
-                          <span className="hidden sm:inline">{meta.title}</span>
-                          <span className="sm:hidden">{meta.title.split(' ')[0]}</span>
+                          <span className="truncate">{meta.title}</span>
                         </button>
                       );
                     })}
                   </div>
-                </div>
-              </div>
-            </div>
+                </aside>
 
-            <div className="min-h-0 flex-1 overflow-hidden px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4">
+                <div className="min-w-0 flex-1 overflow-hidden">
               {activeTab === 'personas' && (
                 <section className="grid h-full gap-2 overflow-y-auto pr-1 xl:grid-cols-[280px_minmax(0,1fr)]">
                   <div className="space-y-3">
@@ -857,6 +841,8 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                   </div>
                 </section>
               )}
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-white/20 bg-white/8 px-4 py-2.5 text-[11px] text-foreground/52 sm:px-5 sm:text-xs">
