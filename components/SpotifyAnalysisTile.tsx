@@ -455,7 +455,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                 <div className="min-w-0 flex-1 overflow-hidden">
               {activeTab === 'personas' && (
                 <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(240px,0.65fr)]">
-                  <div className="grid gap-2 xl:grid-cols-2">
+                  <div className="space-y-2">
                     <div className="relative overflow-hidden rounded-[14px] border border-white/22 bg-white/10 p-3">
                       {selectedCluster === 0 && (
                         <>
@@ -565,62 +565,7 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
               {activeTab === 'galaxy' && (
                 <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.3fr)_280px]">
-                  <div className="order-2 space-y-3 lg:order-2">
-                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Selected Track</p>
-                      <div className="mt-2 flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <h4 className="w-full truncate text-sm font-semibold text-foreground" title={selectedTrack?.name}>{selectedTrack?.name}</h4>
-                          <p className="mt-0.5 text-xs text-foreground/60">{selectedTrack?.release_year}</p>
-                        </div>
-                        <span className="shrink-0 rounded-full border border-white/25 bg-white/15 px-2 py-0.5 text-[10px] text-foreground/58">
-                          {CLUSTER_NAMES[selectedTrack?.cluster ?? 0]?.name}
-                        </span>
-                      </div>
-
-                      <div className="mt-2.5 space-y-1 text-xs">
-                        {[
-                          { label: 'Danceability', value: selectedTrack?.danceability ?? 0 },
-                          { label: 'Energy', value: selectedTrack?.energy ?? 0 },
-                          { label: 'Valence', value: selectedTrack?.valence ?? 0 },
-                          { label: 'Acousticness', value: selectedTrack?.acousticness ?? 0 }
-                        ].map(metric => (
-                          <div key={metric.label}>
-                            <div className="mb-1 flex items-center justify-between text-foreground/65">
-                              <span>{metric.label}</span>
-                              <span className="text-foreground">{Math.round(metric.value * 100)}%</span>
-                            </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-white/18">
-                              <div className="h-full rounded-full bg-foreground/70 transition-all duration-500" style={{ width: `${metric.value * 100}%` }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Closest Wormholes</p>
-                      <div className="mt-2 space-y-1.5">
-                        {wormholeLinks.map(link => {
-                          const track = tracks[link.index];
-                          if (!track) return null;
-
-                          return (
-                            <button
-                              key={`${track.name}-${track.release_year}`}
-                              onClick={() => setSelectedTrackIndex(link.index)}
-                              className="flex min-w-0 w-full items-center justify-between rounded-[10px] border border-white/22 bg-white/12 px-2 py-1.5 text-left text-xs text-foreground/72 transition-colors hover:bg-white/18"
-                            >
-                              <span className="min-w-0 flex-1 truncate pr-2" title={track.name}>{track.name}</span>
-                              <span className="ml-2 shrink-0 text-foreground/52">{Math.round(link.similarity * 100)}%</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="order-1 min-w-0 rounded-[14px] border border-white/22 bg-white/10 p-3 lg:order-1">
+                  <div className="min-w-0 rounded-[14px] border border-white/22 bg-white/10 p-3">
                     <div className="mb-2.5 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/45">2D manifold</p>
@@ -710,6 +655,61 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                             <span>{meta.name}</span>
                           </button>
                         ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Selected Track</p>
+                      <div className="mt-2 flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="w-full truncate text-sm font-semibold text-foreground" title={selectedTrack?.name}>{selectedTrack?.name}</h4>
+                          <p className="mt-0.5 text-xs text-foreground/60">{selectedTrack?.release_year}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-white/25 bg-white/15 px-2 py-0.5 text-[10px] text-foreground/58">
+                          {CLUSTER_NAMES[selectedTrack?.cluster ?? 0]?.name}
+                        </span>
+                      </div>
+
+                      <div className="mt-2.5 space-y-1 text-xs">
+                        {[
+                          { label: 'Danceability', value: selectedTrack?.danceability ?? 0 },
+                          { label: 'Energy', value: selectedTrack?.energy ?? 0 },
+                          { label: 'Valence', value: selectedTrack?.valence ?? 0 },
+                          { label: 'Acousticness', value: selectedTrack?.acousticness ?? 0 }
+                        ].map(metric => (
+                          <div key={metric.label}>
+                            <div className="mb-1 flex items-center justify-between text-foreground/65">
+                              <span>{metric.label}</span>
+                              <span className="text-foreground">{Math.round(metric.value * 100)}%</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-white/18">
+                              <div className="h-full rounded-full bg-foreground/70 transition-all duration-500" style={{ width: `${metric.value * 100}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/50">Closest Wormholes</p>
+                      <div className="mt-2 space-y-1.5">
+                        {wormholeLinks.map(link => {
+                          const track = tracks[link.index];
+                          if (!track) return null;
+
+                          return (
+                            <button
+                              key={`${track.name}-${track.release_year}`}
+                              onClick={() => setSelectedTrackIndex(link.index)}
+                              className="flex min-w-0 w-full items-center justify-between rounded-[10px] border border-white/22 bg-white/12 px-2 py-1.5 text-left text-xs text-foreground/72 transition-colors hover:bg-white/18"
+                            >
+                              <span className="min-w-0 flex-1 truncate pr-2" title={track.name}>{track.name}</span>
+                              <span className="ml-2 shrink-0 text-foreground/52">{Math.round(link.similarity * 100)}%</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
