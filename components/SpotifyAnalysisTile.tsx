@@ -454,77 +454,12 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
 
                 <div className="min-w-0 flex-1 overflow-hidden">
               {activeTab === 'personas' && (
-                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(240px,0.65fr)]">
+                <section className="grid h-full gap-2 overflow-y-auto pr-1 lg:grid-cols-[220px_minmax(0,1fr)]">
                   <div className="space-y-2">
-                    <div className="relative overflow-hidden rounded-[14px] border border-white/22 bg-white/10 p-3">
-                      {selectedCluster === 0 && (
-                        <>
-                          <div
-                            className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-45"
-                            style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
-                          />
-                          <div className="pointer-events-none absolute inset-0 bg-black/45" />
-                        </>
-                      )}
-                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl" style={{ backgroundColor: `${selectedClusterMeta.color}55` }} />
-                      <div className="relative">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
-                          <h4 className="text-sm font-semibold text-foreground">{selectedClusterMeta.name}</h4>
-                        </div>
-                        <span className="rounded-full border border-white/25 bg-white/12 px-2 py-0.5 text-[10px] text-foreground/70">
-                          {Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}% share
-                        </span>
-                      </div>
-                      <p className="mt-1.5 text-xs text-foreground/65">{selectedClusterMeta.description}</p>
-
-                      <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
-                        {[
-                          { label: 'Danceability', value: clusters[selectedCluster]?.danceability ?? 0 },
-                          { label: 'Energy', value: clusters[selectedCluster]?.energy ?? 0 },
-                          { label: 'Valence', value: clusters[selectedCluster]?.valence ?? 0 },
-                          { label: 'Acousticness', value: clusters[selectedCluster]?.acousticness ?? 0 }
-                        ].map(metric => (
-                          <div key={metric.label} className="rounded-[10px] border border-white/20 bg-white/10 px-2.5 py-2">
-                            <div className="mb-1 flex items-center justify-between text-[11px] text-foreground/70">
-                              <span>{metric.label}</span>
-                              <span>{Math.round(metric.value * 100)}%</span>
-                            </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-                              <div className="h-full rounded-full" style={{ width: `${metric.value * 100}%`, backgroundColor: selectedClusterMeta.color }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-[14px] border border-white/22 bg-white/10 p-3 xl:col-span-1">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">Top tracks in selected cluster</p>
-                      <div className="mt-2 space-y-1.5">
-                        {selectedClusterTracks.slice(0, 6).map(track => (
-                          <button
-                            key={`${track.name}-${track.release_year}`}
-                            onClick={() => {
-                              const index = trackIndexByKey.get(getTrackKey(track));
-                              if (typeof index === 'number') setSelectedTrackIndex(index);
-                            }}
-                            className={`flex w-full items-center justify-between rounded-[10px] border px-2.5 py-1.5 text-left text-xs ${selectedTrack?.name === track.name ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
-                          >
-                            <span className="min-w-0 flex-1 truncate pr-2">{track.name}</span>
-                            <span className="text-foreground/55">{track.release_year}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 lg:max-w-[320px]">
                     <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
                       <div className="flex items-center gap-2 text-foreground/75">
                         <Disc3 className="h-4 w-4" />
-                        <p className="text-xs font-semibold">Cluster Menu</p>
+                        <p className="text-xs font-semibold">Cluster Rail</p>
                       </div>
                       <div className="mt-2 space-y-1.5">
                         {clusters.map(cluster => {
@@ -558,6 +493,73 @@ const SpotifyAnalysisTile: React.FC<SpotifyAnalysisTileProps> = ({
                       <p className="mt-1.5 text-xs leading-5 text-foreground/68">
                         This view ranks by sonic similarity network, so high-share clusters represent mainstream vibe centers.
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="relative overflow-hidden rounded-[14px] border border-white/22 bg-white/10 p-3">
+                        {selectedCluster === 0 && (
+                          <>
+                            <div
+                              className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-45"
+                              style={{ backgroundImage: `url(${DISCO_DYNAMO_IMAGES[discoImageIndex].src})` }}
+                            />
+                            <div className="pointer-events-none absolute inset-0 bg-black/45" />
+                          </>
+                        )}
+                        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl" style={{ backgroundColor: `${selectedClusterMeta.color}55` }} />
+                        <div className="relative">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: selectedClusterMeta.color }} />
+                              <h4 className="text-sm font-semibold text-foreground">{selectedClusterMeta.name}</h4>
+                            </div>
+                            <span className="rounded-full border border-white/25 bg-white/12 px-2 py-0.5 text-[10px] text-foreground/70">
+                              {Math.round((weightedClusterImpact[selectedCluster]?.share ?? 0) * 100)}% share
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-xs text-foreground/65">{selectedClusterMeta.description}</p>
+
+                          <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+                            {[
+                              { label: 'Danceability', value: clusters[selectedCluster]?.danceability ?? 0 },
+                              { label: 'Energy', value: clusters[selectedCluster]?.energy ?? 0 },
+                              { label: 'Valence', value: clusters[selectedCluster]?.valence ?? 0 },
+                              { label: 'Acousticness', value: clusters[selectedCluster]?.acousticness ?? 0 }
+                            ].map(metric => (
+                              <div key={metric.label} className="rounded-[10px] border border-white/20 bg-white/10 px-2.5 py-2">
+                                <div className="mb-1 flex items-center justify-between text-[11px] text-foreground/70">
+                                  <span>{metric.label}</span>
+                                  <span>{Math.round(metric.value * 100)}%</span>
+                                </div>
+                                <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+                                  <div className="h-full rounded-full" style={{ width: `${metric.value * 100}%`, backgroundColor: selectedClusterMeta.color }} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[14px] border border-white/22 bg-white/10 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">Top tracks</p>
+                        <div className="mt-2 space-y-1.5">
+                          {selectedClusterTracks.slice(0, 6).map(track => (
+                            <button
+                              key={`${track.name}-${track.release_year}`}
+                              onClick={() => {
+                                const index = trackIndexByKey.get(getTrackKey(track));
+                                if (typeof index === 'number') setSelectedTrackIndex(index);
+                              }}
+                              className={`flex w-full items-center justify-between rounded-[10px] border px-2.5 py-1.5 text-left text-xs ${selectedTrack?.name === track.name ? 'border-white/35 bg-white/20' : 'border-white/20 bg-white/10 hover:bg-white/16'}`}
+                            >
+                              <span className="min-w-0 flex-1 truncate pr-2">{track.name}</span>
+                              <span className="text-foreground/55">{track.release_year}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </section>
